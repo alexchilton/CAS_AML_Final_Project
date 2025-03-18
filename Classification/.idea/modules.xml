@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../CAS_Project-main/.idea/CAS_Project-main.iml" filepath="$PROJECT_DIR$/../../CAS_Project-main/.idea/CAS_Project-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../CAS_Project_2_protein_autoencoders-main/.idea/CAS_Project_2_protein_autoencoders-main.iml" filepath="$PROJECT_DIR$/../../CAS_Project_2_protein_autoencoders-main/.idea/CAS_Project_2_protein_autoencoders-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Graph_project.iml" filepath="$PROJECT_DIR$/.idea/Graph_project.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,73 @@
+HEADER    SCOPe/ASTRAL domain d1qcrj_  [43679]    16-OCT-21   0000
+REMARK  99
+REMARK  99 ASTRAL ASTRAL-version: 2.08
+REMARK  99 ASTRAL SCOPe-sid: d1qcrj_
+REMARK  99 ASTRAL SCOPe-sun: 43679
+REMARK  99 ASTRAL SCOPe-sccs: f.23.14.1
+REMARK  99 ASTRAL Source-PDB: 1qcr
+REMARK  99 ASTRAL Source-PDB-REVDAT: 24-FEB-09
+REMARK  99 ASTRAL Region: J:
+REMARK  99 ASTRAL ASTRAL-SPACI: 0.12 (not valid)
+REMARK  99 ASTRAL ASTRAL-AEROSPACI: 0.12
+REMARK  99 ASTRAL Data-updated-release: 1.63
+ATOM   1789  CA  THR J   4      28.855  91.447 141.748  1.00 87.15           C  
+ATOM   1790  CA  LEU J   5      32.448  90.522 140.855  1.00 87.07           C  
+ATOM   1791  CA  THR J   6      33.131  90.910 137.138  1.00 86.96           C  
+ATOM   1792  CA  ALA J   7      31.840  94.155 138.483  1.00 86.78           C  
+ATOM   1793  CA  ARG J   8      33.456  95.700 141.437  1.00 86.45           C  
+ATOM   1794  CA  LEU J   9      35.878  92.834 141.761  1.00 85.90           C  
+ATOM   1795  CA  TYR J  10      37.573  92.509 138.331  1.00 85.17           C  
+ATOM   1796  CA  SER J  11      36.606  95.764 136.601  1.00 84.04           C  
+ATOM   1797  CA  LEU J  12      37.414  97.680 139.846  1.00 82.84           C  
+ATOM   1798  CA  LEU J  13      40.433  96.136 141.549  1.00 81.55           C  
+ATOM   1799  CA  PHE J  14      41.565  92.906 139.939  1.00 80.39           C  
+ATOM   1800  CA  ARG J  15      43.038  94.582 136.857  1.00 78.97           C  
+ATOM   1801  CA  ARG J  16      46.466  95.948 137.881  1.00 77.34           C  
+ATOM   1802  CA  THR J  17      48.486  94.241 140.474  1.00 75.64           C  
+ATOM   1803  CA  SER J  18      48.092  97.625 142.077  1.00 74.69           C  
+ATOM   1804  CA  THR J  19      44.464  97.827 143.144  1.00 73.77           C  
+ATOM   1805  CA  PHE J  20      44.830  94.089 143.547  1.00 73.14           C  
+ATOM   1806  CA  ALA J  21      47.829  94.233 145.873  1.00 72.79           C  
+ATOM   1807  CA  LEU J  22      46.245  97.319 147.382  1.00 72.27           C  
+ATOM   1808  CA  THR J  23      43.013  95.406 148.077  1.00 72.04           C  
+ATOM   1809  CA  ILE J  24      44.541  92.118 149.083  1.00 72.20           C  
+ATOM   1810  CA  VAL J  25      46.493  94.015 151.691  1.00 72.69           C  
+ATOM   1811  CA  VAL J  26      43.399  96.100 152.729  1.00 73.44           C  
+ATOM   1812  CA  GLY J  27      41.463  92.915 153.263  1.00 74.69           C  
+ATOM   1813  CA  ALA J  28      44.624  91.849 155.035  1.00 75.93           C  
+ATOM   1814  CA  LEU J  29      44.995  93.432 158.491  1.00 77.33           C  
+ATOM   1815  CA  PHE J  30      41.247  94.150 158.352  1.00 78.65           C  
+ATOM   1816  CA  PHE J  31      40.383  90.514 158.154  1.00 80.01           C  
+ATOM   1817  CA  GLU J  32      43.116  89.622 160.529  1.00 81.10           C  
+ATOM   1818  CA  ARG J  33      40.762  91.020 163.135  1.00 82.04           C  
+ATOM   1819  CA  ALA J  34      37.623  89.527 161.704  1.00 82.75           C  
+ATOM   1820  CA  PHE J  35      39.122  85.979 161.866  1.00 83.42           C  
+ATOM   1821  CA  ASP J  36      41.777  86.112 164.654  1.00 84.14           C  
+ATOM   1822  CA  ASN J  37      38.557  87.291 166.352  1.00 84.54           C  
+ATOM   1823  CA  GLY J  38      35.975  84.496 165.909  1.00 84.91           C  
+ATOM   1824  CA  ALA J  39      38.770  82.006 166.685  1.00 85.20           C  
+ATOM   1825  CA  ASP J  40      38.899  83.334 170.289  1.00 85.15           C  
+ATOM   1826  CA  ALA J  41      35.116  83.926 170.273  1.00 85.11           C  
+ATOM   1827  CA  ILE J  42      34.798  80.236 169.876  1.00 85.11           C  
+ATOM   1828  CA  TYR J  43      37.914  79.081 171.599  1.00 84.93           C  
+ATOM   1829  CA  GLU J  44      36.145  80.556 174.625  1.00 84.71           C  
+ATOM   1830  CA  HIS J  45      33.086  78.297 174.469  1.00 84.46           C  
+ATOM   1831  CA  ILE J  46      35.448  75.659 175.958  1.00 84.24           C  
+ATOM   1832  CA  ASN J  47      39.066  75.006 177.302  1.00 84.15           C  
+ATOM   1833  CA  GLU J  48      41.289  72.068 176.549  1.00 84.29           C  
+ATOM   1834  CA  GLY J  49      43.401  70.699 179.443  1.00 84.64           C  
+ATOM   1835  CA  LYS J  50      40.295  69.074 181.021  1.00 84.97           C  
+ATOM   1836  CA  LEU J  51      38.063  65.948 181.404  1.00 85.03           C  
+ATOM   1837  CA  TRP J  52      39.501  62.443 181.610  1.00 85.10           C  
+ATOM   1838  CA  LYS J  53      39.573  58.661 181.977  1.00 85.19           C  
+ATOM   1839  CA  HIS J  54      40.908  55.308 180.591  1.00 85.38           C  
+ATOM   1840  CA  ILE J  55      43.408  54.057 183.166  1.00 85.39           C  
+ATOM   1841  CA  LYS J  56      47.015  52.650 182.962  1.00 85.51           C  
+ATOM   1842  CA  HIS J  57      48.647  49.254 182.101  1.00 85.76           C  
+ATOM   1843  CA  LYS J  58      50.877  47.072 184.480  1.00 86.03           C  
+ATOM   1844  CA  TYR J  59      52.079  43.443 184.750  1.00 86.44           C  
+ATOM   1845  CA  GLU J  60      54.999  41.023 185.590  1.00 86.72           C  
+ATOM   1846  CA  ASN J  61      58.761  41.370 185.759  1.00 86.88           C  
+ATOM   1847  CA  LYS J  62      61.799  39.919 183.801  1.00 87.00           C  
+TER    1848      LYS J  62
+END
