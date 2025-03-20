@@ -1,4 +1,4 @@
-Sequence NCCOH, examples (whole sequence)
+Same sequence NCCOH, different amino acids :
 
 -> associated with GLY in protein 1HCV [59, 64] :
    ['ATOM', '59', 'N', 'GLY', 'A', '8', '0.409', '2.955', '11.662', '1.00', '14.92', 'N']
