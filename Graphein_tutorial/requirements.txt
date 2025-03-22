@@ -1,0 +1,4 @@
+
+pip install graphein
+
+conda install -c conda-forge pymol-open-source
