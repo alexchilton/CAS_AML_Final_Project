@@ -1,0 +1,4 @@
+Generate data for synthetic graph datasets, the graphs are generated with different shapes and features. 
+For example circle, line, cross, star, grid, and the features are different, such as color, size, and charge. 
+They are saved in the directory specified by the `output_dir` variable. 
+Currently it will generate 2500 sample graphs, and also the png which shows the graphs.
