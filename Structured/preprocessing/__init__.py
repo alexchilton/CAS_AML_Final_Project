@@ -1,8 +1,8 @@
 # Import main classes to make them available directly from the package
-from .protein_preprocessor import ProteinPreprocessor
-from .protein_visualizer import ProteinVisualizer
-from .graph_builder import GraphBuilder
-from .feature_extractor import FeatureExtractor
+from .ProteinPreprocessor import ProteinPreprocessor
+from .ProteinVisualizer import ProteinVisualizer
+from .GraphBuilder import GraphBuilder
+from .FeatureExtractor import FeatureExtractor
 
 # Define what's exported when using "from preprocessing import *"
 __all__ = [
