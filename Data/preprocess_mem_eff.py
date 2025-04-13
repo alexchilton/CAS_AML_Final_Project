@@ -1630,16 +1630,6 @@ def visualize_all_graphs(output_dir, visualization_dir=None):
 
 
 
-
-
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
     # folder_path = "fabs"  # Your PDB folder
     # output_path = "fabs_networkx"
