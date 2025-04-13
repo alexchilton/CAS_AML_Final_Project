@@ -6,6 +6,22 @@ from Bio.PDB.DSSP import DSSP
 import pickle
 import json
 from tqdm import tqdm
+from graphein.protein.config import ProteinGraphConfig, DSSPConfig
+from graphein.protein.graphs import construct_graph
+from graphein.protein.features.nodes.dssp import add_dssp_df
+from graphein.protein.utils import download_pdb
+import graphein.protein as gp
+from functools import partial
+from graphein.ml.conversion import GraphFormatConvertor
+from graphein.protein.edges.distance import (add_peptide_bonds,
+                                             add_hydrogen_bond_interactions,
+                                             add_disulfide_interactions,
+                                             add_ionic_interactions,
+                                             add_aromatic_interactions,
+                                             add_aromatic_sulphur_interactions,
+                                             add_cation_pi_interactions
+                                             )
+
 
 class ProteinPreprocessor:
     """
@@ -31,6 +47,32 @@ class ProteinPreprocessor:
             subdirectory in the input folder.
         """
         self.output_dir = output_dir
+        # Use this edge function set for complete biochemical interactions
+        self.all_edge_func = {"edge_construction_functions": [
+
+            add_peptide_bonds,
+            add_aromatic_interactions,
+            add_hydrogen_bond_interactions,
+            add_disulfide_interactions,
+            add_ionic_interactions,
+            add_aromatic_sulphur_interactions,
+            add_cation_pi_interactions,
+            gp.add_hydrophobic_interactions,
+            gp.add_salt_bridges]}
+        # not sure the salt bridges always work
+
+
+        # Use these metadata configurations for the properties you need
+        self.complete_config = {
+            #"graph_metadata_functions": [gp.rsa, gp.secondary_structure], - these come from the dssp
+            "node_metadata_functions": [gp.amino_acid_one_hot,
+                                gp.meiler_embedding,
+                                partial(gp.expasy_protein_scale, add_separate=True)]
+        }
+
+        # Combined configuration
+        self.full_config = gp.ProteinGraphConfig(**{**self.all_edge_func, **self.complete_config})
+
 
     def process_pdb_folder(self, folder_path, output_path=None):
         """
@@ -864,3 +906,22 @@ class ProteinPreprocessor:
                 hydrophobic_res_ids.add(res_id)
 
         return hydrophobic_res_ids
+
+
+    def generate_graph_no_dssp(self, path = "2X89.pdb"):
+        """
+        Generate a graph without using DSSP.
+
+        Parameters:
+        -----------
+        path : str
+            Path to the PDB file
+
+        Returns:
+        --------
+        networkx.Graph
+            NetworkX graph representation of the protein
+        """
+
+        graph = construct_graph(path=path, config=self.full_config)
+        return graph

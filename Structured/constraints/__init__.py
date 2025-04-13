@@ -1,8 +1,8 @@
-from .physical_constraints import PhysicalConstraints
-from .chemical_constraints import ChemicalConstraints
+from .PhysicalConstraints import PhysicalConstraints
+from .ChemicalConstraints import ChemicalConstraints
 
 # Base class
-from .physical_constraints import ConstraintManager
+from .ConstraintManager import ConstraintManager
 
 __all__ = [
     'ConstraintManager',

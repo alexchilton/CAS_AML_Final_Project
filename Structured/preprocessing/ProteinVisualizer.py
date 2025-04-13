@@ -3,6 +3,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+import networkx as nx
+
 
 class ProteinVisualizer:
     """
@@ -538,3 +540,29 @@ class ProteinVisualizer:
         self.inspect_protein_graph(nx_graph, pdb_id)
 
         return nx_graph
+
+    def debug_graph(self, graph):
+        """
+        Debug the graph structure and contents.
+
+        Parameters:
+        -----------
+        graph : networkx.Graph
+            NetworkX graph to debug
+        """
+        print(f"Graph type: {type(graph)}")
+
+        # Print basic node info
+        print(f"\nNumber of nodes: {len(graph.nodes())}")
+        if len(graph.nodes()) > 0:
+            sample_node = list(graph.nodes())[0]
+            print(f"Sample node: {sample_node}")
+            print(f"Sample node attributes: {graph.nodes[sample_node]}")
+
+        # Print basic edge info
+        print(f"\nNumber of edges: {len(graph.edges())}")
+        if len(graph.edges()) > 0:
+            sample_edge = list(graph.edges())[0]
+            print(f"Sample edge: {sample_edge}")
+            print(f"Sample edge attributes: {graph.edges[sample_edge]}")
+
