@@ -1,6 +1,6 @@
-from .protein_generator import ProteinGenerator
-from .generation_visualizer import GenerationVisualizer
-from .optimization import GenerationOptimizer
+from .ProteinGenerator import ProteinGenerator
+from .GenerationVisualizer import GenerationVisualizer
+from .GenerationOptimizer import GenerationOptimizer
 
 __all__ = [
     'ProteinGenerator',

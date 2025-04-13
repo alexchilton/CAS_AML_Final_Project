@@ -1,9 +1,9 @@
-from .io_utils import IOUtils
-from .visualization_utils import VisualizationUtils
-from .metrics import Metrics
+from .io_utils import io_utils
+from .visualization_utils import visualization_utils
+from .metrics import metrics
 
 __all__ = [
-    'IOUtils',
-    'VisualizationUtils',
-    'Metrics'
+    'io_utils',
+    'visualization_utils',
+    'metrics'
 ]
