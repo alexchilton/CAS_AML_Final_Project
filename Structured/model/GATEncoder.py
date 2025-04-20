@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GATConv, global_mean_pool
-from torch_geometric.data import Data, Batch
 
 
 class GATEncoder(nn.Module):
@@ -71,6 +70,7 @@ class GATEncoder(nn.Module):
         logvar = self.fc_logvar(x)
 
         return mu, logvar
+
     def encode(self, data):
         """
         Encode data without returning distribution parameters.

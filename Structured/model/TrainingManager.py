@@ -26,7 +26,7 @@ class TrainingManager:
             kl_weight: Weight for the KL divergence loss term
         """
         self.model = model
-        self.optimizer = Adam(model.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
         self.kl_weight = kl_weight
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -38,6 +38,55 @@ class TrainingManager:
         self.val_losses = []
         self.reconstruction_losses = []
         self.kl_losses = []
+
+    def calculate_loss(self, x_reconstructed, x_original, mu, logvar, batch_size=1):
+        """
+        Calculate VAE loss with component-specific losses.
+
+        Args:
+            x_reconstructed: Reconstructed node features
+            x_original: Original node features
+            mu: Mean of the latent distribution
+            logvar: Log variance of the latent distribution
+            batch_size: Number of graphs in the batch
+
+        Returns:
+            total_loss: Combined loss
+            rec_loss: Reconstruction loss
+            kl_loss: KL divergence loss
+        """
+        # Define feature component indices
+        aa_indices = slice(0, 21)  # Amino acid one-hot
+        ss_indices = slice(21, 28)  # Secondary structure one-hot
+        coords_indices = slice(28, 31)  # Coordinates
+        b_factor_idx = 31  # B-factor
+        meiler_indices = slice(32, 39)  # Meiler features
+
+        # Calculate losses for each component
+        aa_loss = F.binary_cross_entropy(x_reconstructed[:, aa_indices], x_original[:, aa_indices])
+        ss_loss = F.binary_cross_entropy(x_reconstructed[:, ss_indices], x_original[:, ss_indices])
+        coords_loss = F.mse_loss(x_reconstructed[:, coords_indices], x_original[:, coords_indices])
+        b_factor_loss = F.mse_loss(x_reconstructed[:, b_factor_idx:b_factor_idx+1],
+                                   x_original[:, b_factor_idx:b_factor_idx+1])
+        meiler_loss = F.mse_loss(x_reconstructed[:, meiler_indices], x_original[:, meiler_indices])
+
+        # Weighted component losses
+        rec_loss = (
+                2.0 * aa_loss +      # Higher weight for amino acid identity
+                1.0 * ss_loss +      # Secondary structure
+                3.0 * coords_loss +  # Higher weight for spatial coordinates
+                0.5 * b_factor_loss + # B-factor
+                1.0 * meiler_loss    # Meiler features
+        )
+
+        # KL divergence
+        kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        kl_loss = kl_loss / batch_size  # Normalize by batch size
+
+        # Total loss
+        total_loss = rec_loss + self.kl_weight * kl_loss
+
+        return total_loss, rec_loss, kl_loss
 
     def train_epoch(self, dataloader):
         """
@@ -55,7 +104,7 @@ class TrainingManager:
         total_kl_loss = 0
         num_batches = 0
 
-        for data in tqdm(dataloader, desc="Training"):
+        for data in dataloader:
             try:
                 # Move data to device
                 data = data.to(self.device)
@@ -70,18 +119,13 @@ class TrainingManager:
                 # Forward pass
                 x_reconstructed, mu, logvar = self.model(data)
 
-                # Calculate reconstruction loss
-                # Ensure proper scaling for batch size
-                rec_loss = F.mse_loss(x_reconstructed, data.x)
-
-                # Calculate KL divergence loss with proper scaling
-                # Scale KL loss by the number of graphs in the batch
+                # Calculate batch size
                 batch_size = 1 if data.batch is None else (data.batch.max().item() + 1)
-                kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-                kl_loss = kl_loss / batch_size  # Normalize by batch size
 
-                # Total loss
-                loss = rec_loss + self.kl_weight * kl_loss
+                # Calculate loss
+                loss, rec_loss, kl_loss = self.calculate_loss(
+                    x_reconstructed, data.x, mu, logvar, batch_size
+                )
 
                 # Check for NaN loss
                 if torch.isnan(loss):
@@ -127,6 +171,7 @@ class TrainingManager:
         self.kl_losses.append(epoch_kl_loss)
 
         return epoch_loss, epoch_rec_loss, epoch_kl_loss
+
     def validate(self, dataloader):
         """
         Validate the model.
@@ -144,7 +189,7 @@ class TrainingManager:
         num_batches = 0
 
         with torch.no_grad():
-            for data in tqdm(dataloader, desc="Validation"):
+            for data in dataloader:
                 try:
                     # Move data to device
                     data = data.to(self.device)
@@ -156,16 +201,13 @@ class TrainingManager:
                     # Forward pass
                     x_reconstructed, mu, logvar = self.model(data)
 
-                    # Calculate reconstruction loss
-                    rec_loss = F.mse_loss(x_reconstructed, data.x)
-
-                    # Calculate KL divergence loss with proper scaling
+                    # Calculate batch size
                     batch_size = 1 if data.batch is None else (data.batch.max().item() + 1)
-                    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-                    kl_loss = kl_loss / batch_size  # Normalize by batch size
 
-                    # Total loss
-                    loss = rec_loss + self.kl_weight * kl_loss
+                    # Calculate loss
+                    loss, rec_loss, kl_loss = self.calculate_loss(
+                        x_reconstructed, data.x, mu, logvar, batch_size
+                    )
 
                     # Check for NaN loss
                     if torch.isnan(loss):
@@ -263,6 +305,7 @@ class TrainingManager:
             'reconstruction_losses': self.reconstruction_losses,
             'kl_losses': self.kl_losses
         }
+
     def evaluate(self, dataloader):
         """
         Evaluate the model on test data.
@@ -275,24 +318,29 @@ class TrainingManager:
         """
         self.model.eval()
         total_loss = 0
+        num_batches = 0
 
         with torch.no_grad():
-            for data in tqdm(dataloader, desc="Testing"):
+            for data in dataloader:
                 # Move data to device
                 data = data.to(self.device)
 
                 # Forward pass
                 x_reconstructed, mu, logvar = self.model(data)
 
+                # Calculate batch size
+                batch_size = 1 if data.batch is None else (data.batch.max().item() + 1)
+
                 # Calculate loss
-                rec_loss = F.mse_loss(x_reconstructed, data.x)
-                kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-                loss = rec_loss + self.kl_weight * kl_loss
+                loss, _, _ = self.calculate_loss(
+                    x_reconstructed, data.x, mu, logvar, batch_size
+                )
 
                 # Accumulate metrics
                 total_loss += loss.item()
+                num_batches += 1
 
         # Calculate average loss
-        test_loss = total_loss / len(dataloader)
+        test_loss = total_loss / num_batches if num_batches > 0 else float('nan')
 
         return test_loss
