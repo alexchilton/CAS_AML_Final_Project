@@ -9,8 +9,8 @@ from GATDecoder import GATDecoder
 
 class GATVAE(nn.Module):
     """
-    Graph Attention Variational Autoencoder for protein graphs.
-    Combines the GATEncoder and GATDecoder into a single model.
+    Improved Graph Attention Variational Autoencoder for protein graphs.
+    Combines the GATEncoder and ImprovedGATDecoder into a single model.
     """
 
     def __init__(self, input_dim, hidden_dim=64, latent_dim=32, num_heads=4, dropout=0.1):
@@ -35,7 +35,7 @@ class GATVAE(nn.Module):
             dropout=dropout
         )
 
-        # Initialize decoder
+        # Initialize improved decoder
         self.decoder = GATDecoder(
             latent_dim=latent_dim,
             hidden_dim=hidden_dim,

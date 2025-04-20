@@ -1,127 +1,116 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GATConv
-from torch_geometric.data import Data, Batch
+from torch_geometric.nn import GATConv, TransformerConv, global_mean_pool
 
 
 class GATDecoder(nn.Module):
     """
-    Graph Attention Network (GAT) based decoder for protein graphs.
-    Reconstructs a graph from a latent space representation.
+    - Positional embeddings (sequence order)
+    - Secondary structure bias (optional)
     """
 
-    def __init__(self, latent_dim, hidden_dim=64, output_dim=None, num_heads=4, dropout=0.1):
-        """
-        Initialize the GAT decoder.
-
-        Args:
-            latent_dim: Dimension of the latent space
-            hidden_dim: Dimension of hidden layers
-            output_dim: Dimension of output node features
-            num_heads: Number of attention heads for GAT
-            dropout: Dropout rate
-        """
-        super(GATDecoder, self).__init__()
-
-        # Linear layer to transform latent vector to initial node features
-        self.fc = nn.Linear(latent_dim, hidden_dim)
-
-        # First GAT layer
-        self.gat1 = GATConv(hidden_dim, hidden_dim // num_heads, heads=num_heads, dropout=dropout)
-
-        # Calculate the output dimensions for the second GAT layer
-        # We need to ensure the final output has exactly output_dim features
-        # If output_dim is not divisible by num_heads, we'll use a different approach
-        if output_dim % num_heads == 0:
-            # If evenly divisible, we can use output_dim // num_heads for each head
-            second_layer_out_dim = output_dim // num_heads
-            self.need_final_projection = False
-        else:
-            # If not evenly divisible, we'll use a standard size and then project
-            second_layer_out_dim = hidden_dim // num_heads
-            self.need_final_projection = True
-
-        # Second GAT layer
-        self.gat2 = GATConv(hidden_dim, second_layer_out_dim, heads=num_heads, dropout=dropout)
-
-        # Final projection layer if needed
-        if self.need_final_projection:
-            self.final_projection = nn.Linear(second_layer_out_dim * num_heads, output_dim)
-
-        # Dropout layer
-        self.dropout = nn.Dropout(dropout)
-
-        # Store output_dim for later reference
+    def __init__(self, latent_dim, hidden_dim=64, output_dim=None,
+                 num_heads=4, dropout=0.1, max_seq_len=3000, ss_dim=8):
+        super().__init__()
+        self.latent_dim = latent_dim
+        self.hidden_dim = hidden_dim
         self.output_dim = output_dim
 
-    def forward(self, z, data):
-        """
-        Forward pass through the decoder.
+        # Positional embeddings (learned)
+        self.pos_emb = nn.Embedding(max_seq_len, latent_dim)
 
-        Args:
-            z: Latent vector
-            data: PyTorch Geometric Data object containing the graph structure
+        # Secondary structure projection (optional)
+        self.ss_proj = nn.Linear(ss_dim, latent_dim)
 
-        Returns:
-            Reconstructed node features
-        """
-        edge_index = data.edge_index
-        batch = data.batch
+        # Node feature decoder
+        self.dec_node_features = nn.Sequential(
+            nn.Linear(latent_dim * 2, hidden_dim * 2),  # *2 for pos emb
+            nn.ReLU(),
+            nn.LayerNorm(hidden_dim * 2),
+            nn.Linear(hidden_dim * 2, hidden_dim),
+            nn.ReLU(),
+            nn.LayerNorm(hidden_dim)
+        )
 
-        # Handle batched graphs
-        if batch is None:
-            num_nodes = data.x.size(0)
-            batch = torch.zeros(num_nodes, dtype=torch.long, device=z.device)
-            num_graphs = 1
-            num_nodes_per_graph = [num_nodes]
+        # GAT layers
+        self.gat1 = GATConv(
+            hidden_dim, hidden_dim // num_heads,
+            heads=num_heads, dropout=dropout
+        )
+        self.gat2 = GATConv(
+            hidden_dim, hidden_dim // num_heads,
+            heads=num_heads, dropout=dropout
+        )
+
+        # Output projection
+        if output_dim is not None:
+            self.output_proj = nn.Linear(hidden_dim, output_dim)
         else:
-            # Count nodes per graph in batch
-            num_graphs = batch.max().item() + 1
-            num_nodes_per_graph = torch.bincount(batch)
+            self.output_proj = None
 
-        # Transform latent vector to initial node features
-        x = self.fc(z)
+        self.dropout = nn.Dropout(dropout)
 
-        # Repeat features for each node in the corresponding graph
-        x_list = []
-        for i in range(len(z)):
-            # For batched input, get number of nodes in this graph
-            if i < num_graphs:
-                nodes_in_graph = num_nodes_per_graph[i]
-                x_repeated = x[i:i+1].repeat(nodes_in_graph, 1)
-                x_list.append(x_repeated)
+    def forward(self, z, data):
+        """Identical signature to original, enhanced with positions/SS"""
+        edge_index = data.edge_index
+        batch = getattr(data, 'batch', None)
+        num_nodes = data.num_nodes
 
-        # Concatenate node features
-        x = torch.cat(x_list, dim=0)
+        # Positional embeddings (auto-generated)
+        positions = torch.arange(num_nodes, device=z.device)
+        pos_emb = self.pos_emb(positions)
 
-        # Apply first GAT layer
-        x = self.gat1(x, edge_index)
-        x = F.elu(x)
-        x = self.dropout(x)
+        # Combine graph-level z + positional embeddings
+        if batch is None:
+            graph_emb = z.expand(num_nodes, -1)  # Single graph
+        else:
+            graph_emb = z[batch]  # Batched graphs
+        node_emb = torch.cat([graph_emb, pos_emb], dim=-1)
 
-        # Apply second GAT layer
-        x = self.gat2(x, edge_index)
+        # Optional secondary structure bias
+        if hasattr(data, 'ss') and data.ss is not None:
+            ss_emb = self.ss_proj(data.ss.float())
+            node_emb = node_emb[:, :self.latent_dim] + ss_emb
 
-        # Apply final projection if needed
-        if self.need_final_projection:
-            x = self.final_projection(x)
+        # Original node feature decoding
+        h = self.dec_node_features(node_emb)
 
-        # Final activation depends on the nature of the features
-        # Using sigmoid for normalized features
-        x = torch.sigmoid(x)
+        # Original GAT layers
+        h = self.gat1(h, edge_index)
+        h = F.elu(h)
+        h = self.dropout(h)
 
-        return x
+        h = self.gat2(h, edge_index)
+        h = F.elu(h)
+
+        # Dynamic output projection (original behavior)
+        if self.output_proj is None:
+            self.output_proj = nn.Linear(self.hidden_dim, data.x.size(1)).to(z.device)
+
+        features = self.output_proj(h)
+        return self._apply_activations(features)
+
+    def _apply_activations(self, features):
+        """Identical to your original activation splitting logic"""
+        if features.size(1) >= 39:
+            aa_logits = features[:, :21]
+            ss_logits = features[:, 21:28]
+            coords = features[:, 28:31]
+            b_factor = features[:, 31:32]
+            meiler = features[:, 32:39]
+
+            aa_probs = F.softmax(aa_logits, dim=1)
+            ss_probs = F.softmax(ss_logits, dim=1)
+            coords = torch.tanh(coords)
+            b_factor = torch.sigmoid(b_factor)
+            meiler = torch.sigmoid(meiler)
+
+            return torch.cat([aa_probs, ss_probs, coords, b_factor, meiler,
+                              features[:, 39:]], dim=1)
+        else:
+            return torch.sigmoid(features)
 
     def decode(self, z, data):
-        """
-        Decode latent vector to reconstructed graph.
-
-        Args:
-            z: Latent vector
-            data: PyTorch Geometric Data object
-
-        Returns:
-            Reconstructed node features
-        """
+        """Maintains original method signature for compatibility"""
         return self.forward(z, data)
