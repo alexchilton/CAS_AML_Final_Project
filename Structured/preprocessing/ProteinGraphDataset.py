@@ -70,11 +70,15 @@ class ProteinGraphDataset(Dataset):
         Returns:
             Filtered list of nanobody IDs
         """
+        # Exclude directories like 'processed' that aren't actually nanobodies
+        special_dirs = ['processed', 'raw']
+        filtered_ids = [n_id for n_id in nanobody_ids if n_id not in special_dirs]
+
         if self.selected_nanobodies is not None:
             # Filter to include only selected nanobodies
-            return [n_id for n_id in nanobody_ids if n_id in self.selected_nanobodies]
-        return nanobody_ids
+            return [n_id for n_id in filtered_ids if n_id in self.selected_nanobodies]
 
+        return filtered_ids
     @property
     def raw_file_names(self) -> List[str]:
         """
