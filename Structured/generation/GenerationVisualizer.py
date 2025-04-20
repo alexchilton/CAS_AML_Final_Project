@@ -41,9 +41,67 @@ class GenerationVisualizer:
         self.model.to(device)
         self.model.eval()
 
+    def analyze_protein_features(self, data: Data):
+        """
+        Analyze the features of a protein to check for variation across nodes.
+
+        Args:
+            data: Protein graph data
+        """
+        print("\n--- Feature analysis ---")
+
+        # Define indices for different feature types based on ProteinFeatureProcessor
+        aa_indices = range(0, 21)  # Amino acid one-hot
+        ss_indices = range(21, 28)  # Secondary structure one-hot
+        coord_indices = range(28, 31)  # Coordinates (3D)
+        b_factor_idx = 31  # B-factor
+        meiler_indices = range(32, 39)  # Meiler features
+
+        # Check if different feature sections have variation
+        for i, (name, indices) in enumerate([
+            ("Amino acid", aa_indices),
+            ("Secondary structure", ss_indices),
+            ("Coordinates", coord_indices),
+            ("B-factor", [b_factor_idx]),
+            ("Meiler features", meiler_indices)
+        ]):
+            # Take a sample of the features
+            features = data.x[:, indices].cpu().numpy()
+
+            # Check if all rows have the same values
+            all_same = np.all(features == features[0], axis=0)
+            variation = not np.all(all_same)
+
+            print(f"{name}: {'HAS variation' if variation else 'NO variation'}")
+
+            # Print sample values from the first few nodes
+            print(f"  Sample values (first 3 nodes):")
+            for j in range(min(3, features.shape[0])):
+                print(f"    Node {j}: {features[j]}")
+
+        # For amino acids, check which ones are being predicted
+        aa_features = data.x[:, aa_indices].cpu().numpy()
+        if aa_features.shape[0] > 0:
+            # Get the predicted amino acid for each node (argmax of one-hot)
+            predicted_aa_indices = np.argmax(aa_features, axis=1)
+
+            # Count frequency of each amino acid
+            aa_counts = np.bincount(predicted_aa_indices, minlength=21)
+
+            # Amino acid vocabulary from ProteinFeatureProcessor
+            amino_acids = [
+                'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS',
+                'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP',
+                'TYR', 'VAL', 'UNK'
+            ]
+
+            print("\nAmino acid distribution:")
+            for aa_idx, count in enumerate(aa_counts):
+                if count > 0:
+                    print(f"  {amino_acids[aa_idx]}: {count} nodes")
     def plot_protein_graph(self, data: Data, title: str = "Protein Graph",
                            show: bool = True, save: bool = False,
-                           filename: Optional[str] = None) -> nx.Graph:
+                           filename: Optional[str] = None, analyze_features: bool = True) -> nx.Graph:
         """
         Visualize a protein graph structure in 3D.
 
@@ -53,6 +111,7 @@ class GenerationVisualizer:
             show: Whether to display the plot
             save: Whether to save the plot to disk
             filename: Filename for saved plot (if None, use title)
+            analyze_features: Whether to analyze protein features
 
         Returns:
             NetworkX graph object
@@ -60,25 +119,26 @@ class GenerationVisualizer:
         # Convert PyG data to NetworkX for visualization
         G = self._pyg_to_networkx(data)
 
+        # Debug: print number of nodes and edges
+        print(f"Graph has {G.number_of_nodes()} nodes and {G.number_of_edges()} edges")
+
+        # Analyze features if requested
+        if analyze_features:
+            self.analyze_protein_features(data)
+
         # Extract 3D coordinates from the graph
         pos = {}
-        # Extract coordinates from node features (assuming they're at standard position)
-        coord_start_idx = 21 + 7  # After amino acid and secondary structure features
+        coord_start_idx = 28  # Coordinates start after amino acid (21) and secondary structure (7)
 
-        # Debug: print shape of node features tensor
-        print(f"Node features tensor shape: {data.x.shape}")
-
+        # Add random jitter to separate nodes for visualization
+        print("\nAdding random jitter to separate nodes for visualization")
+        np.random.seed(42)  # For reproducibility
         for i, node in enumerate(G.nodes()):
-            # Debug: print node features at coordinate positions
-            if i < 5:  # Print just a few nodes to avoid flooding output
-                print(f"Node {i} coordinates: {data.x[i, coord_start_idx:coord_start_idx+3].cpu().numpy()}")
-            # Get coordinates - assuming they're stored in the node features
-            coords = data.x[i, coord_start_idx:coord_start_idx+3].cpu().numpy()
-            pos[node] = coords
+            # Get base coordinates but add small random offset
+            base_coords = data.x[i, coord_start_idx:coord_start_idx+3].cpu().numpy()
+            jitter = np.random.normal(0, 0.1, 3)  # Small random jitter
+            pos[node] = base_coords + jitter
 
-        # Debug: print the first few positions  # Debug: check if all coordinates are unique
-        unique_coords = set(tuple(p) for p in pos.values())
-        print(f"Number of unique coordinate positions: {len(unique_coords)} out of {len(pos)} nodes")
         # Create 3D plot
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
@@ -115,7 +175,6 @@ class GenerationVisualizer:
             plt.close()
 
         return G
-
     def plot_interpolation_sequence(self, interpolated_graphs: List[Data],
                                     show: bool = True, save: bool = False,
                                     filename: str = "interpolation_sequence.png"):
