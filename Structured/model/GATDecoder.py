@@ -73,6 +73,8 @@ class GATDecoder(nn.Module):
         if batch is None:
             num_nodes = data.x.size(0)
             batch = torch.zeros(num_nodes, dtype=torch.long, device=z.device)
+            num_graphs = 1
+            num_nodes_per_graph = [num_nodes]
         else:
             # Count nodes per graph in batch
             num_graphs = batch.max().item() + 1
@@ -85,14 +87,10 @@ class GATDecoder(nn.Module):
         x_list = []
         for i in range(len(z)):
             # For batched input, get number of nodes in this graph
-            if batch is not None and i < num_graphs:
+            if i < num_graphs:
                 nodes_in_graph = num_nodes_per_graph[i]
                 x_repeated = x[i:i+1].repeat(nodes_in_graph, 1)
-            else:
-                # For single graph
-                x_repeated = x[i:i+1].repeat(data.x.size(0), 1)
-
-            x_list.append(x_repeated)
+                x_list.append(x_repeated)
 
         # Concatenate node features
         x = torch.cat(x_list, dim=0)
