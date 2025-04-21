@@ -4,7 +4,6 @@ import pickle
 import json
 import traceback
 import gc
-from tqdm import tqdm
 from Bio import PDB
 from Bio.PDB.DSSP import DSSP
 import networkx as nx
@@ -14,8 +13,7 @@ def parse_pdb(pdb_filename):
     structure = parser.get_structure("Protein", pdb_filename)
     
     atoms = []
-    residues = []
-    
+
     # Keep track of processed residues by chain
     all_residues_by_chain = {}
     
@@ -46,164 +44,15 @@ def parse_pdb(pdb_filename):
     # Option 1: Return separate residue lists for each chain --> better for our pipeline
     return atoms, all_residues_by_chain
 
-def process_pdb_full_features_memory_efficient(folder_path, output_path=None, max_file_size_mb=25):
-    """
-    Process PDB files with all features while being memory-efficient.
-    
-    Parameters:
-    -----------
-    folder_path : str
-        Path to folder with PDB files
-    output_path : str, optional
-        Output directory
-    max_file_size_mb : float
-        Skip files larger than this
-        
-    Returns:
-    --------
-    dict
-        Processing summary
-    """
-    if output_path is None:
-        output_path = os.path.join(folder_path, "processed_data")
-    
-    os.makedirs(output_path, exist_ok=True)
-    
-    # Get PDB files
-    pdb_files = [f for f in os.listdir(folder_path) if f.endswith('.pdb')]
-    print(f"Found {len(pdb_files)} PDB files")
-    
-    summary = {}
-    
-    for pdb_file in pdb_files:
-        pdb_path = os.path.join(folder_path, pdb_file)
-        pdb_id = os.path.splitext(pdb_file)[0]
-        
-        # Create PDB-specific output directory
-        pdb_output = os.path.join(output_path, pdb_id)
-        os.makedirs(pdb_output, exist_ok=True)
-        
-        try:
-            # Check file size
-            file_size_mb = os.path.getsize(pdb_path) / (1024 * 1024)
-            if file_size_mb > max_file_size_mb:
-                print(f"Skipping {pdb_file} - too large ({file_size_mb:.2f} MB)")
-                summary[pdb_id] = {"status": "skipped", "size_mb": file_size_mb}
-                continue
-            
-            print(f"Processing {pdb_file} ({file_size_mb:.2f} MB)")
-            
-            # Step 1: Parse basic structure and create graph (low memory impact)
-            structure, residues_by_chain = parse_basic_structure(pdb_path)
-            
-            if not structure or not residues_by_chain:
-                print(f"Failed to parse {pdb_file}")
-                summary[pdb_id] = {"status": "error", "error": "Failed to parse structure"}
-                continue
-            
-            print(f"  Found {len(residues_by_chain)} chains")
-            
-            # Step 2: Calculate secondary structure once (low memory impact)
-            ss_data = calculate_secondary_structure(pdb_path)
-            print(f"  Calculated secondary structure for {len(ss_data)} residues")
-            
-            # Step 3: Create protein graph (moderate memory impact)
-            nx_graph = create_protein_graph(pdb_path)
-            nx_graph = add_structure_to_graph(nx_graph, ss_data)
-            print(f"  Created graph with {nx_graph.number_of_nodes()} nodes and {nx_graph.number_of_edges()} edges")
-            
-            # Save graph immediately to free memory
-            graph_path = os.path.join(pdb_output, f"{pdb_id}_graph.pkl")
-            with open(graph_path, 'wb') as f:
-                pickle.dump(nx_graph, f)
-            print(f"  Saved graph to {graph_path}")
-            
-            # Create PDB data dictionary (without the graph)
-            pdb_data = {
-                'pdb_id': pdb_id,
-                'residues_by_chain': residues_by_chain,
-                'secondary_structure': {},
-                'backbone_atoms': {},
-                'edge_indices': {},
-                'bond_lengths': {},
-                'angles': {},
-                'torsions': {},
-                'charges': {},
-                'hydrophobic_residues': {}
-            }
-            
-            # Process each chain separately with incremental save
-            for chain_id in residues_by_chain:
-                print(f"  Processing chain {chain_id}...")
-                
-                # Create output path for this chain
-                chain_output = os.path.join(pdb_output, f"{pdb_id}_{chain_id}")
-                
-                # Step 4: Process one chain at a time with memory-efficient functions
-                #         Save results incrementally to disk
-                process_single_chain_full_features(
-                    pdb_path, 
-                    chain_id, 
-                    chain_output, 
-                    ss_data,
-                    incremental_save=True
-                )
-                
-                # After processing is complete, load the chain results
-                chain_data = load_chain_data(chain_output)
-                
-                # Add to main data dictionary
-                if chain_data:
-                    for key in ['secondary_structure', 'backbone_atoms', 'edge_indices', 
-                               'bond_lengths', 'angles', 'torsions', 'charges', 
-                               'hydrophobic_residues']:
-                        if key in chain_data:
-                            pdb_data[key][chain_id] = chain_data[key]
-                
-                # Force garbage collection
-                gc.collect()
-            
-            # Save the main data dictionary
-            data_path = os.path.join(pdb_output, f"{pdb_id}_data.pkl")
-            with open(data_path, 'wb') as f:
-                pickle.dump(pdb_data, f)
-            print(f"  Saved data to {data_path}")
-            
-            # Update summary
-            summary[pdb_id] = {
-                "status": "success",
-                "chains": list(residues_by_chain.keys()),
-                "size_mb": file_size_mb,
-                "num_nodes": nx_graph.number_of_nodes(),
-                "num_edges": nx_graph.number_of_edges()
-            }
-            
-            # Clear memory for next PDB
-            del nx_graph
-            del pdb_data
-            gc.collect()
-            
-        except Exception as e:
-            print(f"Error processing {pdb_file}: {str(e)}")
-            traceback.print_exc()
-            summary[pdb_id] = {"status": "error", "error": str(e)}
-    
-    # Save summary
-    summary_path = os.path.join(output_path, "processing_summary.json")
-    with open(summary_path, 'w') as f:
-        json.dump(summary, f, indent=2)
-    
-    return summary
-
 def parse_basic_structure(pdb_path):
     """
     Parse basic PDB structure with low memory usage.
-    
+
     Parameters:
     -----------
     pdb_path : str
         Path to PDB file
-        
+
     Returns:
     --------
     tuple
@@ -212,29 +61,292 @@ def parse_basic_structure(pdb_path):
     try:
         parser = PDB.PDBParser(QUIET=True)
         structure = parser.get_structure("temp", pdb_path)
-        
+
         # Extract residues by chain
         residues_by_chain = {}
-        
+
         for model in structure:
             for chain in model:
                 chain_id = chain.get_id()
                 residues_by_chain[chain_id] = []
-                
+
                 for residue in chain:
                     # Skip non-standard residues
                     if residue.get_id()[0] != " ":
                         continue
-                    
+
                     res_id = residue.get_id()[1]
                     res_name = residue.get_resname()
                     residues_by_chain[chain_id].append((res_id, res_name))
-        
+
         return structure, residues_by_chain
-    
+
     except Exception as e:
         print(f"Error parsing structure: {str(e)}")
         return None, None
+
+
+def process_pdb_full_features_memory_efficient(folder_path, output_path=None, max_file_size_mb=25):
+    """
+    Process PDB files with all features while being memory-efficient.
+
+    Parameters:
+    -----------
+    folder_path : str
+        Path to folder with PDB files
+    output_path : str, optional
+        Output directory
+    max_file_size_mb : float
+        Skip files larger than this
+
+    Returns:
+    --------
+    dict
+        Processing summary
+    """
+    output_path = prepare_output_directory(folder_path, output_path)
+    pdb_files = get_pdb_file_list(folder_path)
+    print(f"Found {len(pdb_files)} PDB files")
+
+    summary = {}
+
+    for pdb_file in pdb_files:
+        pdb_path = os.path.join(folder_path, pdb_file)
+        pdb_id = os.path.splitext(pdb_file)[0]
+
+        # Create PDB-specific output directory
+        pdb_output = create_pdb_output_directory(output_path, pdb_id)
+
+        try:
+            # Check file size
+            if should_skip_large_file(pdb_path, max_file_size_mb):
+                file_size_mb = os.path.getsize(pdb_path) / (1024 * 1024)
+                print(f"Skipping {pdb_file} - too large ({file_size_mb:.2f} MB)")
+                summary[pdb_id] = {"status": "skipped", "size_mb": file_size_mb}
+                continue
+
+            file_size_mb = os.path.getsize(pdb_path) / (1024 * 1024)
+            print(f"Processing {pdb_file} ({file_size_mb:.2f} MB)")
+
+            # Step 1: Parse basic structure
+            structure_data = parse_structure_data(pdb_path, pdb_id, summary)
+            if not structure_data:
+                continue
+
+            structure, residues_by_chain = structure_data
+            print(f"  Found {len(residues_by_chain)} chains")
+
+            # Step 2: Calculate secondary structure
+            ss_data = calculate_secondary_structure(pdb_path)
+            print(f"  Calculated secondary structure for {len(ss_data)} residues")
+
+            # Step 3: Create protein graph
+            graph_result = create_and_save_protein_graph(pdb_path, ss_data, pdb_id, pdb_output)
+            if not graph_result:
+                summary[pdb_id] = {"status": "error", "error": "Failed to create graph"}
+                continue
+
+            nx_graph, graph_path = graph_result
+            print(f"  Created graph with {nx_graph.number_of_nodes()} nodes and {nx_graph.number_of_edges()} edges")
+
+            # Create PDB data dictionary (without the graph)
+            pdb_data = initialize_pdb_data(pdb_id, residues_by_chain)
+
+            # Process each chain separately with incremental save
+            process_result = process_all_chains(pdb_path, residues_by_chain, pdb_id, pdb_output,
+                                                ss_data, pdb_data)
+
+            if not process_result:
+                summary[pdb_id] = {"status": "error", "error": "Failed to process chains"}
+                continue
+
+            pdb_data = process_result
+
+            # Save the main data dictionary
+            save_result = save_pdb_data(pdb_data, pdb_output, pdb_id)
+            if not save_result:
+                summary[pdb_id] = {"status": "error", "error": "Failed to save PDB data"}
+                continue
+
+            # Update summary
+            update_summary_for_success(summary, pdb_id, residues_by_chain, nx_graph, file_size_mb)
+
+            # Clear memory for next PDB
+            del nx_graph
+            del pdb_data
+            gc.collect()
+
+        except Exception as e:
+            handle_pdb_processing_error(e, pdb_file, summary, pdb_id)
+
+    # Save summary
+    save_processing_summary(summary, output_path)
+
+    return summary
+
+
+def prepare_output_directory(folder_path, output_path):
+    """Create output directory if it doesn't exist and return the path."""
+    if output_path is None:
+        output_path = os.path.join(folder_path, "processed_data")
+
+    os.makedirs(output_path, exist_ok=True)
+    return output_path
+
+
+def get_pdb_file_list(folder_path):
+    """Get a list of PDB files in the specified folder."""
+    return [f for f in os.listdir(folder_path) if f.endswith('.pdb')]
+
+
+def create_pdb_output_directory(output_path, pdb_id):
+    """Create an output directory for a specific PDB."""
+    pdb_output = os.path.join(output_path, pdb_id)
+    os.makedirs(pdb_output, exist_ok=True)
+    return pdb_output
+
+
+def should_skip_large_file(pdb_path, max_file_size_mb):
+    """Check if a file is too large and should be skipped."""
+    file_size_mb = os.path.getsize(pdb_path) / (1024 * 1024)
+    return file_size_mb > max_file_size_mb
+
+
+def parse_structure_data(pdb_path, pdb_id, summary):
+    """Parse the basic structure of a PDB file."""
+    try:
+        structure, residues_by_chain = parse_basic_structure(pdb_path)
+
+        if not structure or not residues_by_chain:
+            print(f"Failed to parse {os.path.basename(pdb_path)}")
+            summary[pdb_id] = {"status": "error", "error": "Failed to parse structure"}
+            return None
+
+        return (structure, residues_by_chain)
+    except Exception as e:
+        print(f"Error parsing structure: {str(e)}")
+        summary[pdb_id] = {"status": "error", "error": f"Error parsing structure: {str(e)}"}
+        return None
+
+
+def create_and_save_protein_graph(pdb_path, ss_data, pdb_id, pdb_output):
+    """Create a protein graph and save it to disk."""
+    try:
+        nx_graph = create_protein_graph(pdb_path)
+        nx_graph = add_structure_to_graph(nx_graph, ss_data)
+
+        # Save graph immediately to free memory
+        graph_path = os.path.join(pdb_output, f"{pdb_id}_graph.pkl")
+        with open(graph_path, 'wb') as f:
+            pickle.dump(nx_graph, f)
+        print(f"  Saved graph to {graph_path}")
+
+        return (nx_graph, graph_path)
+    except Exception as e:
+        print(f"Error creating graph: {str(e)}")
+        return None
+
+
+def initialize_pdb_data(pdb_id, residues_by_chain):
+    """Initialize an empty PDB data dictionary."""
+    return {
+        'pdb_id': pdb_id,
+        'residues_by_chain': residues_by_chain,
+        'secondary_structure': {},
+        'backbone_atoms': {},
+        'edge_indices': {},
+        'bond_lengths': {},
+        'angles': {},
+        'torsions': {},
+        'charges': {},
+        'hydrophobic_residues': {}
+    }
+
+
+def process_all_chains(pdb_path, residues_by_chain, pdb_id, pdb_output, ss_data, pdb_data):
+    """Process all chains in a PDB file."""
+    try:
+        for chain_id in residues_by_chain:
+            print(f"  Processing chain {chain_id}...")
+
+            # Create output path for this chain
+            chain_output = os.path.join(pdb_output, f"{pdb_id}_{chain_id}")
+
+            # Process one chain at a time with memory-efficient functions
+            process_single_chain_full_features(
+                pdb_path,
+                chain_id,
+                chain_output,
+                ss_data,
+                incremental_save=True
+            )
+
+            # After processing is complete, load the chain results
+            chain_data = load_chain_data(chain_output)
+
+            # Add to main data dictionary
+            if chain_data:
+                update_pdb_data_with_chain(pdb_data, chain_id, chain_data)
+
+            # Force garbage collection
+            gc.collect()
+
+        return pdb_data
+    except Exception as e:
+        print(f"Error processing chains: {str(e)}")
+        return None
+
+
+def update_pdb_data_with_chain(pdb_data, chain_id, chain_data):
+    """Update the PDB data dictionary with data from a specific chain."""
+    for key in ['secondary_structure', 'backbone_atoms', 'edge_indices',
+                'bond_lengths', 'angles', 'torsions', 'charges',
+                'hydrophobic_residues']:
+        if key in chain_data:
+            pdb_data[key][chain_id] = chain_data[key]
+
+
+def save_pdb_data(pdb_data, pdb_output, pdb_id):
+    """Save PDB data to disk."""
+    try:
+        data_path = os.path.join(pdb_output, f"{pdb_id}_data.pkl")
+        with open(data_path, 'wb') as f:
+            pickle.dump(pdb_data, f)
+        print(f"  Saved data to {data_path}")
+        return True
+    except Exception as e:
+        print(f"Error saving PDB data: {str(e)}")
+        return False
+
+
+def update_summary_for_success(summary, pdb_id, residues_by_chain, nx_graph, file_size_mb):
+    """Update the summary dictionary with successful processing information."""
+    summary[pdb_id] = {
+        "status": "success",
+        "chains": list(residues_by_chain.keys()),
+        "size_mb": file_size_mb,
+        "num_nodes": nx_graph.number_of_nodes(),
+        "num_edges": nx_graph.number_of_edges()
+    }
+
+
+def handle_pdb_processing_error(error, pdb_file, summary, pdb_id):
+    """Handle errors during PDB processing."""
+    print(f"Error processing {pdb_file}: {str(error)}")
+    traceback.print_exc()
+    summary[pdb_id] = {"status": "error", "error": str(error)}
+
+
+def save_processing_summary(summary, output_path):
+    """Save the processing summary to disk."""
+    summary_path = os.path.join(output_path, "processing_summary.json")
+    try:
+        with open(summary_path, 'w') as f:
+            json.dump(summary, f, indent=2)
+        print(f"Saved processing summary to {summary_path}")
+    except Exception as e:
+        print(f"Error saving summary: {str(e)}")
+
 
 def process_single_chain_full_features(pdb_path, chain_id, output_prefix, ss_data, incremental_save=True):
     """
@@ -394,66 +506,216 @@ def process_single_chain_full_features(pdb_path, chain_id, output_prefix, ss_dat
         traceback.print_exc()
         return {} if not incremental_save else None
 
+
 def load_chain_data(chain_output_prefix):
     """
     Load chain data from incremental files.
-    
+
     Parameters:
     -----------
     chain_output_prefix : str
         Prefix used for chain files
-        
+
     Returns:
     --------
     dict
         Combined chain data
     """
-    chain_data = {}
-    
     try:
         # Try to load index file
-        with open(f"{chain_output_prefix}_index.json", 'r') as f:
-            index = json.load(f)
-        
-        # Load each file
-        if 'backbone' in index:
-            with open(index['backbone'], 'rb') as f:
-                chain_data['backbone_atoms'] = pickle.load(f)
-        
-        if 'secondary_structure' in index:
-            with open(index['secondary_structure'], 'rb') as f:
-                chain_data['secondary_structure'] = pickle.load(f)
-        
-        if 'edge_pairs' in index:
-            with open(index['edge_pairs'], 'rb') as f:
-                chain_data['edge_indices'] = pickle.load(f)
-        
-        if 'bond_lengths' in index:
-            with open(index['bond_lengths'], 'rb') as f:
-                chain_data['bond_lengths'] = pickle.load(f)
-        
-        if 'angles' in index:
-            with open(index['angles'], 'rb') as f:
-                chain_data['angles'] = pickle.load(f)
-        
-        if 'torsions' in index:
-            with open(index['torsions'], 'rb') as f:
-                chain_data['torsions'] = pickle.load(f)
-        
-        if 'charges' in index:
-            with open(index['charges'], 'rb') as f:
-                chain_data['charges'] = pickle.load(f)
-        
-        if 'hydrophobic' in index:
-            with open(index['hydrophobic'], 'rb') as f:
-                chain_data['hydrophobic_residues'] = pickle.load(f)
-        
+        index = load_index_file(chain_output_prefix)
+        if not index:
+            return {}
+
+        chain_data = {}
+
+        # Load each file using individual functions
+        chain_data = load_backbone_data(index, chain_data)
+        chain_data = load_secondary_structure_data(index, chain_data)
+        chain_data = load_edge_indices_data(index, chain_data)
+        chain_data = load_bond_lengths_data(index, chain_data)
+        chain_data = load_angles_data(index, chain_data)
+        chain_data = load_torsions_data(index, chain_data)
+        chain_data = load_charges_data(index, chain_data)
+        chain_data = load_hydrophobic_data(index, chain_data)
+
         return chain_data
-        
+
     except Exception as e:
         print(f"  Error loading chain data: {str(e)}")
         return {}
 
+
+def load_index_file(chain_output_prefix):
+    """
+    Load the index file for chain data.
+
+    Parameters:
+    -----------
+    chain_output_prefix : str
+        Prefix used for chain files
+
+    Returns:
+    --------
+    dict
+        Index data or None on error
+    """
+    try:
+        with open(f"{chain_output_prefix}_index.json", 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"  Error loading index file: {str(e)}")
+        return None
+
+
+def load_file_safely(filepath, file_type):
+    """
+    Safely load a pickle file.
+
+    Parameters:
+    -----------
+    filepath : str
+        Path to the file
+    file_type : str
+        Type of file for error messages
+
+    Returns:
+    --------
+    object
+        Loaded data or None on error
+    """
+    try:
+        with open(filepath, 'rb') as f:
+            return pickle.load(f)
+    except Exception as e:
+        print(f"  Error loading {file_type} file: {str(e)}")
+        return None
+
+
+def load_backbone_data(index, chain_data):
+    """Load backbone data from file."""
+    if 'backbone' in index:
+        data = load_file_safely(index['backbone'], 'backbone')
+        if data:
+            chain_data['backbone_atoms'] = data
+    return chain_data
+
+
+def load_secondary_structure_data(index, chain_data):
+    """Load secondary structure data from file."""
+    if 'secondary_structure' in index:
+        data = load_file_safely(index['secondary_structure'], 'secondary structure')
+        if data:
+            chain_data['secondary_structure'] = data
+    return chain_data
+
+
+def load_edge_indices_data(index, chain_data):
+    """Load edge indices data from file."""
+    if 'edge_pairs' in index:
+        data = load_file_safely(index['edge_pairs'], 'edge pairs')
+        if data:
+            chain_data['edge_indices'] = data
+    return chain_data
+
+
+def load_bond_lengths_data(index, chain_data):
+    """Load bond lengths data from file."""
+    if 'bond_lengths' in index:
+        data = load_file_safely(index['bond_lengths'], 'bond lengths')
+        if data:
+            chain_data['bond_lengths'] = data
+    return chain_data
+
+
+def load_angles_data(index, chain_data):
+    """Load angles data from file."""
+    if 'angles' in index:
+        data = load_file_safely(index['angles'], 'angles')
+        if data:
+            chain_data['angles'] = data
+    return chain_data
+
+
+def load_torsions_data(index, chain_data):
+    """Load torsions data from file."""
+    if 'torsions' in index:
+        data = load_file_safely(index['torsions'], 'torsions')
+        if data:
+            chain_data['torsions'] = data
+    return chain_data
+
+
+def load_charges_data(index, chain_data):
+    """Load charges data from file."""
+    if 'charges' in index:
+        data = load_file_safely(index['charges'], 'charges')
+        if data:
+            chain_data['charges'] = data
+    return chain_data
+
+
+def load_hydrophobic_data(index, chain_data):
+    """Load hydrophobic residues data from file."""
+    if 'hydrophobic' in index:
+        data = load_file_safely(index['hydrophobic'], 'hydrophobic residues')
+        if data:
+            chain_data['hydrophobic_residues'] = data
+    return chain_data
+
+
+def load_pdb_data(pdb_output_dir, pdb_id):
+    """
+    Load processed PDB data from disk.
+
+    Parameters:
+    -----------
+    pdb_output_dir : str
+        Directory containing processed PDB data
+    pdb_id : str
+        PDB identifier
+
+    Returns:
+    --------
+    tuple
+        (pdb_data, nx_graph) or (None, None) on error
+    """
+    try:
+        # Load graph
+        graph_path = os.path.join(pdb_output_dir, f"{pdb_id}_graph.pkl")
+        nx_graph = load_file_safely(graph_path, 'graph')
+
+        # Load other data
+        data_path = os.path.join(pdb_output_dir, f"{pdb_id}_data.pkl")
+        pdb_data = load_file_safely(data_path, 'PDB data')
+
+        return pdb_data, nx_graph
+    except Exception as e:
+        print(f"Error loading PDB data for {pdb_id}: {str(e)}")
+        return None, None
+
+
+def load_processed_data_summary(output_dir):
+    """
+    Load the processing summary from disk.
+
+    Parameters:
+    -----------
+    output_dir : str
+        Output directory containing the summary
+
+    Returns:
+    --------
+    dict
+        Processing summary or empty dict on error
+    """
+    summary_path = os.path.join(output_dir, "processing_summary.json")
+    try:
+        with open(summary_path, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading processing summary: {str(e)}")
+        return {}
 # Helper functions optimized for memory efficiency
 
 def extract_chain_atoms(pdb_path, chain_id):
@@ -691,10 +953,12 @@ def calculate_angles_memory_efficient(chain_atoms, positions, distance_cutoff=5.
     print(f"    Calculated {triplet_count} angles")
     return angles
 
+
+
 def calculate_torsions_memory_efficient(chain_atoms, positions, distance_cutoff=2.0, backbone_only=True):
     """
     Calculate torsions with memory efficiency.
-    
+
     Parameters:
     -----------
     chain_atoms : list
@@ -705,7 +969,200 @@ def calculate_torsions_memory_efficient(chain_atoms, positions, distance_cutoff=
         Maximum distance to consider for connections
     backbone_only : bool
         If True, only calculate torsions for backbone atoms
-        
+
+    Returns:
+    --------
+    dict
+        Dictionary of torsion angles
+    """
+    if backbone_only:
+        return calculate_backbone_torsions(chain_atoms, positions)
+    else:
+        return calculate_all_torsions(chain_atoms, positions, distance_cutoff)
+
+
+def calculate_backbone_torsions(chain_atoms, positions):
+    """
+    Calculate only backbone torsion angles (phi, psi, omega) for a protein chain.
+
+    Parameters:
+    -----------
+    chain_atoms : list
+        List of atom data
+    positions : ndarray
+        Array of atom positions
+
+    Returns:
+    --------
+    dict
+        Dictionary of backbone torsion angles
+    """
+    torsions = {}
+
+    # Group atoms by residue
+    residue_groups = {}
+
+    # First pass: organize atoms by residue
+    for i, atom in enumerate(chain_atoms):
+        chain_id, res_id, res_name, atom_name, element, position = atom
+
+        if atom_name in ['N', 'CA', 'C', 'O']:
+            if res_id not in residue_groups:
+                residue_groups[res_id] = {}
+            residue_groups[res_id][atom_name] = i
+
+    # Sort residues by ID
+    sorted_res_ids = sorted(residue_groups.keys())
+
+    # Calculate phi, psi, omega angles between consecutive residues
+    for i in range(1, len(sorted_res_ids)):
+        prev_res = sorted_res_ids[i-1]
+        curr_res = sorted_res_ids[i]
+
+        # Skip if residues aren't sequential
+        if curr_res - prev_res != 1:
+            continue
+
+        prev_atoms = residue_groups.get(prev_res, {})
+        curr_atoms = residue_groups.get(curr_res, {})
+
+        # Calculate phi (C-N-CA-C)
+        phi_torsion = calculate_phi_torsion(prev_atoms, curr_atoms, positions)
+        if phi_torsion:
+            torsions[phi_torsion[0]] = phi_torsion[1]
+
+        # Calculate psi if next residue exists
+        if i < len(sorted_res_ids) - 1:
+            next_res = sorted_res_ids[i+1]
+
+            # Skip if residues aren't sequential
+            if next_res - curr_res != 1:
+                continue
+
+            next_atoms = residue_groups.get(next_res, {})
+
+            psi_torsion = calculate_psi_torsion(curr_atoms, next_atoms, positions)
+            if psi_torsion:
+                torsions[psi_torsion[0]] = psi_torsion[1]
+
+        # Calculate omega
+        omega_torsion = calculate_omega_torsion(prev_atoms, curr_atoms, positions)
+        if omega_torsion:
+            torsions[omega_torsion[0]] = omega_torsion[1]
+
+    print(f"    Calculated {len(torsions)} backbone torsions")
+    return torsions
+
+
+def calculate_phi_torsion(prev_atoms, curr_atoms, positions):
+    """
+    Calculate phi torsion angle (C-N-CA-C).
+
+    Parameters:
+    -----------
+    prev_atoms : dict
+        Dictionary of previous residue atoms by name->index
+    curr_atoms : dict
+        Dictionary of current residue atoms by name->index
+    positions : ndarray
+        Array of atom positions
+
+    Returns:
+    --------
+    tuple or None
+        ((i, j, k, l), torsion_value) or None if calculation fails
+    """
+    if ('C' in prev_atoms and 'N' in curr_atoms and
+            'CA' in curr_atoms and 'C' in curr_atoms):
+        i = prev_atoms['C']
+        j = curr_atoms['N']
+        k = curr_atoms['CA']
+        l = curr_atoms['C']
+
+        torsion = calculate_single_torsion(
+            positions[i], positions[j], positions[k], positions[l])
+        if torsion is not None:
+            return ((i, j, k, l), torsion)
+    return None
+
+
+def calculate_psi_torsion(curr_atoms, next_atoms, positions):
+    """
+    Calculate psi torsion angle (N-CA-C-N).
+
+    Parameters:
+    -----------
+    curr_atoms : dict
+        Dictionary of current residue atoms by name->index
+    next_atoms : dict
+        Dictionary of next residue atoms by name->index
+    positions : ndarray
+        Array of atom positions
+
+    Returns:
+    --------
+    tuple or None
+        ((i, j, k, l), torsion_value) or None if calculation fails
+    """
+    if ('N' in curr_atoms and 'CA' in curr_atoms and
+            'C' in curr_atoms and 'N' in next_atoms):
+        i = curr_atoms['N']
+        j = curr_atoms['CA']
+        k = curr_atoms['C']
+        l = next_atoms['N']
+
+        torsion = calculate_single_torsion(
+            positions[i], positions[j], positions[k], positions[l])
+        if torsion is not None:
+            return ((i, j, k, l), torsion)
+    return None
+
+
+def calculate_omega_torsion(prev_atoms, curr_atoms, positions):
+    """
+    Calculate omega torsion angle (CA-C-N-CA).
+
+    Parameters:
+    -----------
+    prev_atoms : dict
+        Dictionary of previous residue atoms by name->index
+    curr_atoms : dict
+        Dictionary of current residue atoms by name->index
+    positions : ndarray
+        Array of atom positions
+
+    Returns:
+    --------
+    tuple or None
+        ((i, j, k, l), torsion_value) or None if calculation fails
+    """
+    if ('CA' in prev_atoms and 'C' in prev_atoms and
+            'N' in curr_atoms and 'CA' in curr_atoms):
+        i = prev_atoms['CA']
+        j = prev_atoms['C']
+        k = curr_atoms['N']
+        l = curr_atoms['CA']
+
+        torsion = calculate_single_torsion(
+            positions[i], positions[j], positions[k], positions[l])
+        if torsion is not None:
+            return ((i, j, k, l), torsion)
+    return None
+
+
+def calculate_all_torsions(chain_atoms, positions, distance_cutoff=2.0):
+    """
+    Calculate all possible torsion angles for a protein chain.
+
+    Parameters:
+    -----------
+    chain_atoms : list
+        List of atom data
+    positions : ndarray
+        Array of atom positions
+    distance_cutoff : float
+        Maximum distance to consider for connections
+
     Returns:
     --------
     dict
@@ -713,323 +1170,270 @@ def calculate_torsions_memory_efficient(chain_atoms, positions, distance_cutoff=
     """
     torsions = {}
     n_atoms = len(chain_atoms)
-    
-    if backbone_only:
-        # Approach 1: Focus on backbone torsions only
-        # Group atoms by residue
-        residue_groups = {}
-        
-        for i, atom in enumerate(chain_atoms):
-            chain_id, res_id, res_name, atom_name, element, position = atom
-            
-            if atom_name in ['N', 'CA', 'C', 'O']:
-                if res_id not in residue_groups:
-                    residue_groups[res_id] = {}
-                residue_groups[res_id][atom_name] = i
-        
-        # Sort residues by ID
-        sorted_res_ids = sorted(residue_groups.keys())
-        
-        # Calculate phi, psi, omega angles between consecutive residues
-        for i in range(1, len(sorted_res_ids)):
-            prev_res = sorted_res_ids[i-1]
-            curr_res = sorted_res_ids[i]
-            
-            # Skip if residues aren't sequential
-            if curr_res - prev_res != 1:
-                continue
-                
-            prev_atoms = residue_groups.get(prev_res, {})
-            curr_atoms = residue_groups.get(curr_res, {})
-            
-            # Calculate phi (C-N-CA-C)
-            if ('C' in prev_atoms and 'N' in curr_atoms and 
-                'CA' in curr_atoms and 'C' in curr_atoms):
-                i = prev_atoms['C']
-                j = curr_atoms['N']
-                k = curr_atoms['CA']
-                l = curr_atoms['C']
-                
-                torsion = calculate_single_torsion(
-                    positions[i], positions[j], positions[k], positions[l])
-                if torsion is not None:
-                    torsions[(i, j, k, l)] = torsion
-            
-            # Calculate psi if next residue exists
-            if i < len(sorted_res_ids) - 1:
-                next_res = sorted_res_ids[i+1]
-                
-                # Skip if residues aren't sequential
-                if next_res - curr_res != 1:
-                    continue
-                    
-                next_atoms = residue_groups.get(next_res, {})
-                
-                if ('N' in curr_atoms and 'CA' in curr_atoms and 
-                    'C' in curr_atoms and 'N' in next_atoms):
-                    i = curr_atoms['N']
-                    j = curr_atoms['CA']
-                    k = curr_atoms['C']
-                    l = next_atoms['N']
-                    
+
+    # First identify connected pairs (similar to angle calculation)
+    connected_pairs = identify_connected_pairs(chain_atoms, positions, distance_cutoff)
+
+    # Find valid quadruplets (i-j-k-l where each adjacent pair is connected)
+    jk_pairs = identify_connected_jk_pairs(connected_pairs, n_atoms)
+
+    # Process j-k pairs in batches
+    torsions = process_torsion_batches(jk_pairs, connected_pairs, positions, n_atoms)
+
+    print(f"    Calculated {len(torsions)} torsions")
+    return torsions
+
+
+def identify_connected_pairs(chain_atoms, positions, distance_cutoff):
+    """
+    Identify pairs of atoms that are connected.
+
+    Parameters:
+    -----------
+    chain_atoms : list
+        List of atom data
+    positions : ndarray
+        Array of atom positions
+    distance_cutoff : float
+        Maximum distance to consider for connections
+
+    Returns:
+    --------
+    set
+        Set of connected atom pairs (i,j)
+    """
+    connected_pairs = set()
+    n_atoms = len(chain_atoms)
+
+    for i in range(n_atoms):
+        res_i = chain_atoms[i][1]
+        pos_i = positions[i]
+
+        for j in range(i+1, n_atoms):
+            res_j = chain_atoms[j][1]
+            pos_j = positions[j]
+
+            # Check if connected by residue
+            residue_connected = (res_i == res_j or abs(res_i - res_j) == 1)
+
+            # Check distance
+            distance = np.linalg.norm(pos_j - pos_i)
+
+            if residue_connected or distance <= distance_cutoff:
+                connected_pairs.add((i, j))
+                connected_pairs.add((j, i))  # Undirected
+
+    return connected_pairs
+
+
+def identify_connected_jk_pairs(connected_pairs, n_atoms):
+    """
+    Identify all connected j-k pairs for torsion calculation.
+
+    Parameters:
+    -----------
+    connected_pairs : set
+        Set of connected atom pairs
+    n_atoms : int
+        Total number of atoms
+
+    Returns:
+    --------
+    list
+        List of j-k pairs where j < k
+    """
+    jk_pairs = []
+    for j in range(n_atoms):
+        for k in range(j+1, n_atoms):
+            if (j, k) in connected_pairs:
+                jk_pairs.append((j, k))
+
+    return jk_pairs
+
+
+def process_torsion_batches(jk_pairs, connected_pairs, positions, n_atoms, batch_size=500):
+    """
+    Process torsion calculations in batches for memory efficiency.
+
+    Parameters:
+    -----------
+    jk_pairs : list
+        List of j-k pairs
+    connected_pairs : set
+        Set of connected atom pairs
+    positions : ndarray
+        Array of atom positions
+    n_atoms : int
+        Total number of atoms
+    batch_size : int
+        Size of batches for processing
+
+    Returns:
+    --------
+    dict
+        Dictionary of torsion angles
+    """
+    torsions = {}
+    quadruplet_count = 0
+
+    # Process j-k pairs in batches
+    for jk_start in range(0, len(jk_pairs), batch_size):
+        jk_end = min(jk_start + batch_size, len(jk_pairs))
+
+        for jk_idx in range(jk_start, jk_end):
+            j, k = jk_pairs[jk_idx]
+
+            # Find i's connected to j
+            i_candidates = find_connected_atoms(j, k, connected_pairs, n_atoms)
+
+            # Find l's connected to k
+            l_candidates = find_connected_atoms(k, j, connected_pairs, n_atoms)
+
+            # Process i-l candidates in smaller batches
+            quadruplet_count = process_ijkl_candidates(
+                i_candidates, l_candidates, j, k, positions, torsions,
+                quadruplet_count, batch_size
+            )
+
+        # Force garbage collection
+        gc.collect()
+
+    return torsions
+
+
+def find_connected_atoms(atom_idx, exclude_idx, connected_pairs, n_atoms):
+    """
+    Find atoms connected to a specific atom.
+
+    Parameters:
+    -----------
+    atom_idx : int
+        Index of the atom to find connections for
+    exclude_idx : int
+        Index of atom to exclude
+    connected_pairs : set
+        Set of connected atom pairs
+    n_atoms : int
+        Total number of atoms
+
+    Returns:
+    --------
+    list
+        List of atoms connected to atom_idx
+    """
+    candidates = []
+    for idx in range(n_atoms):
+        if idx != atom_idx and idx != exclude_idx and (idx, atom_idx) in connected_pairs:
+            candidates.append(idx)
+    return candidates
+
+
+def process_ijkl_candidates(i_candidates, l_candidates, j, k, positions, torsions,
+                            quadruplet_count, batch_size):
+    """
+    Process i-j-k-l candidates for torsion calculation.
+
+    Parameters:
+    -----------
+    i_candidates : list
+        List of atoms connected to j
+    l_candidates : list
+        List of atoms connected to k
+    j : int
+        Index of atom j
+    k : int
+        Index of atom k
+    positions : ndarray
+        Array of atom positions
+    torsions : dict
+        Dictionary to store calculated torsions
+    quadruplet_count : int
+        Running count of calculated torsions
+    batch_size : int
+        Size of batches for processing
+
+    Returns:
+    --------
+    int
+        Updated count of calculated torsions
+    """
+    for i_start in range(0, len(i_candidates), batch_size):
+        i_end = min(i_start + batch_size, len(i_candidates))
+
+        for l_start in range(0, len(l_candidates), batch_size):
+            l_end = min(l_start + batch_size, len(l_candidates))
+
+            for i_idx in range(i_start, i_end):
+                i = i_candidates[i_idx]
+
+                for l_idx in range(l_start, l_end):
+                    l = l_candidates[l_idx]
+
+                    # Skip if i and l are the same atom
+                    if i == l:
+                        continue
+
+                    # Calculate torsion
                     torsion = calculate_single_torsion(
                         positions[i], positions[j], positions[k], positions[l])
                     if torsion is not None:
                         torsions[(i, j, k, l)] = torsion
-            
-            # Calculate omega
-            if ('CA' in prev_atoms and 'C' in prev_atoms and 
-                'N' in curr_atoms and 'CA' in curr_atoms):
-                i = prev_atoms['CA']
-                j = prev_atoms['C']
-                k = curr_atoms['N']
-                l = curr_atoms['CA']
-                
-                torsion = calculate_single_torsion(
-                    positions[i], positions[j], positions[k], positions[l])
-                if torsion is not None:
-                    torsions[(i, j, k, l)] = torsion
-        
-        print(f"    Calculated {len(torsions)} backbone torsions")
-        return torsions
-    
-    else:
-        # Approach 2: Original function for all torsions
-        # First identify connected pairs (similar to angle calculation)
-        connected_pairs = set()
-        
-        for i in range(n_atoms):
-            res_i = chain_atoms[i][1]
-            pos_i = positions[i]
-            
-            for j in range(i+1, n_atoms):
-                res_j = chain_atoms[j][1]
-                pos_j = positions[j]
-                
-                # Check if connected by residue
-                residue_connected = (res_i == res_j or abs(res_i - res_j) == 1)
-                
-                # Check distance
-                distance = np.linalg.norm(pos_j - pos_i)
-                
-                if residue_connected or distance <= distance_cutoff:
-                    connected_pairs.add((i, j))
-                    connected_pairs.add((j, i))  # Undirected
-        
-        # Find valid quadruplets (i-j-k-l where each adjacent pair is connected)
-        batch_size = 500
-        quadruplet_count = 0
-        
-        # First find all potential j-k pairs
-        jk_pairs = []
-        for j in range(n_atoms):
-            for k in range(j+1, n_atoms):
-                if (j, k) in connected_pairs:
-                    jk_pairs.append((j, k))
-        
-        # Process j-k pairs in batches
-        for jk_start in range(0, len(jk_pairs), batch_size):
-            jk_end = min(jk_start + batch_size, len(jk_pairs))
-            
-            for jk_idx in range(jk_start, jk_end):
-                j, k = jk_pairs[jk_idx]
-                
-                # Find i's connected to j
-                i_candidates = []
-                for i in range(n_atoms):
-                    if i != j and i != k and (i, j) in connected_pairs:
-                        i_candidates.append(i)
-                
-                # Find l's connected to k
-                l_candidates = []
-                for l in range(n_atoms):
-                    if l != i and l != j and l != k and (k, l) in connected_pairs:
-                        l_candidates.append(l)
-                
-                # Process i-l candidates in smaller batches
-                for i_start in range(0, len(i_candidates), batch_size):
-                    i_end = min(i_start + batch_size, len(i_candidates))
-                    
-                    for l_start in range(0, len(l_candidates), batch_size):
-                        l_end = min(l_start + batch_size, len(l_candidates))
-                        
-                        for i_idx in range(i_start, i_end):
-                            i = i_candidates[i_idx]
-                            
-                            for l_idx in range(l_start, l_end):
-                                l = l_candidates[l_idx]
-                                
-                                # Calculate torsion
-                                torsion = calculate_single_torsion(
-                                    positions[i], positions[j], positions[k], positions[l])
-                                if torsion is not None:
-                                    torsions[(i, j, k, l)] = torsion
-                                    quadruplet_count += 1
-                        
-                        # Force garbage collection
-                        gc.collect()
-        
-        print(f"    Calculated {quadruplet_count} torsions")
-        return torsions
+                        quadruplet_count += 1
+
+            # Force garbage collection
+            gc.collect()
+
+    return quadruplet_count
+
 
 def calculate_single_torsion(pos_i, pos_j, pos_k, pos_l):
-    """Calculate a single torsion angle from 4 positions."""
+    """
+    Calculate a single torsion angle from 4 positions.
+
+    Parameters:
+    -----------
+    pos_i, pos_j, pos_k, pos_l : ndarray
+        3D coordinates of the four atoms
+
+    Returns:
+    --------
+    float or None
+        Torsion angle in degrees or None if calculation fails
+    """
     # Define vectors
     v1 = pos_j - pos_i
     v2 = pos_k - pos_j
     v3 = pos_l - pos_k
-    
+
     # Skip if any vector is too short
-    if (np.linalg.norm(v1) < 1e-6 or 
-        np.linalg.norm(v2) < 1e-6 or 
-        np.linalg.norm(v3) < 1e-6):
+    if (np.linalg.norm(v1) < 1e-6 or
+            np.linalg.norm(v2) < 1e-6 or
+            np.linalg.norm(v3) < 1e-6):
         return None
-    
+
     # Cross products
     n1 = np.cross(v1, v2)
     n2 = np.cross(v2, v3)
-    
+
     # Skip if either normal is too short
     n1_norm = np.linalg.norm(n1)
     n2_norm = np.linalg.norm(n2)
-    
+
     if n1_norm < 1e-6 or n2_norm < 1e-6:
         return None
-    
+
     # Normalize
     n1 = n1 / n1_norm
     n2 = n2 / n2_norm
-    
+
     # Compute torsion angle
     v2_norm = np.linalg.norm(v2)
     torsion = np.arctan2(
-        np.dot(np.cross(n1, n2), v2 / v2_norm), 
+        np.dot(np.cross(n1, n2), v2 / v2_norm),
         np.dot(n1, n2)
     )
-    
-    return np.degrees(torsion)
 
-# def calculate_torsions_memory_efficient(chain_atoms, positions, distance_cutoff=2.0):
-#     """
-#     Calculate torsions with memory efficiency.
-    
-#     This version doesn't create the full edge index first,
-#     but directly identifies valid quadruplets during calculation.
-#     """
-#     torsions = {}
-#     n_atoms = len(chain_atoms)
-    
-#     # First identify connected pairs (similar to angle calculation)
-#     connected_pairs = set()
-    
-#     for i in range(n_atoms):
-#         res_i = chain_atoms[i][1]
-#         pos_i = positions[i]
-        
-#         for j in range(i+1, n_atoms):
-#             res_j = chain_atoms[j][1]
-#             pos_j = positions[j]
-            
-#             # Check if connected by residue
-#             residue_connected = (res_i == res_j or abs(res_i - res_j) == 1)
-            
-#             # Check distance
-#             distance = np.linalg.norm(pos_j - pos_i)
-            
-#             if residue_connected or distance <= distance_cutoff:
-#                 connected_pairs.add((i, j))
-#                 connected_pairs.add((j, i))  # Undirected
-    
-#     # Find valid quadruplets (i-j-k-l where each adjacent pair is connected)
-#     batch_size = 500
-#     quadruplet_count = 0
-    
-#     # First find all potential j-k pairs
-#     jk_pairs = []
-#     for j in range(n_atoms):
-#         for k in range(j+1, n_atoms):
-#             if (j, k) in connected_pairs:
-#                 jk_pairs.append((j, k))
-    
-#     # Process j-k pairs in batches
-#     for jk_start in range(0, len(jk_pairs), batch_size):
-#         jk_end = min(jk_start + batch_size, len(jk_pairs))
-        
-#         for jk_idx in range(jk_start, jk_end):
-#             j, k = jk_pairs[jk_idx]
-            
-#             # Find i's connected to j
-#             i_candidates = []
-#             for i in range(n_atoms):
-#                 if i != j and i != k and (i, j) in connected_pairs:
-#                     i_candidates.append(i)
-            
-#             # Find l's connected to k
-#             l_candidates = []
-#             for l in range(n_atoms):
-#                 if l != i and l != j and l != k and (k, l) in connected_pairs:
-#                     l_candidates.append(l)
-            
-#             # Process i-l candidates in smaller batches
-#             for i_start in range(0, len(i_candidates), batch_size):
-#                 i_end = min(i_start + batch_size, len(i_candidates))
-                
-#                 for l_start in range(0, len(l_candidates), batch_size):
-#                     l_end = min(l_start + batch_size, len(l_candidates))
-                    
-#                     for i_idx in range(i_start, i_end):
-#                         i = i_candidates[i_idx]
-                        
-#                         for l_idx in range(l_start, l_end):
-#                             l = l_candidates[l_idx]
-                            
-#                             # Calculate torsion
-#                             pos_i = positions[i]
-#                             pos_j = positions[j]
-#                             pos_k = positions[k]
-#                             pos_l = positions[l]
-                            
-#                             # Define vectors
-#                             v1 = pos_j - pos_i
-#                             v2 = pos_k - pos_j
-#                             v3 = pos_l - pos_k
-                            
-#                             # Skip if any vector is too short
-#                             if (np.linalg.norm(v1) < 1e-6 or 
-#                                 np.linalg.norm(v2) < 1e-6 or 
-#                                 np.linalg.norm(v3) < 1e-6):
-#                                 continue
-                            
-#                             # Cross products
-#                             n1 = np.cross(v1, v2)
-#                             n2 = np.cross(v2, v3)
-                            
-#                             # Skip if either normal is too short
-#                             n1_norm = np.linalg.norm(n1)
-#                             n2_norm = np.linalg.norm(n2)
-                            
-#                             if n1_norm < 1e-6 or n2_norm < 1e-6:
-#                                 continue
-                            
-#                             # Normalize
-#                             n1 = n1 / n1_norm
-#                             n2 = n2 / n2_norm
-                            
-#                             # Compute torsion angle
-#                             v2_norm = np.linalg.norm(v2)
-#                             torsion = np.arctan2(
-#                                 np.dot(np.cross(n1, n2), v2 / v2_norm), 
-#                                 np.dot(n1, n2)
-#                             )
-                            
-#                             torsions[(i, j, k, l)] = np.degrees(torsion)
-#                             quadruplet_count += 1
-                    
-#                     # Force garbage collection
-#                     gc.collect()
-    
-#     print(f"    Calculated {quadruplet_count} torsions")
-#     return torsions
+    return np.degrees(torsion)
 
 def assign_charges(chain_atoms):
     """Assign partial charges to atoms."""
@@ -1631,42 +2035,6 @@ def visualize_all_graphs(output_dir, visualization_dir=None):
 
 
 if __name__ == "__main__":
-    # folder_path = "fabs"  # Your PDB folder
-    # output_path = "fabs_networkx"
-    
-    # # Process with memory optimizations but full features
-    # summary = process_pdb_full_features_memory_efficient(
-    #     folder_path,
-    #     output_path=output_path,
-    #     max_file_size_mb=25  # Skip files larger than this
-    # )
-
-
-    # # After processing is complete
-    # graph_path = "fabs_networkx/7JKB/7JKB_graph.pkl"
-    # visualize_protein_graph(
-    #     graph_path,
-    #     output_path="7JKB_graph_visualization.png",
-    #     color_by='ss',  # Color by secondary structure
-    #     node_size=50    # Smaller nodes for better visibility
-    # )
-
-    # # Try other visualizations:
-    # # Color by chain
-    # visualize_protein_graph(
-    #     graph_path,
-    #     output_path="7JKB_graph_by_chain.png",
-    #     color_by='chain',
-    #     node_size=50
-    # )
-
-    # # Color by amino acid type
-    # visualize_protein_graph(
-    #     graph_path,
-    #     output_path="7JKB_graph_by_residue.png",
-    #     color_by='residue_name',
-    #     node_size=50
-    # )
 
 
     visualize_all_graphs("fabs_networkx")

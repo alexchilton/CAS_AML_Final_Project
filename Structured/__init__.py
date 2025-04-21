@@ -2,7 +2,7 @@
 Protein ML Library - Tools for protein structure generation and analysis
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = ''
 
 # Import key classes and modules for easy access
@@ -10,6 +10,8 @@ from .preprocessing.ProteinPreprocessor import ProteinPreprocessor
 from .preprocessing.ProteinVisualizer import ProteinVisualizer
 from .preprocessing.GraphBuilder import GraphBuilder
 from .preprocessing.FeatureExtractor import FeatureExtractor
+from .preprocessing.ProteinFeatureProcessor import ProteinFeatureProcessor
+from .preprocessing.ProteinGraphDataset import ProteinGraphDataset
 
 from .model.Decoder import Decoder
 from .model.Encoder import Encoder
@@ -31,6 +33,8 @@ __all__ = [
     "ProteinVisualizer",
     "GraphBuilder",
     "FeatureExtractor",
+    "ProteinFeatureProcessor",
+    "ProteinGraphDataset",
     "Decoder",
     "Encoder",
     "LatentSpaceManager",
