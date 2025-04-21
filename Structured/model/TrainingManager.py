@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 import os
 
-from GATVAE import GATVAE
+from Structured.model  import GATVAE
 
 
 class TrainingManager:

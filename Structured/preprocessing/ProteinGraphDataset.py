@@ -7,8 +7,11 @@ import networkx as nx
 import pickle
 import json
 
-from GraphBuilder import GraphBuilder
-from ProteinFeatureProcessor import ProteinFeatureProcessor
+from Structured.preprocessing.GraphBuilder import GraphBuilder
+from Structured.preprocessing.ProteinFeatureProcessor import ProteinFeatureProcessor
+
+#from GraphBuilder import GraphBuilder
+#from ProteinFeatureProcessor import ProteinFeatureProcessor
 
 
 class ProteinGraphDataset(Dataset):

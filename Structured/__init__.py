@@ -15,6 +15,9 @@ from .preprocessing.ProteinGraphDataset import ProteinGraphDataset
 
 from .model.Decoder import Decoder
 from .model.Encoder import Encoder
+from .model.GATVAE import GATVAE
+from .model.GATEncoder import GATEncoder
+from .model.GATDecoder import GATDecoder
 from .model.LatentSpaceManager  import LatentSpaceManager
 from .model.TrainingManager import TrainingManager
 from .model.LossVisualizer import LossVisualizer
@@ -31,6 +34,9 @@ from .utils.metrics import metrics
 __all__ = [
     "ProteinPreprocessor",
     "ProteinVisualizer",
+    "GATVAE",
+    "GATEncoder",
+    "GATDecoder",
     "GraphBuilder",
     "FeatureExtractor",
     "ProteinFeatureProcessor",

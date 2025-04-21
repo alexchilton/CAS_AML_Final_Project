@@ -18,7 +18,7 @@ class EnhancedTrainingManager:
     """
 
     def __init__(self, model, learning_rate=0.001, kl_weight=0.01, edge_weight=0.5,
-                 spatial_weight=0.2, lambda_reg=0.001):
+                 spatial_weight=1000, lambda_reg=0.001):
         """
         Initialize the enhanced training manager.
 
@@ -76,9 +76,189 @@ class EnhancedTrainingManager:
 
         return edge_loss + edge_sparsity
 
+
+    def train_epoch(self, dataloader):
+        """
+        Enhanced training loop with careful gradient tracking and debugging.
+
+        Args:
+            dataloader: DataLoader for training data
+
+        Returns:
+            epoch_metrics: Dictionary of loss metrics
+        """
+        self.model.train()
+        total_loss = 0
+        total_rec_loss = 0
+        total_kl_loss = 0
+        total_edge_loss = 0
+        total_spatial_loss = 0
+        num_batches = 0
+
+        # Create hook for gradient debugging
+        gradients = {}
+
+        def hook_fn(name):
+            def fn(grad):
+                gradients[name] = grad.abs().mean().item()
+            return fn
+
+        # Register hooks for key layers to track gradient flow
+        hooks = []
+        for name, param in self.model.named_parameters():
+            if any(key in name for key in ['decoder.fc_z', 'decoder.coord_generator',
+                                           'decoder.edge_predictor']):
+                hook = param.register_hook(hook_fn(name))
+                hooks.append(hook)
+
+        for batch_idx, data in enumerate(tqdm(dataloader, desc="Training")):
+            try:
+                # Move data to device
+                data = data.to(self.device)
+
+                # Ensure data has required attributes
+                if not hasattr(data, 'edge_attr') or data.edge_attr is None:
+                    data.edge_attr = torch.ones(data.edge_index.size(1), 2,
+                                                dtype=torch.float, device=self.device)
+
+                # Zero gradients
+                self.optimizer.zero_grad()
+
+                # Debug data
+                if batch_idx < 2:  # Only for first few batches
+                    print(f"\nBatch {batch_idx} - Data shape: {data.x.shape}")
+                    coord_idx_start = 21 + 7
+                    coord_idx_end = coord_idx_start + 3
+                    print(f"Coordinate slice: [{coord_idx_start}:{coord_idx_end}]")
+                    print("Original coords sample:",
+                          data.x[:2, coord_idx_start:coord_idx_end].detach().cpu().numpy())
+
+                # Forward pass with enhanced model
+                # Get each return value explicitly to ensure gradient flow
+                reconstructed_data, mu, logvar, edge_probs = self.model(data)
+
+                # Verify coordinates in reconstructed data
+                if batch_idx < 2:  # Only for first few batches
+                    recon_coords = reconstructed_data.x[:2, coord_idx_start:coord_idx_end]
+                    print("Reconstructed coords sample:", recon_coords.detach().cpu().numpy())
+                    print("Gradients enabled for recon_coords:", recon_coords.requires_grad)
+
+                # Calculate reconstruction loss for node features
+                # Using sum reduction instead of mean to scale with batch size
+                rec_loss = F.mse_loss(reconstructed_data.x, data.x, reduction='sum')
+
+                # Calculate KL divergence loss
+                # Scale KL by batch size
+                batch_size = 1 if data.batch is None else (data.batch.max().item() + 1)
+                kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+                kl_loss = kl_loss / batch_size
+
+                # Calculate edge prediction loss with more direct gradient path
+                edge_loss = self._calculate_edge_prediction_loss(data, edge_probs)
+
+                # Calculate spatial consistency loss
+                spatial_loss = self._calculate_spatial_consistency_loss(data, reconstructed_data)
+
+                # Scale spatial loss to make gradients more significant
+                # This can help when the spatial loss is important but gradients are small
+                spatial_loss = spatial_loss * 10.0  # Explicit scaling factor
+
+                if batch_idx < 2:
+                    print(f"Spatial loss (scaled): {spatial_loss.item():.4f}")
+
+                # Calculate the total loss with careful coefficient scaling
+                loss = (
+                        rec_loss / data.x.size(0) +  # Normalize reconstruction loss
+                        self.kl_weight * kl_loss +
+                        self.edge_weight * edge_loss +
+                        self.spatial_weight * spatial_loss
+                )
+
+                # Check for reasonable loss values
+                if torch.isnan(loss) or torch.isinf(loss):
+                    print(f"Warning: Invalid loss detected: {loss.item()}")
+                    print(f"  Reconstruction loss: {rec_loss.item()}")
+                    print(f"  KL loss: {kl_loss.item()}")
+                    print(f"  Edge loss: {edge_loss.item()}")
+                    print(f"  Spatial loss: {spatial_loss.item()}")
+                    continue
+
+                # Backward pass with retain_graph to allow gradient analysis
+                loss.backward(retain_graph=(batch_idx < 2))
+
+                # Check for gradient flow in key parameters for the first few batches
+                if batch_idx < 2:
+                    print("\nGradient flow check:")
+                    for name, param in self.model.named_parameters():
+                        if any(key in name for key in ['decoder.fc_z', 'decoder.coord_generator',
+                                                       'decoder.edge_predictor']):
+                            if param.grad is not None:
+                                grad_norm = param.grad.abs().mean().item()
+                                print(f"  {name}: {grad_norm:.6f}")
+                            else:
+                                print(f"  {name}: No gradient")
+
+                    # Print collected gradients from hooks
+                    print("\nGradient magnitudes from hooks:")
+                    for name, value in gradients.items():
+                        print(f"  {name}: {value:.6f}")
+                    gradients.clear()  # Clear for next batch
+
+                # Gradient clipping to prevent exploding gradients
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+
+                # Update weights
+                self.optimizer.step()
+
+                # Accumulate metrics for reporting
+                total_loss += loss.item()
+                total_rec_loss += rec_loss.item() / data.x.size(0)  # Normalize
+                total_kl_loss += kl_loss.item()
+                total_edge_loss += edge_loss.item()
+                total_spatial_loss += spatial_loss.item()
+                num_batches += 1
+
+                # Print loss components for first few batches
+                if batch_idx < 2:
+                    print(f"Loss components - Rec: {rec_loss.item()/data.x.size(0):.4f}, "
+                          f"KL: {kl_loss.item():.4f}, Edge: {edge_loss.item():.4f}, "
+                          f"Spatial: {spatial_loss.item():.4f}")
+
+            except Exception as e:
+                print(f"Error processing batch {batch_idx}: {e}")
+                import traceback
+                traceback.print_exc()
+                continue
+
+        # Remove hooks
+        for hook in hooks:
+            hook.remove()
+
+        # Calculate average metrics
+        metrics = {}
+        if num_batches > 0:
+            metrics['loss'] = total_loss / num_batches
+            metrics['rec_loss'] = total_rec_loss / num_batches
+            metrics['kl_loss'] = total_kl_loss / num_batches
+            metrics['edge_loss'] = total_edge_loss / num_batches
+            metrics['spatial_loss'] = total_spatial_loss / num_batches
+        else:
+            metrics = {k: float('nan') for k in
+                       ['loss', 'rec_loss', 'kl_loss', 'edge_loss', 'spatial_loss']}
+
+        # Store in training history
+        self.train_losses.append(metrics['loss'])
+        self.reconstruction_losses.append(metrics['rec_loss'])
+        self.kl_losses.append(metrics['kl_loss'])
+        self.edge_losses.append(metrics['edge_loss'])
+        self.spatial_losses.append(metrics['spatial_loss'])
+
+        return metrics
+
     def _calculate_spatial_consistency_loss(self, original_data, reconstructed_data):
         """
         Calculate spatial consistency loss between original and reconstructed coordinates.
+        Modified to ensure stronger gradient signal and proper backpropagation.
 
         Args:
             original_data: Original PyTorch Geometric Data object
@@ -95,13 +275,16 @@ class EnhancedTrainingManager:
         orig_coords = original_data.x[:, coord_idx_start:coord_idx_end]
         recon_coords = reconstructed_data.x[:, coord_idx_start:coord_idx_end]
 
+        # Direct coordinate loss - simple but effective for gradient flow
+        direct_coord_loss = F.mse_loss(recon_coords, orig_coords)
+
         # Calculate pairwise distance matrices
         def calc_dist_matrix(coords):
-            # Expand coordinates for pairwise calculations
-            x_i = coords.unsqueeze(1)  # Shape: [N, 1, 3]
-            x_j = coords.unsqueeze(0)  # Shape: [1, N, 3]
-            # Compute Euclidean distances
-            dist = torch.sqrt(torch.sum((x_i - x_j) ** 2, dim=2) + 1e-6)
+            # Use broadcasting for efficient distance calculation
+            # Shape: [N, 1, 3] - [1, N, 3] = [N, N, 3]
+            diff = coords.unsqueeze(1) - coords.unsqueeze(0)
+            # Add epsilon for numerical stability, shape: [N, N]
+            dist = torch.sqrt(torch.sum(diff * diff, dim=2) + 1e-10)
             return dist
 
         # Calculate distance matrices
@@ -109,122 +292,13 @@ class EnhancedTrainingManager:
         recon_dist_matrix = calc_dist_matrix(recon_coords)
 
         # MSE loss between distance matrices
-        spatial_loss = F.mse_loss(recon_dist_matrix, orig_dist_matrix)
+        dist_matrix_loss = F.mse_loss(recon_dist_matrix, orig_dist_matrix)
+
+        # Combine both losses, with emphasis on direct coordinate loss
+        # This provides multiple gradient paths
+        spatial_loss = direct_coord_loss + 0.5 * dist_matrix_loss
 
         return spatial_loss
-
-    def train_epoch(self, dataloader):
-        """
-        Train for one epoch.
-
-        Args:
-            dataloader: DataLoader for training data
-
-        Returns:
-            epoch_loss: Average loss for the epoch
-            epoch_rec_loss: Average reconstruction loss
-            epoch_kl_loss: Average KL divergence loss
-            epoch_edge_loss: Average edge prediction loss
-            epoch_spatial_loss: Average spatial consistency loss
-        """
-        self.model.train()
-        total_loss = 0
-        total_rec_loss = 0
-        total_kl_loss = 0
-        total_edge_loss = 0
-        total_spatial_loss = 0
-        num_batches = 0
-
-        for data in tqdm(dataloader, desc="Training"):
-            try:
-                # Move data to device
-                data = data.to(self.device)
-
-                # Ensure data has required attributes
-                if not hasattr(data, 'edge_attr') or data.edge_attr is None:
-                    data.edge_attr = torch.ones(data.edge_index.size(1), 2, dtype=torch.float, device=self.device)
-
-                # Zero gradients
-                self.optimizer.zero_grad()
-
-                # Forward pass with enhanced model
-                reconstructed_data, mu, logvar, edge_probs = self.model(data)
-
-                # Calculate reconstruction loss for node features
-                rec_loss = F.mse_loss(reconstructed_data.x, data.x)
-
-                # Calculate KL divergence loss
-                batch_size = 1 if data.batch is None else (data.batch.max().item() + 1)
-                kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-                kl_loss = kl_loss / batch_size  # Normalize by batch size
-
-                # Calculate edge prediction loss
-                edge_loss = self._calculate_edge_prediction_loss(data, edge_probs)
-
-                # Calculate spatial consistency loss
-                spatial_loss = self._calculate_spatial_consistency_loss(data, reconstructed_data)
-
-                # Total loss
-                loss = (rec_loss +
-                        self.kl_weight * kl_loss +
-                        self.edge_weight * edge_loss +
-                        self.spatial_weight * spatial_loss)
-
-                # Check for NaN loss
-                if torch.isnan(loss):
-                    print(f"Warning: NaN loss detected. Skipping batch.")
-                    print(f"  Reconstruction loss: {rec_loss.item()}")
-                    print(f"  KL loss: {kl_loss.item()}")
-                    print(f"  Edge loss: {edge_loss.item()}")
-                    print(f"  Spatial loss: {spatial_loss.item()}")
-                    continue
-
-                # Backward pass
-                loss.backward()
-
-                # Gradient clipping to prevent exploding gradients
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-
-                # Update weights
-                self.optimizer.step()
-
-                # Accumulate metrics
-                total_loss += loss.item()
-                total_rec_loss += rec_loss.item()
-                total_kl_loss += kl_loss.item()
-                total_edge_loss += edge_loss.item()
-                total_spatial_loss += spatial_loss.item()
-                num_batches += 1
-
-            except Exception as e:
-                print(f"Error processing batch: {e}")
-                import traceback
-                traceback.print_exc()
-                continue
-
-        # Calculate average losses
-        if num_batches > 0:
-            epoch_loss = total_loss / num_batches
-            epoch_rec_loss = total_rec_loss / num_batches
-            epoch_kl_loss = total_kl_loss / num_batches
-            epoch_edge_loss = total_edge_loss / num_batches
-            epoch_spatial_loss = total_spatial_loss / num_batches
-        else:
-            epoch_loss = float('nan')
-            epoch_rec_loss = float('nan')
-            epoch_kl_loss = float('nan')
-            epoch_edge_loss = float('nan')
-            epoch_spatial_loss = float('nan')
-
-        # Store training history
-        self.train_losses.append(epoch_loss)
-        self.reconstruction_losses.append(epoch_rec_loss)
-        self.kl_losses.append(epoch_kl_loss)
-        self.edge_losses.append(epoch_edge_loss)
-        self.spatial_losses.append(epoch_spatial_loss)
-
-        return epoch_loss, epoch_rec_loss, epoch_kl_loss, epoch_edge_loss, epoch_spatial_loss
-
     def validate(self, dataloader):
         """
         Validate the model.
@@ -317,7 +391,8 @@ class EnhancedTrainingManager:
             # Print summary
             print(f"Validation - Total: {val_loss:.4f}, Rec: {val_rec_loss:.4f}, "
                   f"KL: {val_kl_loss:.4f}, Edge: {val_edge_loss:.4f}, "
-                  f"Spatial: {val_spatial_loss:.4f}")
+                  f"Spatial: {val_spatial_loss:.4f}"
+                  f"Spatialweight: {self.spatial_weight:.4f}")
 
             return val_loss, val_metrics
         else:
@@ -339,7 +414,7 @@ class EnhancedTrainingManager:
         print(f"Training on {self.device}")
 
         best_val_loss = float('inf')
-        patience = 5  # Early stopping patience
+        patience = 10  # Early stopping patience
         no_improve = 0
 
         # Dictionary to store all metrics
@@ -355,7 +430,12 @@ class EnhancedTrainingManager:
 
         for epoch in range(num_epochs):
             # Train for one epoch
-            train_loss, rec_loss, kl_loss, edge_loss, spatial_loss = self.train_epoch(train_loader)
+            metrics = self.train_epoch(train_loader)
+            train_loss = metrics['loss']
+            rec_loss = metrics.get('rec_loss', 0.0)
+            kl_loss = metrics.get('kl_loss', 0.0)
+            edge_loss = metrics.get('edge_loss', 0.0)
+            spatial_loss = metrics.get('spatial_loss', 0.0)
 
             # Validate
             val_loss, val_metrics = self.validate(val_loader)
@@ -370,10 +450,9 @@ class EnhancedTrainingManager:
             if val_metrics:
                 history['val_metrics'].append(val_metrics)
 
-            # Print metrics
-            print(f"Epoch {epoch+1}/{num_epochs}, "
-                  f"Train Loss: {train_loss:.4f}, "
-                  f"Val Loss: {val_loss:.4f}")
+            # Print metrics with type checking
+            print("Epoch {}/{}, Train Loss: {:.4f}, Val Loss: {:.4f}".format(
+                epoch+1, num_epochs, train_loss, val_loss))
 
             # Check for NaN losses
             if torch.isnan(torch.tensor(train_loss)) or torch.isnan(torch.tensor(val_loss)):

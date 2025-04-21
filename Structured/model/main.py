@@ -19,7 +19,7 @@ def main():
     latent_dim = 32
     num_heads = 4
     learning_rate = 0.001
-    num_epochs = 30
+    num_epochs = 100
     kl_weight = 0.01  # Reduced KL weight to prevent vanishing KL loss
 
     # Set random seed for reproducibility

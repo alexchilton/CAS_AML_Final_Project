@@ -263,8 +263,8 @@ class DatasetHandler:
             norm_params = data.normalization_params
 
         # Convert tensors to numpy for denormalization
-        x_np = data.x.cpu().numpy()
-        edge_attr_np = data.edge_attr.cpu().numpy() if hasattr(data, 'edge_attr') else None
+        x_np = data.x.detach().cpu().numpy()
+        edge_attr_np = data.edge_attr.detach().cpu().numpy() if hasattr(data, 'edge_attr') else None
 
         # Denormalize node features
         denorm_x_np = self.feature_processor.denormalize_features(x_np, norm_params)
