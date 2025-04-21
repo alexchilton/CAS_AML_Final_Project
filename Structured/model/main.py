@@ -35,7 +35,11 @@ def main():
     dataset_handler = DatasetHandler(data_root=data_root, batch_size=batch_size)
 
     # Load and prepare dataset
-    dataset = dataset_handler.load_dataset()
+    # Load dataset with global normalization
+    dataset = dataset_handler.load_dataset(use_global_normalization=True)
+
+    # Save parameters for future use
+    dataset_handler.save_global_normalization_params("params.json")
     train_loader, val_loader, test_loader = dataset_handler.prepare_dataloaders()
 
     # Get input dimension
@@ -144,4 +148,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
