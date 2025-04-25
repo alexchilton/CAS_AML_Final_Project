@@ -66,7 +66,7 @@ class GenerationVisualizer:
             ("Meiler features", meiler_indices)
         ]):
             # Take a sample of the features
-            features = data.x[:, indices].cpu().numpy()
+            features = data.x[:, indices].detach().cpu().numpy()  # Added detach()
 
             # Check if all rows have the same values
             all_same = np.all(features == features[0], axis=0)
@@ -80,7 +80,7 @@ class GenerationVisualizer:
                 print(f"    Node {j}: {features[j]}")
 
         # For amino acids, check which ones are being predicted
-        aa_features = data.x[:, aa_indices].cpu().numpy()
+        aa_features = data.x[:, aa_indices].detach().cpu().numpy()
         if aa_features.shape[0] > 0:
             # Get the predicted amino acid for each node (argmax of one-hot)
             predicted_aa_indices = np.argmax(aa_features, axis=1)
@@ -135,7 +135,7 @@ class GenerationVisualizer:
         np.random.seed(42)  # For reproducibility
         for i, node in enumerate(G.nodes()):
             # Get base coordinates but add small random offset
-            base_coords = data.x[i, coord_start_idx:coord_start_idx+3].cpu().numpy()
+            base_coords = data.x[i, coord_start_idx:coord_start_idx+3].detach().cpu().numpy()
             jitter = np.random.normal(0, 0.1, 3)  # Small random jitter
             pos[node] = base_coords + jitter
 
@@ -220,7 +220,7 @@ class GenerationVisualizer:
         coord_start_idx = 21 + 7  # After amino acid and secondary structure features
 
         # Get node coordinates
-        coords = data.x[:, coord_start_idx:coord_start_idx+3].cpu().numpy()
+        coords = data.x[:, coord_start_idx:coord_start_idx+3].detach().cpu().numpy()
 
         # Plot nodes
         ax.scatter(coords[:, 0], coords[:, 1], coords[:, 2], c='blue', s=20, alpha=0.7)
@@ -473,7 +473,7 @@ def _plot_protein_data(self, data: Data, ax, title: str = ""):
     coord_start_idx = 21 + 7  # After amino acid and secondary structure features
 
     # Get node coordinates
-    coords = data.x[:, coord_start_idx:coord_start_idx+3].cpu().numpy()
+    coords = data.x[:, coord_start_idx:coord_start_idx+3].detach().cpu().numpy()
 
     # Plot nodes
     ax.scatter(coords[:, 0], coords[:, 1], coords[:, 2], c='blue', s=20, alpha=0.7)

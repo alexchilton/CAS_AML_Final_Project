@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.data import Data
 
-from GATEncoder import GATEncoder
-from GATDecoder import GATDecoder
+from Structured.model import GATEncoder
+from Structured.model import GATDecoder
 
 
 class GATVAE(nn.Module):

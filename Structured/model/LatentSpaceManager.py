@@ -7,7 +7,7 @@ from typing import List, Dict, Any, Optional
 import os
 from torch_geometric.loader import DataLoader as PyGDataLoader
 
-from GATVAE import GATVAE
+from Structured.model  import GATVAE
 
 
 class LatentSpaceManager:
