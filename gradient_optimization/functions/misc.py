@@ -40,10 +40,8 @@ def reconstruct_coords_local_plural_maps(contact_maps: list, configs: list, shar
         Reconstructed coordinates as numpy array
     """
 
-    print ('Gradient-based optimization based on multiple contact maps...')
+    print ('Gradient-based optimization with multiple contact maps...')
     
-    max_distance = 12.0
-    medium_distance = 5.0
     min_distance = 2.3  # Minimum allowed distance between points
     
     N = contact_maps[0].shape[0]
@@ -141,8 +139,8 @@ def reconstruct_coords_local_plural_maps(contact_maps: list, configs: list, shar
         
         # Print progress and update best model if needed
         if step % max(1, int(max_iter // prints)) == 0:
-            partial_losses_str = [f"{p_loss.item():10.4f}" for p_loss in partial_losses]
-            print(f"Step {step:7d} | total loss: {total_loss.item():10.4f} ({partial_losses_str})")
+            partial_losses_str = [f"{p_loss.item():8.2f}" for p_loss in partial_losses]
+            print(f"Step {step:7d} | total loss: {total_loss.item():8.2f} ({partial_losses_str})")
             
             if total_loss.item() < best_loss:
                 best_loss = total_loss.item()
@@ -157,8 +155,8 @@ def reconstruct_coords_local_plural_maps(contact_maps: list, configs: list, shar
                 break
     
     # Final loss report
-    partial_losses_str = [f"{p_loss.item():10.4f}" for p_loss in partial_losses]
-    print(f"Step {step:7d} | total loss: {total_loss.item():10.4f} ({partial_losses_str}), final.")
+    partial_losses_str = [f"{p_loss.item():8.2f}" for p_loss in partial_losses]
+    print(f"Step {step:7d} | total loss: {total_loss.item():8.2f} ({partial_losses_str}), final.")
     print ('')
     
     # Return best coordinates
