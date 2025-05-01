@@ -3,9 +3,8 @@ from scipy.spatial.distance import cdist
 import random
 
 class Protein:
-    def __init__(self, atoms=[], aas=None, cas=None, previous_aa=['NUL']):
+    def __init__(self, atoms=[], aas=None, cas=None):
         self.atoms = atoms
-        self.previous_aa = previous_aa
         self.contact_maps = []
         self.contact_maps_config = []
 
@@ -19,6 +18,11 @@ class Protein:
             self.get_D()
         else:
             print ('Data missing.')
+        
+    def get_oh(self, aas):
+        idx = np.array([aas.index(aa) for aa in self.aa])
+        oh = np.eye(len(aas))[idx]
+        return oh
 
     def get_Ca(self):
         coords, aa = [], []
@@ -56,23 +60,16 @@ class Protein:
         padded_oneHot[:self.len] = oneHot
         return padded_oneHot
         
-    def get_previous_aa(self, max_len, aas):
-        idx = np.array([aas.index(aa) for aa in self.previous_aa])
-        oneHot = np.eye(len(aas))[idx]
-        padded_oneHot = np.zeros((1, len(aas)))
-        padded_oneHot[0] = oneHot
-        return padded_oneHot
-        
     def explode(self, length):
         new_aas = []
         new_cas = []
-        previous_aa = ['NUL']
+        for i in range(length):
+            new_aas.append(self.aa[-length+i:] + self.aa[:i])
+            new_cas.append(self.ca[-length+i:] + self.ca[:i])
         for i in range(length, self.len):
             new_aas.append(self.aa[i-length:i])
             new_cas.append(self.ca[i-length:i])
-            if i > length:
-                previous_aa.append(self.aa[i-length-1])
-        return (new_aas, new_cas, previous_aa)
+        return (new_aas, new_cas)
 
 class Database:
     def __init__(self):
