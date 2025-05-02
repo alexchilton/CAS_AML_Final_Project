@@ -1,12 +1,14 @@
 import numpy as np
 from scipy.spatial.distance import cdist
 import random
+from Bio.Align import substitution_matrices
 
 class Protein:
-    def __init__(self, atoms=[], aas=None, cas=None):
+    def __init__(self, atoms=[], aas=None, cas=None, blosum=False):
         self.atoms = atoms
         self.contact_maps = []
         self.contact_maps_config = []
+        self.blosum = blosum
 
         if len(atoms) > 0:
             self.get_Ca()
@@ -18,11 +20,23 @@ class Protein:
             self.get_D()
         else:
             print ('Data missing.')
+
+        if self.blosum:
+            self.set_blosum()
         
     def get_oh(self, aas):
         idx = np.array([aas.index(aa) for aa in self.aa])
         oh = np.eye(len(aas))[idx]
         return oh
+
+    def set_blosum(self):
+        blosum = np.zeros(self.D.shape)
+        for i, aa0 in enumerate(self.aa):
+            for ii, aa1 in enumerate(self.aa):
+                letter_1 = amino_acids[aa0]['one_letter'] if aa0 in amino_acids else 'X'
+                letter_2 = amino_acids[aa1]['one_letter'] if aa1 in amino_acids else 'X'
+                blosum[i,ii] = blosum62[(letter_1, letter_2)]
+        self.blosum = blosum
 
     def get_Ca(self):
         coords, aa = [], []
@@ -95,3 +109,31 @@ class Database:
     @property
     def randomize(self):
         random.shuffle(self.proteins)
+
+blosum62 = substitution_matrices.load("BLOSUM62")
+
+amino_acids = {
+    "ALA": {"one_letter": "A", "name": "Alanine"},
+    "ARG": {"one_letter": "R", "name": "Arginine"},
+    "ASN": {"one_letter": "N", "name": "Asparagine"},
+    "ASP": {"one_letter": "D", "name": "Aspartic Acid"},
+    "CYS": {"one_letter": "C", "name": "Cysteine"},
+    "GLN": {"one_letter": "Q", "name": "Glutamine"},
+    "GLU": {"one_letter": "E", "name": "Glutamic Acid"},
+    "GLY": {"one_letter": "G", "name": "Glycine"},
+    "HIS": {"one_letter": "H", "name": "Histidine"},
+    "ILE": {"one_letter": "I", "name": "Isoleucine"},
+    "LEU": {"one_letter": "L", "name": "Leucine"},
+    "LYS": {"one_letter": "K", "name": "Lysine"},
+    "MET": {"one_letter": "M", "name": "Methionine"},
+    "PHE": {"one_letter": "F", "name": "Phenylalanine"},
+    "PRO": {"one_letter": "P", "name": "Proline"},
+    "SER": {"one_letter": "S", "name": "Serine"},
+    "THR": {"one_letter": "T", "name": "Threonine"},
+    "TRP": {"one_letter": "W", "name": "Tryptophan"},
+    "TYR": {"one_letter": "Y", "name": "Tyrosine"},
+    "VAL": {"one_letter": "V", "name": "Valine"},
+    "ASX": {"one_letter": "B", "name": "Aspartic Acid or Asparagine"},
+    "GLX": {"one_letter": "Z", "name": "Glutamic Acid or Glutamine"},
+    "UNK": {"one_letter": "X", "name": "Unknown or Other"}
+}
