@@ -8,14 +8,16 @@ import torch.nn.functional as F
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 class XYVAE(nn.Module):
-    def __init__(self, input_size=12, hidden_size=32, code_size=2, output_size=12, dropout=0., epsilon="std"):
+    def __init__(self, input_size=12, hidden_size=32, code_size=2, output_size=12,
+                 dropout=0., epsilon="std",device=None):
         super(XYVAE, self).__init__()
         
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.code_size = code_size
-        
-        # Encoder
+        self.device = device if device is not None else torch.device("cpu")
+
+    # Encoder
         self.encoder_fc1 = nn.Linear(input_size, 4 * hidden_size)  
         self.encoder_fc2 = nn.Linear(4 * hidden_size, 2 * hidden_size)  
         self.encoder_fc3 = nn.Linear(2 * hidden_size, hidden_size)  
@@ -28,7 +30,12 @@ class XYVAE(nn.Module):
         self.decoder_fc1 = nn.Linear(code_size, hidden_size) 
         self.decoder_fc2 = nn.Linear(hidden_size, 2 * hidden_size)  
         self.decoder_fc3 = nn.Linear(2 * hidden_size, 4 * hidden_size)  
-        self.fc_out = nn.Linear(4 * hidden_size, output_size)   
+        self.fc_out = nn.Linear(4 * hidden_size, output_size)
+
+    def to(self, device):
+        """Override the to() method to also update self.device"""
+        self.device = device
+        return super().to(device)
 
     def encode(self, x):
         h = self.encoder_fc1(x)
@@ -57,7 +64,7 @@ class XYVAE(nn.Module):
         return h
     
     def forward(self, d, verbose=False):
-        x = d['x']
+        x = d['x'].to(self.device)
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
         z_2d = self.encode_2d(z)
