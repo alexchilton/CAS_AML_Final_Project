@@ -2,13 +2,18 @@ import numpy as np
 from scipy.spatial.distance import cdist
 import random
 from Bio.Align import substitution_matrices
+from collections import Counter
+import math
+from Bio.SeqUtils import IsoelectricPoint
+from Bio.Seq import Seq
 
 class Protein:
-    def __init__(self, atoms=[], aas=None, cas=None, blosum=False):
+    def __init__(self, atoms=[], aas=None, cas=None, blosum=False, source_idx=None):
         self.atoms = atoms
         self.contact_maps = []
         self.contact_maps_config = []
         self.blosum = blosum
+        self.source_idx = source_idx
 
         if len(atoms) > 0:
             self.get_Ca()
@@ -23,6 +28,30 @@ class Protein:
 
         if self.blosum:
             self.set_blosum()
+
+        self.fasta = ''.join([amino_acids[aa]['one_letter'] if aa in amino_acids else 'X' for aa in self.aa])
+
+    @property
+    def hydrophobicity_score(self):
+        values = [hydropathy[aa] for aa in self.fasta if aa in hydropathy]
+        return sum(values) / len(values) if values else 0.0
+
+    @property
+    def charge(self, pH=7.0):
+        charge = net_charge(self.fasta, pH=pH)
+        return charge
+
+    @property
+    def cysteine_fraction(self):
+        if len(self.fasta) == 0:
+            return 0.0
+        return self.fasta.count('C') / len(self.fasta)
+
+    @property
+    def isoelectric_point(self):
+        seq_obj = Seq(self.fasta)
+        ip = IsoelectricPoint.IsoelectricPoint(seq_obj)
+        return ip.pi()
         
     def get_oh(self, aas):
         idx = np.array([aas.index(aa) for aa in self.aa])
@@ -61,18 +90,6 @@ class Protein:
             self.contact_maps_config.append({'lower': threshold_lower, 'upper': threshold_upper})
         else:
             return contact
-
-    def get_padded_D(self, max_len):
-        arr = np.zeros((max_len, max_len))
-        arr[:self.len,:self.len] = self.D
-        return arr
-
-    def get_padded_aa(self, max_len, aas):
-        idx = np.array([aas.index(aa) for aa in self.aa])
-        oneHot = np.eye(len(aas))[idx]
-        padded_oneHot = np.zeros((max_len, len(aas)))
-        padded_oneHot[:self.len] = oneHot
-        return padded_oneHot
         
     def explode(self, length):
         new_aas = []
@@ -137,3 +154,35 @@ amino_acids = {
     "GLX": {"one_letter": "Z", "name": "Glutamic Acid or Glutamine"},
     "UNK": {"one_letter": "X", "name": "Unknown or Other"}
 }
+# Kyte-Doolittle hydropathy index
+hydropathy = {
+    'A': 1.8,  'R': -4.5, 'N': -3.5, 'D': -3.5, 'C': 2.5,
+    'Q': -3.5, 'E': -3.5, 'G': -0.4, 'H': -3.2, 'I': 4.5,
+    'L': 3.8,  'K': -3.9, 'M': 1.9,  'F': 2.8,  'P': -1.6,
+    'S': -0.8, 'T': -0.7, 'W': -0.9, 'Y': -1.3, 'V': 4.2
+}
+pKa = {
+    'K': 10.5, 'R': 12.5, 'H': 6.0,    # Basic side chains
+    'D': 3.9,  'E': 4.1,               # Acidic side chains
+    'C_term': 3.1, 'N_term': 8.0      # Termini
+}
+
+def charge_at_pH(pH, pKa_val, is_acid=False):
+    if is_acid:
+        return -1 / (1 + 10**(pKa_val - pH))
+    else:
+        return 1 / (1 + 10**(pH - pKa_val))
+
+def net_charge(sequence, pH=7.0):
+    counts = Counter(sequence)
+    # Side chains
+    charge = 0.0
+    charge += counts.get('K', 0) * charge_at_pH(pH, pKa['K'], is_acid=False)
+    charge += counts.get('R', 0) * charge_at_pH(pH, pKa['R'], is_acid=False)
+    charge += counts.get('H', 0) * charge_at_pH(pH, pKa['H'], is_acid=False)
+    charge += counts.get('D', 0) * charge_at_pH(pH, pKa['D'], is_acid=True)
+    charge += counts.get('E', 0) * charge_at_pH(pH, pKa['E'], is_acid=True)
+    # Termini
+    charge += charge_at_pH(pH, pKa['N_term'], is_acid=False)
+    charge += charge_at_pH(pH, pKa['C_term'], is_acid=True)
+    return charge
