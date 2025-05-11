@@ -209,7 +209,8 @@ def main():
     print("=" * 50)
     
     # Check for required files
-    if not os.path.exists("enzyme_ph_dataset.csv"):
+    #filename='expanded_enzyme_dataset.csv'
+    if not os.path.exists(filename):     ## Set here the name of the csv file
         print("ERROR: enzyme_ph_dataset.csv not found!")
         return
     
@@ -233,7 +234,7 @@ def main():
     
     # Load PDB structures
     print("\nLoading PDB structures...")
-    pdb_df = pd.read_csv("enzyme_ph_dataset.csv")
+    pdb_df = pd.read_csv(filename)
     print(f"Loaded {len(pdb_df)} structures")
     
     # Match BRENDA data with PDB structures
@@ -255,7 +256,7 @@ def main():
             enhanced_df.loc[mask, 'ph_optimum'] = row['brenda_ph']
             enhanced_df.loc[mask, 'ph_source'] = row['ph_source']
         
-        enhanced_df.to_csv("enzyme_ph_dataset_enhanced.csv", index=False)
+        enhanced_df.to_csv(output_name, index=False)
         
         # Create summary
         summary = {
@@ -303,4 +304,6 @@ def main():
         print(f"\nCleaned up temporary file: {txt_file}")
 
 if __name__ == "__main__":
+    filename='expanded_enzyme_dataset.csv'
+    output_name= 'matched_pdb_brenda_files.csv'
     main()
