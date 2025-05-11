@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fixed BRENDA matcher that works with your specific CSV format
+Robust BRENDA matcher that handles mixed data types in EC numbers
 """
 
 import tarfile
@@ -35,7 +35,7 @@ def parse_brenda_flatfile(filename):
         for line in f:
             line = line.rstrip('\n')
             
-            # EC number line - handle different possible formats
+            # EC number line
             if line.startswith("ID\t"):
                 parts = line.split('\t')
                 if len(parts) > 1:
@@ -53,7 +53,7 @@ def parse_brenda_flatfile(filename):
                 if len(parts) > 1:
                     enzymes[current_ec]['name'] = parts[1]
             
-            # pH optimum - check multiple possible formats
+            # pH optimum
             elif current_ec and ('PH_OPTIMUM' in line or 'PHO\t' in line):
                 ph_data = extract_ph_value(line)
                 if ph_data:
@@ -77,7 +77,6 @@ def parse_brenda_flatfile(filename):
 def extract_ph_value(line):
     """Extract pH values from a line"""
     try:
-        # Remove the field identifier
         content = line
         if '\t' in line:
             parts = line.split('\t', 1)
@@ -86,7 +85,7 @@ def extract_ph_value(line):
         
         entries = []
         
-        # Look for pH values using various patterns
+        # Look for pH values
         patterns = [
             r'pH\s*[:=]?\s*(\d+(?:\.\d+)?)',
             r'(\d+(?:\.\d+)?)\s*\(',
@@ -98,12 +97,12 @@ def extract_ph_value(line):
             for match in matches:
                 try:
                     value = float(match)
-                    if 0 <= value <= 14:  # Valid pH range
+                    if 0 <= value <= 14:
                         entries.append({'value': value})
                 except:
                     continue
         
-        # Handle pH ranges (e.g., "5.0-7.0")
+        # Handle pH ranges
         range_pattern = r'(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)'
         range_matches = re.findall(range_pattern, content)
         for low, high in range_matches:
@@ -111,7 +110,6 @@ def extract_ph_value(line):
                 low_val = float(low)
                 high_val = float(high)
                 if 0 <= low_val <= 14 and 0 <= high_val <= 14:
-                    # Use midpoint of range
                     entries.append({'value': (low_val + high_val) / 2})
             except:
                 continue
@@ -122,17 +120,24 @@ def extract_ph_value(line):
         return []
 
 def normalize_ec_number(ec):
-    """Normalize EC number for matching"""
-    # Remove trailing dashes
-    ec = ec.rstrip('.-')
-    # Remove trailing zeros
-    parts = ec.split('.')
+    """Normalize EC number for matching - handles both string and float inputs"""
+    # Convert to string if it's not already
+    ec_str = str(ec)
+    
+    # Remove trailing dashes and dots
+    ec_str = ec_str.rstrip('.-')
+    
+    # Split into parts
+    parts = ec_str.split('.')
     normalized_parts = []
+    
     for part in parts:
         if part.isdigit():
+            # Remove leading zeros
             normalized_parts.append(str(int(part)))
         else:
             normalized_parts.append(part)
+    
     return '.'.join(normalized_parts)
 
 def match_brenda_to_pdb(brenda_data, pdb_df):
@@ -143,16 +148,28 @@ def match_brenda_to_pdb(brenda_data, pdb_df):
     for idx, row in pdb_df.iterrows():
         pdb_id = row['pdb_id']
         ec_number = row['ec_number']
-        enzyme_name = row['enzyme_name']
-        category = row['category']
-        original_ph = row['ph_optimum']
+        enzyme_name = row.get('enzyme_name', '')
+        category = row.get('category', '')
+        original_ph = row.get('ph_optimum', 7.0)
+        
+        # Convert EC number to string and normalize
+        ec_str = str(ec_number) if pd.notna(ec_number) else ""
+        
+        # Skip if no EC number
+        if not ec_str or ec_str == 'nan':
+            unmatched.append({
+                'enzyme_name': enzyme_name,
+                'ec_number': ec_number,
+                'pdb_id': pdb_id
+            })
+            continue
         
         # Try different EC number formats
         ec_variants = [
-            ec_number,
-            normalize_ec_number(ec_number),
-            ec_number.replace('.-', ''),
-            ec_number.replace('-', ''),
+            ec_str,
+            normalize_ec_number(ec_str),
+            ec_str.replace('.-', ''),
+            ec_str.replace('-', ''),
         ]
         
         matched = False
@@ -183,7 +200,7 @@ def match_brenda_to_pdb(brenda_data, pdb_df):
                         'category': category,
                         'enzyme_name': enzyme_name,
                         'pdb_id': pdb_id,
-                        'ec_number': ec_number,
+                        'ec_number': ec_str,
                         'original_ph': original_ph,
                         'brenda_ph': median_ph,
                         'ph_source': f'BRENDA_{source_type}',
@@ -202,18 +219,17 @@ def match_brenda_to_pdb(brenda_data, pdb_df):
     
     return matched_data, unmatched
 
-def main():
+def main(dataset_file='expanded_enzyme_dataset.csv', output_file='matched_brenda_expanded.csv'):
     """Main function to extract pH data from BRENDA"""
     
     print("BRENDA pH Data Extraction")
     print("=" * 50)
     
     # Check for required files
-    #filename='expanded_enzyme_dataset.csv'
-    if not os.path.exists(filename):     ## Set here the name of the csv file
-        print("ERROR: enzyme_ph_dataset.csv not found!")
-        return
-    
+    if not os.path.exists(dataset_file):
+        print(f"ERROR: {dataset_file} not found!")
+        print("Looking for alternative dataset files...")
+          
     # Find BRENDA tarball
     tarball_files = [f for f in os.listdir('.') if f.endswith('.tar.gz') and 'brenda' in f.lower()]
     if not tarball_files:
@@ -234,8 +250,8 @@ def main():
     
     # Load PDB structures
     print("\nLoading PDB structures...")
-    pdb_df = pd.read_csv(filename)
-    print(f"Loaded {len(pdb_df)} structures")
+    pdb_df = pd.read_csv(dataset_file)
+    print(f"Loaded {len(pdb_df)} structures from {dataset_file}")
     
     # Match BRENDA data with PDB structures
     print("\nMatching BRENDA data with PDB structures...")
@@ -246,26 +262,33 @@ def main():
         results_df = pd.DataFrame(matched_data)
         
         # Save matched data
-        output_file = "brenda_pdb_matched.csv"
         results_df.to_csv(output_file, index=False)
         
         # Create enhanced dataset
         enhanced_df = pdb_df.copy()
+        
+        # Convert EC numbers to string for comparison
+        enhanced_df['ec_number'] = enhanced_df['ec_number'].astype(str)
+        
+        # Update pH values
         for idx, row in results_df.iterrows():
             mask = enhanced_df['pdb_id'] == row['pdb_id']
             enhanced_df.loc[mask, 'ph_optimum'] = row['brenda_ph']
             enhanced_df.loc[mask, 'ph_source'] = row['ph_source']
         
-        enhanced_df.to_csv(output_name, index=False)
+        enhanced_file = dataset_file.replace('.csv', '_with_brenda_ph.csv')
+        enhanced_df.to_csv(enhanced_file, index=False)
         
         # Create summary
         summary = {
+            'input_file': dataset_file,
+            'total_structures': len(pdb_df),
             'total_matches': len(results_df),
             'unmatched': len(unmatched_data),
             'match_rate': f"{len(results_df)/len(pdb_df)*100:.1f}%",
             'ph_range': f"{results_df['brenda_ph'].min():.1f} - {results_df['brenda_ph'].max():.1f}",
             'avg_ph_change': f"{abs(results_df['original_ph'] - results_df['brenda_ph']).mean():.2f}",
-            'categories_matched': results_df['category'].nunique(),
+            'categories_matched': results_df['category'].nunique() if 'category' in results_df else 0,
             'sources': results_df['ph_source'].value_counts().to_dict()
         }
         
@@ -276,27 +299,23 @@ def main():
         print(f"Average pH change: {summary['avg_ph_change']}")
         print(f"\nFiles created:")
         print(f"  - {output_file} (detailed matches)")
-        print(f"  - enzyme_ph_dataset_enhanced.csv (updated dataset)")
+        print(f"  - {enhanced_file} (updated dataset)")
         print(f"{'='*50}")
         
         # Save summary
-        with open("brenda_matching_summary.json", 'w') as f:
+        summary_file = output_file.replace('.csv', '_summary.json')
+        with open(summary_file, 'w') as f:
             json.dump(summary, f, indent=2)
         
         # Report unmatched
         if unmatched_data:
             unmatched_df = pd.DataFrame(unmatched_data)
-            unmatched_df.to_csv("unmatched_enzymes.csv", index=False)
-            print(f"\nUnmatched enzymes saved to: unmatched_enzymes.csv")
-            print(f"Example unmatched: {unmatched_data[:3]}")
+            unmatched_file = output_file.replace('.csv', '_unmatched.csv')
+            unmatched_df.to_csv(unmatched_file, index=False)
+            print(f"\nUnmatched enzymes saved to: {unmatched_file}")
+            print(f"Total unmatched: {len(unmatched_data)}")
     else:
         print("\nNo matches found!")
-        print("Debugging: First few EC numbers from your dataset:")
-        for ec in pdb_df['ec_number'].unique()[:5]:
-            print(f"  {ec}")
-        print("\nFirst few EC numbers from BRENDA:")
-        for ec in list(brenda_data.keys())[:5]:
-            print(f"  {ec}")
     
     # Clean up
     if os.path.exists(txt_file):
@@ -304,6 +323,4 @@ def main():
         print(f"\nCleaned up temporary file: {txt_file}")
 
 if __name__ == "__main__":
-    filename='expanded_enzyme_dataset.csv'
-    output_name= 'matched_pdb_brenda_files.csv'
-    main()
+   main(dataset_file='enzyme_dataset_complete_ec.csv', output_file='brenda_enzymes.csv')
