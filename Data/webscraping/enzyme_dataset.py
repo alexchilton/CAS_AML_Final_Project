@@ -9,6 +9,7 @@ import pandas as pd
 import time
 import os
 from Bio.PDB import PDBList
+import numpy as np
 
 # Enzyme database organized by categories
 ENZYME_CATEGORIES = {
