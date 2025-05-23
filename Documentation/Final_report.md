@@ -45,14 +45,7 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh 
 - [Methods](#methods)
 - [Data](#data)
   - [Protein Structure Preprocessing](#protein-structure-preprocessing)
-    - [Overview](#overview)
-    - [Input Filtering](#input-filtering)
-    - [Structural Parsing](#structural-parsing)
-    - [Secondary Structure Assignment](#secondary-structure-assignment)
-    - [Graph Construction](#graph-construction)
-    - [Geometric Feature Extraction](#geometric-feature-extraction)
     - [Physicochemical Features](#physicochemical-features)
-    - [Output](#output)
 
 <div style="page-break-after: always;"></div>
 
@@ -60,13 +53,13 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh 
 
 <div style="text-align: justify;">
 
-Proteins are the most abundant biological macromolecules, present in all cells and cellular compartments. They exhibit substantial diversity in both size and function, ranging from small peptides to large polymeric complexes. Functionally, proteins are central to virtually all biological processes and represent the primary end products of genetic information pathways. 
+Proteins are the most abundant biological macromolecules, present in all living creatures. They exhibit substantial diversity in both size and function, ranging from small peptides to large polymeric complexes. Functionally, proteins are central to virtually all biological processes and represent the primary end products of genetic information pathways. 
 
-Structurally, proteins are linear polymers of amino acids linked by peptide bonds. Twenty standard α-amino acids constitute protein sequences, each containing a central (α) carbon bonded to an amino group, a carboxyl group, a hydrogen atom, and a variable side chain (R group). These side chains differ in size, structure, polarity, and charge, influencing the solubility and conformational properties of the protein. Except for glycine, all amino acids have four distinct substituents on the α-carbon, imparting chirality to the molecule. The repeating sequence of α-carbons forms the protein backbone.  
+Structurally, proteins are linear polymers of amino acids linked by peptide bonds. Twenty standard α-amino acids constitute protein sequences, each containing a central (α) carbon bonded to an amino group, a carboxyl group, a hydrogen atom, and a variable side chain (R group). These side chains differ in size, structure, polarity, and charge, influencing the solubility and conformational properties of the protein. Except for glycine, all amino acids have four distinct substituents on the α-carbon (CA), imparting chirality to the molecule. The repeating sequence of α-carbons forms the protein backbone.  
 
-Protein structure is conventionally described at four hierarchical levels. The primary structure is the linear sequence of amino acids. The secondary structure refers to local conformations such as α-helices and β-sheets. The tertiary structure is the full three-dimensional configuration of a single polypeptide chain, while the quaternary structure represents the assembly of multiple folded subunits into a functional complex. Unlike the primary structure, which is genetically encoded, the secondary and tertiary structures are influenced by both the amino acid sequence and environmental factors. Predicting these higher-order structures remains a complex task due to the intricate balance of biochemical constraints and conformational variability.  
+Protein structure is conventionally described at four hierarchical levels. The primary structure is the linear sequence of the amino acids. The secondary structure refers to the local conformations such as α-helices and β-sheets. The tertiary structure is the full three-dimensional configuration of a single polypeptide chain, while the quaternary structure represents the assembly of multiple folded subunits into a functional complex. Unlike the primary structure, which is genetically encoded, the secondary and tertiary structures are influenced also by environmental factors. Predicting these higher-order structures remains a complex task due to the intricate balance of biochemical constraints and conformational variability.  
 
-In this work, we aim to investigate and compare computational methodologies for generating plausible three-dimensional protein structures from PDB-derived representations. Focusing on the generative potential of machine learning techniques, we explore a spectrum of approaches including gradient-based optimization, graph-based representations, and deep generative models. The objective is to characterize their respective modeling capabilities, limitations, and potential integration strategies for future protein structure prediction frameworks.
+The aim of this work was to investigate and compare computational methodologies for generating plausible three-dimensional protein structures from PDB-derived representations. Focusing on the generative potential of machine learning techniques, a spectrum of approaches including gradient-based optimization, graph-based representations, and deep generative models were explored. The objective was to characterize their respective modeling capabilities, limitations, and potential integration strategies for future protein structure prediction frameworks.
 
 </div>
 
@@ -87,21 +80,12 @@ Which infrastructure, tools, software libraries, statistical methods etc do you 
 
 ### Protein Structure Preprocessing
 
-#### Overview
-
-We propose a memory-efficient preprocessing pipeline for the systematic extraction of structural, geometric, and physicochemical features from Protein Data Bank (PDB) files. The workflow is implemented as a modular system and designed to handle large-scale datasets with minimal memory overhead.
-
-#### Input Filtering
-
-All files with the `.pdb` extension are recursively identified. Each file is validated by size $S$, and only those satisfying the condition:
+A memory-efficient preprocessing pipeline was proposed for the systematic extraction of structural, geometric, and physicochemical features from Protein Data Bank (PDB) files. The implementation was designed as a modular system and built to handle large-scale datasets with minimal memory overhead. All files with the `.pdb` extension were identified and validated by size $S$. Only those satisfying the condition:
 
 $$S \leq S_{\text{max}} \quad \text{with} \quad S_{\\text{max}} = 25\,\text{MB}$$
-are processed.
+were processed.
 
-
-#### Structural Parsing
-
-Using BioPython, the structure is parsed at the atomic level. Each standard residue is extracted and stored by chain. A tuple representation is maintained:
+Using BioPython, the structures were parsed at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form:
 
 $$
 a_i = (\text{chain\_id}, r_i, t_i, a_i^n, e_i, \vec{x}_i)
@@ -114,63 +98,39 @@ where:
 - $e_i$ is the element,
 - $\vec{x}_i \in \mathbb{R}^3$ is the atomic position.
 
-
-#### Secondary Structure Assignment
-
-Residue-level secondary structure is computed using DSSP, resulting in a mapping:
+Residue-level secondary structures were computed using DSSP (REF 3), resulting in a mapping:
 
 $$
 (r_i, \text{chain\_id}) \mapsto s_i \in \{H, E, C, G, I, T, S, ?\}
 $$
 
-where $s_i$ denotes the DSSP-assigned secondary structure class.
+where $s_i$ denoted the DSSP-assigned secondary structure class.
 
-
-#### Graph Construction
-
-A residue-level protein graph $G = (V, E)$ is built where:
-- $V$ are nodes representing residues,
-- $E$ are edges representing either peptide bonds or spatial proximity.
-
-Edges $(i, j) \in \mathbb{E}$ are defined by:
+Subsequently, residue-level protein graphs $G = (V, E)$ were built where $V$ represented nodes features and $E$ represented edge features (either peptide bonds or spatial proximity). Edges $(i, j) \in \mathbb{E}$ were defined by the following:
 
 $$
 \|\vec{x}_i^{CA} - \vec{x}_j^{CA}\|_2 < \delta \quad \text{with} \quad \delta = 7.0\,\text{\AA}
 $$
 
-
-#### Geometric Feature Extraction
-
-To characterize the 3D conformation of protein chains, we compute several geometric features: bond lengths, bond angles, and torsion angles. These features capture local spatial relationships between atoms and are fundamental for understanding protein structure and stability.
-
-Due to the computational cost associated with calculating all geometric interactions at the atomic level—and in line with the specific objectives of the present study—we restrict these calculations to the backbone atoms only. These include the nitrogen (N), alpha carbon (CA), carbon (C), and oxygen (O) atoms that form the peptide backbone of each amino acid residue. This reduction significantly improves computational efficiency while retaining essential structural information relevant for most downstream analyses. The underlying implementation, however, has been designed to support full-atom calculations and can be extended in future work.
-
-Each chain is processed independently. For each residue: 
-
-**Bond Lengths**: Bond lengths are defined as the Euclidean distance between two bonded atoms. In this context, they are computed between pairs of backbone atoms within the same residue or between sequential residues. The bond length $d_{ij}$ between atoms $i$ and $j$ is given by: 
+To characterize the 3D conformation of protein chains, bond lengths, bond angles, and torsion angles were computed. These factors enables to capture local spatial relationships between atoms and provide fundamental features for protein structure and stability. Due to the computational cost associated with calculating all geometric interactions at the atomic level—and in line with the specific objectives of the present study— the calculations were restricted to the backbone atoms only. These include the nitrogen (N), alpha carbon (CA), carbon (C), and oxygen (O) atoms that form the peptide backbone of each amino acid residue. This reduction significantly improved computational efficiency while retaining essential structural information relevant for most downstream analyses. The underlying implementation, however, was been designed to support full-atom calculations and could be extended in future work. Each chain was processed independently.  
+**Bond lengths** are defined as the Euclidean distance between two bonded atoms. In this context, they were calculated between pairs of backbone atoms within the same residue or between sequential residues. The bond length $d_{ij}$ between atoms $i$ and $j$ was computed by: 
 
   $$
   d_{ij} = \|\vec{x}_i - \vec{x}_j\|_2
   $$
 
-  where $\vec{x}_i$ and $\vec{x}_j$ are the 3D coordinates of the respective atoms.
-
-
-**Bond Angles** (for triplet  $i - j - k$): Bond angles provide a measure of the angle formed by three consecutive atoms and are useful for assessing local bending in the protein chain. Given a triplet of atoms $(i, j, k)$ , the bond angle $\theta_{ijk}$  is computed as:
+  where $\vec{x}_i$ and $\vec{x}_j$ were the 3D coordinates of the respective atoms.  **Bond Angles** (for triplet  $i - j - k$) provide a measure of the angle formed by three consecutive atoms and are useful for assessing local bending in the protein chain. Given a triplet of atoms $(i, j, k)$ , the  bond angle $\theta_{ijk}$  were computed as:
   $$
   \theta_{ijk} = \cos^{-1}\left( \frac{ (\vec{x}_i - \vec{x}_j) \cdot (\vec{x}_k - \vec{x}_j) }{ \|\vec{x}_i - \vec{x}_j\|_2 \cdot \|\vec{x}_k - \vec{x}_j\|_2 } \right)
   $$
 
-  Only triplets involving backbone atoms are considered, including intra-residue angles (e.g., N–CA–C) and inter-residue connections (e.g., C–N–CA across peptide bonds).
+  Only triplets involving backbone atoms were considered, including intra-residue angles (e.g., N–CA–C) and inter-residue connections (e.g., C–N–CA across peptide bonds). **Torsion Angles**, also called dihedral angles, describe the rotational relationship between four sequential atoms and are critical for capturing the 3D folding of the protein. Also these angles were computed exclusively on the backbone atoms and included the three canonical torsions: phi $(\phi)$, psi $(\psi)$ and omega $(\omega)$, each corresponding to a specific atom configuration across sequential residues:  
 
-**Torsion Angles** : also called dihedral angles, they describe the rotational relationship between four sequential atoms and are critical for capturing the 3D folding of the protein. These angles are computed exclusively on the backbone atoms and include the three canonical torsions: phi $(\phi)$, psi $(\psi)$ and omega $(\omega)$. 
-Each angle corresponds to a specific actom configuration across sequential residues:  
+  - $\phi$: from atoms $C_{i-1} - N_i -  CA_i -  C_i$, for the rotation on the $N-CA$ bond
+  - $\psi$: from $N_i - CA_i - C_{i} – N_{i-1}$, for the the rotation on the $CA–C$ bond
+  - $\omega$: from $CA_{i–1}–C_{i–1}–N_i–CA_i$, reflecting the cis/trans conformation across the peptide bond.    
 
-  - $\phi$: calculated from atoms $C(i-1 - N(i) - CA(i) - C(i)$, measuring rotation on the $N-CA$ bond
-  - $\psi$: from $N(i)-CA(i)-C(i)–N(i+1)$, measuring the rotation on the $CA–C$ bond
-  - $\omega$: from $CA(i–1)–C(i–1)–N(i)–CA(i)$, reflecting th ecis/trans conformation across the peptide bond.    
-
-For atoms $(i, j, k, l)$ , the torsion angle $\phi$ is calculated using the angle between the planes formed by $(i, j, k)$ and $(j, k, l)$:
+For atoms $(i, j, k, l)$ , the torsion angle $\phi$ were calculated using the angle between the planes formed by $(i, j, k)$ and $(j, k, l)$:
 
   Let $\vec{b}_1 = \vec{x}_j - \vec{x}_i,  \vec{b}_2 = \vec{x}_k - \vec{x}_j,  \vec{b}_3 = \vec{x}_l - \vec{x}_k$
 
@@ -178,13 +138,10 @@ For atoms $(i, j, k, l)$ , the torsion angle $\phi$ is calculated using the angl
   \phi = \text{atan2}\left( \frac{ \vec{b}_2 \cdot (\vec{b}_1 \times \vec{b}_3) }{ \|\vec{b}_1 \times \vec{b}_2\|_2 \cdot \|\vec{b}_2 \times \vec{b}_3\|_2 }, (\vec{b}_1 \times \vec{b}_2) \cdot (\vec{b}_2 \times \vec{b}_3) \right)
   $$
 
-  where $\vec{x}_i$, $\vec{x}_j$, $\vec{x}_k$, $\vec{x}_l$ are the 3D coordinates of the respective atoms. 
-
-  This formulation is applied uniformly across all torsion types. While current calculations are limited to backbone atoms, the implementation is generalizable and can be extended to side-chain or full-atom torsions in future work.
-
+  where $\vec{x}_i$, $\vec{x}_j$, $\vec{x}_k$, $\vec{x}_l$ were the 3D coordinates of the respective atoms. This formulation was applied uniformly across all torsion types.
 #### Physicochemical Features
 
-Charges are heuristically assigned:
+Lastly the physiochemical features were computed. Charges were estimated using predefined rules:
 
 $$
 q_i = 
@@ -196,7 +153,7 @@ q_i =
 \end{cases}
 $$
 
-Hydrophobic residues are identified using a fixed set $H = \{\text{ALA}, \text{VAL}, \text{LEU}, \ldots\}$, such that:
+Hydrophobic residues were identified using a fixed set $H$, such that:
 
 $$
 \text{hydrophobic}(r_i) = \begin{cases}
@@ -205,10 +162,22 @@ $$
 \end{cases}
 $$
 
+The graph structure of the NetworkX graph obtained is summarized in [Table 1](#table-1)
 
-#### Output
+<a id="table-1"></a>
+**Table 1:** Protein Graph Representation
 
-For each PDB entry, the following artifacts are saved:
-- Serialized graph object with node/edge attributes.
-- Pickled feature dictionaries.
-- JSON summary reporting file size, number of residues, edges, and status.
+| Component | Attribute        | Description                                                                 |
+|-----------|------------------|-----------------------------------------------------------------------------|
+| Node      | `Node ID`        | Unique node identifier: `"chain_id:residue_name:residue_number"`            |
+| Node      | `chain_id`       | Protein chain identifier                                                    |
+| Node      | `residue_number` | Sequential position of the residue in the protein                           |
+| Node      | `residue_name`   | Three-letter amino acid code                                                |
+| Node      | `ss`             | Secondary structure class (DSSP code: H, E, B, G, T, S, ?)                   |
+| Node      | `has_backbone`   | Boolean indicating presence of backbone atoms (N, CA, C, O)                 |
+| Node      | `coords`         | 3D coordinates of the CA atom                                               |
+| Node      | `CA`, `N`, `C`, `O` | Optional atomic coordinates if available                                    |
+| Edge      | `kind`           | Type of connection: `{peptide_bond}` or `{contact}`                        |
+| Edge      | `distance`       | Distance between CA atoms for contact edges (Ångströms)                    |
+
+
