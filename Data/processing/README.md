@@ -1,7 +1,7 @@
 # Protein Graph Data Format Documentation
 
 ## Overview
-This document describes the data structures produced by our protein structure preprocessing pipeline. The output consists of NetworkX graphs and associated physical properties stored in pickled dictionaries.
+This document describes the data structures produced by the pdb processing pipeline. The output consists of NetworkX graphs and associated physical properties stored in pickled dictionaries.
 
 ## File Structure
 For each PDB file processed, the following files are generated:
@@ -129,7 +129,6 @@ The `{pdb_id}_data.pkl` file contains a dictionary with the following structure:
 }
 
 ```
-
 
 ## Physical Properties
 
