@@ -822,103 +822,6 @@ def calculate_angles_memory_efficient(chain_atoms, positions, distance_cutoff=5.
         return angles
 
 
-
-
-
-
-# def calculate_angles_memory_efficient(chain_atoms, positions, distance_cutoff=5.0):
-#     """
-#     Calculate angles with memory efficiency.
-    
-#     This version doesn't create the full edge index first,
-#     but directly identifies valid triplets during calculation.
-#     """
-#     angles = {}
-#     n_atoms = len(chain_atoms)
-    
-#     # Find connected atom pairs (i-j and j-k must be connected)
-#     connected_pairs = set()
-    
-#     # First identify connected pairs (atoms within same residue or sequential residues)
-#     for i in range(n_atoms):
-#         res_i = chain_atoms[i][1]
-#         pos_i = positions[i]
-        
-#         for j in range(i+1, n_atoms):
-#             res_j = chain_atoms[j][1]
-#             pos_j = positions[j]
-            
-#             # Check if connected by residue
-#             residue_connected = (res_i == res_j or abs(res_i - res_j) == 1)
-            
-#             # Check distance
-#             distance = np.linalg.norm(pos_j - pos_i)
-            
-#             if residue_connected or distance <= distance_cutoff:
-#                 connected_pairs.add((i, j))
-#                 connected_pairs.add((j, i))  # Undirected
-    
-#     # Process in batches
-#     batch_size = 1000
-#     triplet_count = 0
-    
-#     for j in range(n_atoms):
-#         # Find all potential triplets i-j-k where j is the central atom
-#         i_candidates = []
-#         k_candidates = []
-        
-#         for i in range(n_atoms):
-#             if i != j and (i, j) in connected_pairs:
-#                 i_candidates.append(i)
-        
-#         for k in range(n_atoms):
-#             if k != j and (j, k) in connected_pairs:
-#                 k_candidates.append(k)
-        
-#         # Process candidates in batches
-#         for i_start in range(0, len(i_candidates), batch_size):
-#             i_end = min(i_start + batch_size, len(i_candidates))
-            
-#             for k_start in range(0, len(k_candidates), batch_size):
-#                 k_end = min(k_start + batch_size, len(k_candidates))
-                
-#                 for i_idx in range(i_start, i_end):
-#                     i = i_candidates[i_idx]
-                    
-#                     for k_idx in range(k_start, k_end):
-#                         k = k_candidates[k_idx]
-                        
-#                         # Ensure i ≠ k
-#                         if i == k:
-#                             continue
-                        
-#                         # Calculate angle
-#                         pos_i = positions[i]
-#                         pos_j = positions[j]
-#                         pos_k = positions[k]
-                        
-#                         vec_ij = pos_i - pos_j
-#                         vec_jk = pos_k - pos_j
-                        
-#                         # Compute angle
-#                         norm_ij = np.linalg.norm(vec_ij)
-#                         norm_jk = np.linalg.norm(vec_jk)
-                        
-#                         if norm_ij < 1e-6 or norm_jk < 1e-6:
-#                             continue  # Skip if vectors too small
-                        
-#                         cos_angle = np.dot(vec_ij, vec_jk) / (norm_ij * norm_jk)
-#                         angle = np.arccos(np.clip(cos_angle, -1.0, 1.0))
-                        
-#                         angles[(i, j, k)] = np.degrees(angle)
-#                         triplet_count += 1
-                
-#                 # Force garbage collection after each batch
-#                 gc.collect()
-    
-#     print(f"    Calculated {triplet_count} angles")
-#     return angles
-
 def calculate_torsions_memory_efficient(chain_atoms, positions, distance_cutoff=2.0, backbone_only=True):
     """
     Calculate torsions with memory efficiency.
@@ -1137,127 +1040,127 @@ def calculate_single_torsion(pos_i, pos_j, pos_k, pos_l):
     
     return np.degrees(torsion)
 
-# def calculate_torsions_memory_efficient(chain_atoms, positions, distance_cutoff=2.0):
-#     """
-#     Calculate torsions with memory efficiency.
+def calculate_torsions_all_atoms(chain_atoms, positions, distance_cutoff=2.0):
+    """
+    Calculate torsions with memory efficiency.
     
-#     This version doesn't create the full edge index first,
-#     but directly identifies valid quadruplets during calculation.
-#     """
-#     torsions = {}
-#     n_atoms = len(chain_atoms)
+    This version doesn't create the full edge index first,
+    but directly identifies valid quadruplets during calculation.
+    """
+    torsions = {}
+    n_atoms = len(chain_atoms)
     
-#     # First identify connected pairs (similar to angle calculation)
-#     connected_pairs = set()
+    # First identify connected pairs (similar to angle calculation)
+    connected_pairs = set()
     
-#     for i in range(n_atoms):
-#         res_i = chain_atoms[i][1]
-#         pos_i = positions[i]
+    for i in range(n_atoms):
+        res_i = chain_atoms[i][1]
+        pos_i = positions[i]
         
-#         for j in range(i+1, n_atoms):
-#             res_j = chain_atoms[j][1]
-#             pos_j = positions[j]
+        for j in range(i+1, n_atoms):
+            res_j = chain_atoms[j][1]
+            pos_j = positions[j]
             
-#             # Check if connected by residue
-#             residue_connected = (res_i == res_j or abs(res_i - res_j) == 1)
+            # Check if connected by residue
+            residue_connected = (res_i == res_j or abs(res_i - res_j) == 1)
             
-#             # Check distance
-#             distance = np.linalg.norm(pos_j - pos_i)
+            # Check distance
+            distance = np.linalg.norm(pos_j - pos_i)
             
-#             if residue_connected or distance <= distance_cutoff:
-#                 connected_pairs.add((i, j))
-#                 connected_pairs.add((j, i))  # Undirected
+            if residue_connected or distance <= distance_cutoff:
+                connected_pairs.add((i, j))
+                connected_pairs.add((j, i))  # Undirected
     
-#     # Find valid quadruplets (i-j-k-l where each adjacent pair is connected)
-#     batch_size = 500
-#     quadruplet_count = 0
+    # Find valid quadruplets (i-j-k-l where each adjacent pair is connected)
+    batch_size = 500
+    quadruplet_count = 0
     
-#     # First find all potential j-k pairs
-#     jk_pairs = []
-#     for j in range(n_atoms):
-#         for k in range(j+1, n_atoms):
-#             if (j, k) in connected_pairs:
-#                 jk_pairs.append((j, k))
+    # First find all potential j-k pairs
+    jk_pairs = []
+    for j in range(n_atoms):
+        for k in range(j+1, n_atoms):
+            if (j, k) in connected_pairs:
+                jk_pairs.append((j, k))
     
-#     # Process j-k pairs in batches
-#     for jk_start in range(0, len(jk_pairs), batch_size):
-#         jk_end = min(jk_start + batch_size, len(jk_pairs))
+    # Process j-k pairs in batches
+    for jk_start in range(0, len(jk_pairs), batch_size):
+        jk_end = min(jk_start + batch_size, len(jk_pairs))
         
-#         for jk_idx in range(jk_start, jk_end):
-#             j, k = jk_pairs[jk_idx]
+        for jk_idx in range(jk_start, jk_end):
+            j, k = jk_pairs[jk_idx]
             
-#             # Find i's connected to j
-#             i_candidates = []
-#             for i in range(n_atoms):
-#                 if i != j and i != k and (i, j) in connected_pairs:
-#                     i_candidates.append(i)
+            # Find i's connected to j
+            i_candidates = []
+            for i in range(n_atoms):
+                if i != j and i != k and (i, j) in connected_pairs:
+                    i_candidates.append(i)
             
-#             # Find l's connected to k
-#             l_candidates = []
-#             for l in range(n_atoms):
-#                 if l != i and l != j and l != k and (k, l) in connected_pairs:
-#                     l_candidates.append(l)
+            # Find l's connected to k
+            l_candidates = []
+            for l in range(n_atoms):
+                if l != i and l != j and l != k and (k, l) in connected_pairs:
+                    l_candidates.append(l)
             
-#             # Process i-l candidates in smaller batches
-#             for i_start in range(0, len(i_candidates), batch_size):
-#                 i_end = min(i_start + batch_size, len(i_candidates))
+            # Process i-l candidates in smaller batches
+            for i_start in range(0, len(i_candidates), batch_size):
+                i_end = min(i_start + batch_size, len(i_candidates))
                 
-#                 for l_start in range(0, len(l_candidates), batch_size):
-#                     l_end = min(l_start + batch_size, len(l_candidates))
+                for l_start in range(0, len(l_candidates), batch_size):
+                    l_end = min(l_start + batch_size, len(l_candidates))
                     
-#                     for i_idx in range(i_start, i_end):
-#                         i = i_candidates[i_idx]
+                    for i_idx in range(i_start, i_end):
+                        i = i_candidates[i_idx]
                         
-#                         for l_idx in range(l_start, l_end):
-#                             l = l_candidates[l_idx]
+                        for l_idx in range(l_start, l_end):
+                            l = l_candidates[l_idx]
                             
-#                             # Calculate torsion
-#                             pos_i = positions[i]
-#                             pos_j = positions[j]
-#                             pos_k = positions[k]
-#                             pos_l = positions[l]
+                            # Calculate torsion
+                            pos_i = positions[i]
+                            pos_j = positions[j]
+                            pos_k = positions[k]
+                            pos_l = positions[l]
                             
-#                             # Define vectors
-#                             v1 = pos_j - pos_i
-#                             v2 = pos_k - pos_j
-#                             v3 = pos_l - pos_k
+                            # Define vectors
+                            v1 = pos_j - pos_i
+                            v2 = pos_k - pos_j
+                            v3 = pos_l - pos_k
                             
-#                             # Skip if any vector is too short
-#                             if (np.linalg.norm(v1) < 1e-6 or 
-#                                 np.linalg.norm(v2) < 1e-6 or 
-#                                 np.linalg.norm(v3) < 1e-6):
-#                                 continue
+                            # Skip if any vector is too short
+                            if (np.linalg.norm(v1) < 1e-6 or 
+                                np.linalg.norm(v2) < 1e-6 or 
+                                np.linalg.norm(v3) < 1e-6):
+                                continue
                             
-#                             # Cross products
-#                             n1 = np.cross(v1, v2)
-#                             n2 = np.cross(v2, v3)
+                            # Cross products
+                            n1 = np.cross(v1, v2)
+                            n2 = np.cross(v2, v3)
                             
-#                             # Skip if either normal is too short
-#                             n1_norm = np.linalg.norm(n1)
-#                             n2_norm = np.linalg.norm(n2)
+                            # Skip if either normal is too short
+                            n1_norm = np.linalg.norm(n1)
+                            n2_norm = np.linalg.norm(n2)
                             
-#                             if n1_norm < 1e-6 or n2_norm < 1e-6:
-#                                 continue
+                            if n1_norm < 1e-6 or n2_norm < 1e-6:
+                                continue
                             
-#                             # Normalize
-#                             n1 = n1 / n1_norm
-#                             n2 = n2 / n2_norm
+                            # Normalize
+                            n1 = n1 / n1_norm
+                            n2 = n2 / n2_norm
                             
-#                             # Compute torsion angle
-#                             v2_norm = np.linalg.norm(v2)
-#                             torsion = np.arctan2(
-#                                 np.dot(np.cross(n1, n2), v2 / v2_norm), 
-#                                 np.dot(n1, n2)
-#                             )
+                            # Compute torsion angle
+                            v2_norm = np.linalg.norm(v2)
+                            torsion = np.arctan2(
+                                np.dot(np.cross(n1, n2), v2 / v2_norm), 
+                                np.dot(n1, n2)
+                            )
                             
-#                             torsions[(i, j, k, l)] = np.degrees(torsion)
-#                             quadruplet_count += 1
+                            torsions[(i, j, k, l)] = np.degrees(torsion)
+                            quadruplet_count += 1
                     
-#                     # Force garbage collection
-#                     gc.collect()
+                    # Force garbage collection
+                    gc.collect()
     
-#     print(f"    Calculated {quadruplet_count} torsions")
-#     return torsions
+    print(f"    Calculated {quadruplet_count} torsions")
+    return torsions
 
 def assign_charges(chain_atoms):
     """Assign partial charges to atoms."""
