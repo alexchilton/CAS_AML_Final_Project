@@ -93,11 +93,9 @@ We propose a memory-efficient preprocessing pipeline for the systematic extracti
 
 #### Input Filtering
 
-All files with the `.pdb` extension are recursively identified. Each file is validated by size $( S )$, and only those satisfying the condition:
+All files with the `.pdb` extension are recursively identified. Each file is validated by size $S$, and only those satisfying the condition:
 
-$$
-(S \leq S_{\text{max}} \quad \text{with} \quad S_{\\text{max}} = 25\,\text{MB}
-)$$
+$$S \leq S_{\text{max}} \quad \text{with} \quad S_{\\text{max}} = 25\,\text{MB}$$
 are processed.
 
 
@@ -105,56 +103,74 @@ are processed.
 
 Using BioPython, the structure is parsed at the atomic level. Each standard residue is extracted and stored by chain. A tuple representation is maintained:
 
-$$(
+$$
 a_i = (\text{chain\_id}, r_i, t_i, a_i^n, e_i, \vec{x}_i)
-)$$
+$$
 
 where:
-- $( r_i )$ is the residue number,
-- $( t_i )$ is the residue type (three-letter code),
-- $( a_i^n )$ is the atom name,
-- $( e_i )$ is the element,
-- $( \vec{x}_i \in \mathbb{R}^3 )$ is the atomic position.
+- $r_i$ is the residue number,
+- $t_i$ is the residue type (three-letter code),
+- $a_i^n$ is the atom name,
+- $e_i$ is the element,
+- $\vec{x}_i \in \mathbb{R}^3$ is the atomic position.
 
 
 #### Secondary Structure Assignment
 
 Residue-level secondary structure is computed using DSSP, resulting in a mapping:
 
-$$(
+$$
 (r_i, \text{chain\_id}) \mapsto s_i \in \{H, E, C, G, I, T, S, ?\}
-)$$
+$$
 
-where $( s_i )$ denotes the DSSP-assigned secondary structure class.
+where $s_i$ denotes the DSSP-assigned secondary structure class.
 
 
 #### Graph Construction
 
-A residue-level protein graph $( G = (V, E) )$ is built where:
-- $( V )$ are nodes representing residues,
-- $( E )$ are edges representing either peptide bonds or spatial proximity.
+A residue-level protein graph $G = (V, E)$ is built where:
+- $V$ are nodes representing residues,
+- $E$ are edges representing either peptide bonds or spatial proximity.
 
-Edges $( (i, j) \in \mathbb{E} )$ are defined by:
+Edges $(i, j) \in \mathbb{E}$ are defined by:
 
-$$(
+$$
 \|\vec{x}_i^{CA} - \vec{x}_j^{CA}\|_2 < \delta \quad \text{with} \quad \delta = 7.0\,\text{\AA}
-)$$
+$$
 
 
 #### Geometric Feature Extraction
 
-Each chain is processed independently. For each residue:
-- **Bond Lengths**:
-  $$(
+To characterize the 3D conformation of protein chains, we compute several geometric features: bond lengths, bond angles, and torsion angles. These features capture local spatial relationships between atoms and are fundamental for understanding protein structure and stability.
+
+Due to the computational cost associated with calculating all geometric interactions at the atomic level—and in line with the specific objectives of the present study—we restrict these calculations to the backbone atoms only. These include the nitrogen (N), alpha carbon (CA), carbon (C), and oxygen (O) atoms that form the peptide backbone of each amino acid residue. This reduction significantly improves computational efficiency while retaining essential structural information relevant for most downstream analyses. The underlying implementation, however, has been designed to support full-atom calculations and can be extended in future work.
+
+Each chain is processed independently. For each residue: 
+
+**Bond Lengths**: Bond lengths are defined as the Euclidean distance between two bonded atoms. In this context, they are computed between pairs of backbone atoms within the same residue or between sequential residues. The bond length $d_{ij}$ between atoms $i$ and $j$ is given by: 
+
+  $$
   d_{ij} = \|\vec{x}_i - \vec{x}_j\|_2
-  )$$
+  $$
 
-- **Bond Angles** (for triplet  $i - j - k$):
-  $$(
+  where $\vec{x}_i$ and $\vec{x}_j$ are the 3D coordinates of the respective atoms.
+
+
+**Bond Angles** (for triplet  $i - j - k$): Bond angles provide a measure of the angle formed by three consecutive atoms and are useful for assessing local bending in the protein chain. Given a triplet of atoms $(i, j, k)$ , the bond angle $\theta_{ijk}$  is computed as:
+  $$
   \theta_{ijk} = \cos^{-1}\left( \frac{ (\vec{x}_i - \vec{x}_j) \cdot (\vec{x}_k - \vec{x}_j) }{ \|\vec{x}_i - \vec{x}_j\|_2 \cdot \|\vec{x}_k - \vec{x}_j\|_2 } \right)
-  )$$
+  $$
 
-- **Torsion Angles** (for quadruplet $i - j - k - l$):
+  Only triplets involving backbone atoms are considered, including intra-residue angles (e.g., N–CA–C) and inter-residue connections (e.g., C–N–CA across peptide bonds).
+
+**Torsion Angles** : also called dihedral angles, they describe the rotational relationship between four sequential atoms and are critical for capturing the 3D folding of the protein. These angles are computed exclusively on the backbone atoms and include the three canonical torsions: phi $(\phi)$, psi $(\psi)$ and omega $(\omega)$. 
+Each angle corresponds to a specific actom configuration across sequential residues:  
+
+  - $\phi$: calculated from atoms $C(i-1 - N(i) - CA(i) - C(i)$, measuring rotation on the $N-CA$ bond
+  - $\psi$: from $N(i)-CA(i)-C(i)–N(i+1)$, measuring the rotation on the $CA–C$ bond
+  - $\omega$: from $CA(i–1)–C(i–1)–N(i)–CA(i)$, reflecting th ecis/trans conformation across the peptide bond.    
+
+For atoms $(i, j, k, l)$ , the torsion angle $\phi$ is calculated using the angle between the planes formed by $(i, j, k)$ and $(j, k, l)$:
 
   Let $\vec{b}_1 = \vec{x}_j - \vec{x}_i,  \vec{b}_2 = \vec{x}_k - \vec{x}_j,  \vec{b}_3 = \vec{x}_l - \vec{x}_k$
 
@@ -162,24 +178,32 @@ Each chain is processed independently. For each residue:
   \phi = \text{atan2}\left( \frac{ \vec{b}_2 \cdot (\vec{b}_1 \times \vec{b}_3) }{ \|\vec{b}_1 \times \vec{b}_2\|_2 \cdot \|\vec{b}_2 \times \vec{b}_3\|_2 }, (\vec{b}_1 \times \vec{b}_2) \cdot (\vec{b}_2 \times \vec{b}_3) \right)
   $$
 
+  where $\vec{x}_i$, $\vec{x}_j$, $\vec{x}_k$, $\vec{x}_l$ are the 3D coordinates of the respective atoms. 
+
+  This formulation is applied uniformly across all torsion types. While current calculations are limited to backbone atoms, the implementation is generalizable and can be extended to side-chain or full-atom torsions in future work.
+
 #### Physicochemical Features
 
 Charges are heuristically assigned:
 
-$$q_i = 
+$$
+q_i = 
 \begin{cases}
 -0.5 & \text{if } e_i = \text{N} \\
 0.5 & \text{if } e_i = \text{C} \\
 -0.5 & \text{if } e_i = \text{O} \\
 0 & \text{otherwise}
-\end{cases}$$
+\end{cases}
+$$
 
 Hydrophobic residues are identified using a fixed set $H = \{\text{ALA}, \text{VAL}, \text{LEU}, \ldots\}$, such that:
 
-$$\text{hydrophobic}(r_i) = \begin{cases}
+$$
+\text{hydrophobic}(r_i) = \begin{cases}
 1 & \text{if } t_i \in H \\
 0 & \text{otherwise}
-\end{cases}$$
+\end{cases}
+$$
 
 
 #### Output
