@@ -42,10 +42,11 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh 
 - [Abstract](#abstract)
 - [Table of contents](#table-of-contents)
 - [Project objectives](#project-objectives)
-- [Methods](#methods)
+- [System requirements](#system-requirements)
 - [Data](#data)
+  - [Webscrapring](#webscrapring)
   - [Protein Structure Preprocessing](#protein-structure-preprocessing)
-    - [Physicochemical Features](#physicochemical-features)
+- [References](#references)
 
 <div style="page-break-after: always;"></div>
 
@@ -63,20 +64,33 @@ The aim of this work was to investigate and compare computational methodologies 
 
 </div>
 
-## Methods 
+## System requirements
 
 <div style="text-align: justify;">
 
-0.5-1.0 page
+The preprocessing pipeline was developed and executed under the following system configuration and software dependencies:
 
-Which infrastructure, tools, software libraries, statistical methods etc do you intend to use. It is clear that you may not know all this at this stage, but try to make yourself some thoughts, even if it is going to change during the CAS.
+- Operating System: Linux-based environment
+
+- Python Version: 3.9
+
+- Required Python Packages: numpy ≥ 1.20, BioPython ≥ 1.79 (including Bio.PDB and DSSP interface), Graphein (for protein graph construction), networkx ≥ 2.6
+
+- Hardware: CPU-based system with minimum 30 GB of available RAM to support memory-efficient feature extraction for large PDB files
+
+- Parallel Execution: A parallelized version of the pipeline is available and was deployed on a high-performance computing (HPC) cluster to process datasets in parallel across multiple nodes.
+
+**Note**: A Linux-based system is required due to dependencies on external tools used by DSSP and Graphein, which may rely on Unix-specific system calls, executable paths, or subprocess handling that are not reliably supported on Windows or macOS environments.
 
 </div>
-
 
 ## Data
 
 <div style="text-align: justify;">
+
+### Webscrapring
+
+Data were obtained from the Protein Data Bank (PDB) [[1]](#ref1) using the official API. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. In a secondary phase, the pipeline was extended to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[2]](#ref2) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features.
 
 ### Protein Structure Preprocessing
 
@@ -98,7 +112,7 @@ where:
 - $e_i$ is the element,
 - $\vec{x}_i \in \mathbb{R}^3$ is the atomic position.
 
-Residue-level secondary structures were computed using DSSP (REF 3), resulting in a mapping:
+Residue-level secondary structures were computed using DSSP [[3]](#ref3), resulting in a mapping:
 
 $$
 (r_i, \text{chain\_id}) \mapsto s_i \in \{H, E, C, G, I, T, S, ?\}
@@ -139,7 +153,6 @@ For atoms $(i, j, k, l)$ , the torsion angle $\phi$ were calculated using the an
   $$
 
   where $\vec{x}_i$, $\vec{x}_j$, $\vec{x}_k$, $\vec{x}_l$ were the 3D coordinates of the respective atoms. This formulation was applied uniformly across all torsion types.
-#### Physicochemical Features
 
 Lastly the physiochemical features were computed. Charges were estimated using predefined rules:
 
@@ -181,3 +194,16 @@ The graph structure of the NetworkX graph obtained is summarized in [Table 1](#t
 | Edge      | `distance`       | Distance between CA atoms for contact edges (Ångströms)                    |
 
 
+
+
+
+## References
+
+<a id="ref1"></a>
+[1] Berman, H. M., Westbrook, J., Feng, Z., Gilliland, G., Bhat, T. N., Weissig, H., Shindyalov, I. N., & Bourne, P. E. (2000). The Protein Data Bank. Nucleic Acids Research, 28(1), 235-242. https://doi.org/10.1093/nar/28.1.235
+
+<a id="ref2"></a>
+[2] Chang A., Jeske L., Ulbrich S., Hofmann J., Koblitz J., Schomburg I., Neumann-Schaal M., Jahn D., Schomburg D. BRENDA, the ELIXIR core data resource in 2021: new developments and updates. (2021), Nucleic Acids Res., 49:D498-D508. DOI: 10.1093/nar/gkaa1025 PubMed: 33211880
+
+<a id="ref3"></a>
+[3] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
