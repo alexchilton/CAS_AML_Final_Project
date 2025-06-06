@@ -30,10 +30,11 @@ Methodological Exploration of Protein Structure Generation from PDB Representati
 <div style="page-break-after: always;"></div>
 
 ## Abstract
+<div style="text-align: justify;">
 
-10-20 lines
+We present a comprehensive methodological exploration of computational approaches for generating plausible three-dimensional protein structures from PDB-derived representations. While originally conceived for Physics-Informed Neural Network applications targeting environmental perturbation prediction, our research evolved to address fundamental challenges in protein structure generation methodologies. Our work encompassed systematic data preprocessing using Linux-based computational biology libraries, followed by extensive exploration of multiple generative approaches including contact map-based Variational Autoencoders with gradient optimization, Graph Attention Network architectures, synthetic graph validation frameworks, and Graph Recurrent Attention Network-inspired dual output systems. Our investigation demonstrates the complexity of computational protein generation while establishing methodological foundations for future Physics-Informed Neural Network development. The most successful approach achieved 99.51% contact map accuracy with visually plausible 3D structures, providing strong foundations for advancing toward environmental perturbation modeling applications.
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper.
+</div>
 
 <div style="page-break-after: always;"></div>
 
@@ -41,26 +42,37 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh 
 
 - [Abstract](#abstract)
 - [Table of contents](#table-of-contents)
-- [Project objectives](#project-objectives)
+- [1. Introduction and project scope](#1-introduction-and-project-scope)
+  - [1.1 Biological and computational context](#11-biological-and-computational-context)
+  - [1.2 Project objectives and evolution](#12-project-objectives-and-evolution)
+  - [1.3 Methodological framework](#13-methodological-framework)
 - [System requirements](#system-requirements)
 - [Data](#data)
   - [Webscrapring](#webscrapring)
+  - [Synthetic datasets](#synthetic-datasets)
   - [Protein Structure Preprocessing](#protein-structure-preprocessing)
+- [Data quality](#data-quality)
 - [References](#references)
 
 <div style="page-break-after: always;"></div>
 
-## Project objectives
+## 1. Introduction and project scope
+
+### 1.1 Biological and computational context
 
 <div style="text-align: justify;">
 
-Proteins are the most abundant biological macromolecules, present in all living creatures. They exhibit substantial diversity in both size and function, ranging from small peptides to large polymeric complexes. Functionally, proteins are central to virtually all biological processes and represent the primary end products of genetic information pathways. 
-
-Structurally, proteins are linear polymers of amino acids linked by peptide bonds. Twenty standard α-amino acids constitute protein sequences, each containing a central (α) carbon bonded to an amino group, a carboxyl group, a hydrogen atom, and a variable side chain (R group). These side chains differ in size, structure, polarity, and charge, influencing the solubility and conformational properties of the protein. Except for glycine, all amino acids have four distinct substituents on the α-carbon (CA), imparting chirality to the molecule. The repeating sequence of α-carbons forms the protein backbone.  
+Proteins are the most abundant biological macromolecules, present in all living creatures. They exhibit substantial diversity in both size and function, ranging from small peptides to large polymeric complexes. Functionally, proteins are central to virtually all biological processes and represent the primary end products of genetic information pathways. Structurally, proteins are linear polymers of amino acids linked by peptide bonds. Twenty standard α-amino acids constitute protein sequences, each containing a central (α) carbon bonded to an amino group, a carboxyl group, a hydrogen atom, and a variable side chain (R group). These side chains differ in size, structure, polarity, and charge, influencing the solubility and conformational properties of the protein. Except for glycine, all amino acids have four distinct substituents on the α-carbon (CA), imparting chirality to the molecule. The repeating sequence of α-carbons forms the protein backbone.  
 
 Protein structure is conventionally described at four hierarchical levels. The primary structure is the linear sequence of the amino acids. The secondary structure refers to the local conformations such as α-helices and β-sheets. The tertiary structure is the full three-dimensional configuration of a single polypeptide chain, while the quaternary structure represents the assembly of multiple folded subunits into a functional complex. Unlike the primary structure, which is genetically encoded, the secondary and tertiary structures are influenced also by environmental factors. Predicting these higher-order structures remains a complex task due to the intricate balance of biochemical constraints and conformational variability.  
 
-The aim of this work was to investigate and compare computational methodologies for generating plausible three-dimensional protein structures from PDB-derived representations. Focusing on the generative potential of machine learning techniques, a spectrum of approaches including gradient-based optimization, graph-based representations, and deep generative models were explored. The objective was to characterize their respective modeling capabilities, limitations, and potential integration strategies for future protein structure prediction frameworks.
+### 1.2 Project objectives and evolution
+
+We initially conceptualized this project to investigate and compare computational methodologies for generating plausible three-dimensional protein structures from PDB-derived representations, with particular focus on Physics-Informed Neural Network applications for environmental perturbation prediction. Our original scope envisioned developing systems capable of predicting protein structural modifications under environmental changes such as pH variations, temperature fluctuations, and ionic strength modifications.
+
+However, during implementation, our research evolved to address preliminary challenges in protein structure generation methodologies. The complexity of basic protein generation necessitated comprehensive exploration of underlying computational approaches before advancing to environmental perturbation modeling. This evolution led to systematic investigation of multiple generative architectures, with each approach addressing different aspects of the protein structure generation problem.
+
+### 1.3 Methodological framework 
 
 </div>
 
@@ -91,6 +103,10 @@ The preprocessing pipeline was developed and executed under the following system
 ### Webscrapring
 
 Data were obtained from the Protein Data Bank (PDB) [[1]](#ref1) using the official API. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. In a secondary phase, the pipeline was extended to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[2]](#ref2) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features.
+
+### Synthetic datasets
+
+Additionally to the webscraped data two sets of synthetic data were created to compare the generative capabilities of the methods using data with known properties. 
 
 ### Protein Structure Preprocessing
 
@@ -194,7 +210,10 @@ The graph structure of the NetworkX graph obtained is summarized in [Table 1](#t
 | Edge      | `distance`       | Distance between CA atoms for contact edges (Ångströms)                    |
 
 
+## Data quality
 
+For the first stage opf the project a datsset composed of nanobodies only was used. While this gave substantial advantages it carried also some limitations. Nanobodies are small in size ( ~15kDa, ~120-130 residues) but they maintain a consistenmt immunoglobulin fold architecture. They are naturally evolved, stable proteins which have been selected for proper folding and function, allowing the models to learn from biologically viable conformation. PDB nanobodiy structures are high-resolution X-ray or cryo-EM structures of high quality, this provides stable ground trith data for trainingm which is crucial for physics-informed approaches of common usew in the field. Despite their small size, nanobodies exhibit wide sequence and binding diversity while maintaining the same overall fold, exposing the models to functional variations without the complexity of completely different protein architecture. 
+While though nanobodies are diverse in sequence, they share the same immunoglobulin scaffold which could limit the generalizatiopn ability of the trained models, additionally many PDB nanobodies come from camelids or have been engineered for stability, potentially biasing the training data toward unusually stable conformations which may not represent typical protein behaviour. This could be a potential drwback for a physics informed neural network but it's not an applicable risk for this stage of the project focused primarily on the investigation of the different generation techniques from data preprocessed for a physics informed network. 
 
 
 ## References
