@@ -46,12 +46,15 @@ We present a comprehensive methodological exploration of computational approache
   - [1.1 Biological and computational context](#11-biological-and-computational-context)
   - [1.2 Project objectives and evolution](#12-project-objectives-and-evolution)
   - [1.3 Methodological framework](#13-methodological-framework)
-- [System requirements](#system-requirements)
-- [Data](#data)
-  - [Webscrapring](#webscrapring)
-  - [Synthetic datasets](#synthetic-datasets)
-  - [Protein Structure Preprocessing](#protein-structure-preprocessing)
-- [Data quality](#data-quality)
+- [2. Infrastructure and development environment](#2-infrastructure-and-development-environment)
+- [3. Data](#3-data)
+  - [3.1 Primary data source](#31-primary-data-source)
+  - [3.2 Preprocessing and feature engineering](#32-preprocessing-and-feature-engineering)
+  - [3.3 Geometric feature engineering and structural analysis](#33-geometric-feature-engineering-and-structural-analysis)
+  - [3.4 Physicochemical property integration:](#34-physicochemical-property-integration)
+  - [3.5 Graph structure and feature integration](#35-graph-structure-and-feature-integration)
+  - [3.6 Additional datasets for model validation and testing](#36-additional-datasets-for-model-validation-and-testing)
+  - [3.7 Data quality](#37-data-quality)
 - [References](#references)
 
 <div style="page-break-after: always;"></div>
@@ -74,48 +77,46 @@ However, during implementation, our research evolved to address preliminary chal
 
 ### 1.3 Methodological framework 
 
-</div>
+Our investigation was structured with clearly defined phases:
 
-## System requirements
+1. **Systematic Data Preprocessing**: Development of comprehensive pipelines for converting protein structural data into computationally tractable representations suitable for machine learning applications
 
-<div style="text-align: justify;">
+2. **Multiple Methodological Exploration**: Investigation of various neural network architectures and approaches, building upon the shared preprocessing foundation
 
-The preprocessing pipeline was developed and executed under the following system configuration and software dependencies:
+3. **Validation and Assessment**: Integration of findings from different approaches to identify optimal methodologies and establish foundations for future development
 
-- Operating System: Linux-based environment
-
-- Python Version: 3.9
-
-- Required Python Packages: numpy ≥ 1.20, BioPython ≥ 1.79 (including Bio.PDB and DSSP interface), Graphein (for protein graph construction), networkx ≥ 2.6
-
-- Hardware: CPU-based system with minimum 30 GB of available RAM to support memory-efficient feature extraction for large PDB files
-
-- Parallel Execution: A parallelized version of the pipeline is available and was deployed on a high-performance computing (HPC) cluster to process datasets in parallel across multiple nodes.
-
-**Note**: A Linux-based system is required due to dependencies on external tools used by DSSP and Graphein, which may rely on Unix-specific system calls, executable paths, or subprocess handling that are not reliably supported on Windows or macOS environments.
+Our objective was to characterize the respective modeling capabilities, limitations, and potential integration strategies of different approaches for future protein structure prediction frameworks, while acknowledging that environmental modification prediction remains a target for future research.
 
 </div>
 
-## Data
+## 2. Infrastructure and development environment
+
+**Core framework**: We used PyTorch as the primary deep learning framework, with PyTorch Geometric providing specialized graph neural network operations for protein graph processing. A Linux-based environment was required due to dependencies on external tools used by DSSP [[1]](#ref1) and Graphein [[2]](#ref2). For implementation, we leveraged Google Colab [[3]](#ref3) with GPU acceleration (Tesla T4, 15GB memory) and UBELIX [[4]](#ref4) for processing datasets across multiple nodes. We used different Python versions for different implementation phases: Python 3.9 for preprocessing and Python 3.11 or later for all other implementations, with required libraries detailed in requirements.txt.
+
+**Experiment tracking**: we used Weights & Biases [[5]](#ref5) integration for experiment logging and visualization, tracking training metrics, loss components, and model performance across different architectural approaches. 
+
+**Data and Model Distribution**: We made the trained best model and associated metadata publicly available via Hugging Face [[6]](#ref6) to ensure reproducibility and facilitate further research. 
 
 <div style="text-align: justify;">
 
-### Webscrapring
+(to be completed yet)
 
-Data were obtained from the Protein Data Bank (PDB) [[1]](#ref1) using the official API. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. In a secondary phase, the pipeline was extended to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[2]](#ref2) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features.
+</div>
 
-### Synthetic datasets
+## 3. Data 
 
-Additionally to the webscraped data two sets of synthetic data were created to compare the generative capabilities of the methods using data with known properties. 
+<div style="text-align: justify;">
 
-### Protein Structure Preprocessing
+### 3.1 Primary data source
 
-A memory-efficient preprocessing pipeline was proposed for the systematic extraction of structural, geometric, and physicochemical features from Protein Data Bank (PDB) files. The implementation was designed as a modular system and built to handle large-scale datasets with minimal memory overhead. All files with the `.pdb` extension were identified and validated by size $S$. Only those satisfying the condition:
+Data were obtained from the Protein Data Bank (PDB) [[7]](#ref7) using the official API with carefully defined selection criteria.
+The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. In a secondary phase, we extended the pipeline to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[8]](#ref8) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features. 
 
-$$S \leq S_{\text{max}} \quad \text{with} \quad S_{\\text{max}} = 25\,\text{MB}$$
-were processed.
+### 3.2 Preprocessing and feature engineering 
 
-Using BioPython, the structures were parsed at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form:
+**Atomic-level feature extraction and molecular representation**
+
+Using BioPython [[9]](#ref9), we parsed the structures at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form: 
 
 $$
 a_i = (\text{chain\_id}, r_i, t_i, a_i^n, e_i, \vec{x}_i)
@@ -128,7 +129,8 @@ where:
 - $e_i$ is the element,
 - $\vec{x}_i \in \mathbb{R}^3$ is the atomic position.
 
-Residue-level secondary structures were computed using DSSP [[3]](#ref3), resulting in a mapping:
+**Secondary Structure Integration:**
+Residue-level secondary structures were computed using DSSP [[4]](#ref4), resulting in a mapping:
 
 $$
 (r_i, \text{chain\_id}) \mapsto s_i \in \{H, E, C, G, I, T, S, ?\}
@@ -136,41 +138,57 @@ $$
 
 where $s_i$ denoted the DSSP-assigned secondary structure class.
 
-Subsequently, residue-level protein graphs $G = (V, E)$ were built where $V$ represented nodes features and $E$ represented edge features (either peptide bonds or spatial proximity). Edges $(i, j) \in \mathbb{E}$ were defined by the following:
+**Graph construction methodology**
+
+Subsequently, residue-level protein graphs $G = (V, E)$ were built where $V$ represented nodes features and $E$ represented edge features (either peptide bonds or spatial proximity). We defined Edges $(i, j) \in \mathbb{E}$ by the following:
 
 $$
 \|\vec{x}_i^{CA} - \vec{x}_j^{CA}\|_2 < \delta \quad \text{with} \quad \delta = 7.0\,\text{\AA}
 $$
 
-To characterize the 3D conformation of protein chains, bond lengths, bond angles, and torsion angles were computed. These factors enables to capture local spatial relationships between atoms and provide fundamental features for protein structure and stability. Due to the computational cost associated with calculating all geometric interactions at the atomic level—and in line with the specific objectives of the present study— the calculations were restricted to the backbone atoms only. These include the nitrogen (N), alpha carbon (CA), carbon (C), and oxygen (O) atoms that form the peptide backbone of each amino acid residue. This reduction significantly improved computational efficiency while retaining essential structural information relevant for most downstream analyses. The underlying implementation, however, was been designed to support full-atom calculations and could be extended in future work. Each chain was processed independently.  
-**Bond lengths** are defined as the Euclidean distance between two bonded atoms. In this context, they were calculated between pairs of backbone atoms within the same residue or between sequential residues. The bond length $d_{ij}$ between atoms $i$ and $j$ was computed by: 
+### 3.3 Geometric feature engineering and structural analysis
 
-  $$
-  d_{ij} = \|\vec{x}_i - \vec{x}_j\|_2
-  $$
+**Backbone geometry characterization**
+To characterize the 3D conformation of th protein chain we computed bond lengths, bond angles and torsion angles. These calculations were restricted to backbone atoms only (N, CA, C, O) to balance computational efficiency with essential structural information retention, though the underlying implementation was designed to support full-atom calculations for future extension.
 
-  where $\vec{x}_i$ and $\vec{x}_j$ were the 3D coordinates of the respective atoms.  **Bond Angles** (for triplet  $i - j - k$) provide a measure of the angle formed by three consecutive atoms and are useful for assessing local bending in the protein chain. Given a triplet of atoms $(i, j, k)$ , the  bond angle $\theta_{ijk}$  were computed as:
-  $$
-  \theta_{ijk} = \cos^{-1}\left( \frac{ (\vec{x}_i - \vec{x}_j) \cdot (\vec{x}_k - \vec{x}_j) }{ \|\vec{x}_i - \vec{x}_j\|_2 \cdot \|\vec{x}_k - \vec{x}_j\|_2 } \right)
-  $$
+**Bond length calculation**
+Bond lengths were defined as Euclidean distances between bonded atoms:
 
-  Only triplets involving backbone atoms were considered, including intra-residue angles (e.g., N–CA–C) and inter-residue connections (e.g., C–N–CA across peptide bonds). **Torsion Angles**, also called dihedral angles, describe the rotational relationship between four sequential atoms and are critical for capturing the 3D folding of the protein. Also these angles were computed exclusively on the backbone atoms and included the three canonical torsions: phi $(\phi)$, psi $(\psi)$ and omega $(\omega)$, each corresponding to a specific atom configuration across sequential residues:  
+$$
+d_{ij} = \|\vec{x}_i - \vec{x}_j\|_2
+$$
 
-  - $\phi$: from atoms $C_{i-1} - N_i -  CA_i -  C_i$, for the rotation on the $N-CA$ bond
-  - $\psi$: from $N_i - CA_i - C_{i} – N_{i-1}$, for the the rotation on the $CA–C$ bond
-  - $\omega$: from $CA_{i–1}–C_{i–1}–N_i–CA_i$, reflecting the cis/trans conformation across the peptide bond.    
+calculated between pairs of backbone atoms within the same residue or between sequential residues
+
+**Bond angles computation**
+For triplets of atoms (i, j, k), bond angles $\theta_{ijk}$ provided measures of angles formed by three consecutive atoms:
+
+$$
+\theta_{ijk} = \cos^{-1}\left( \frac{ (\vec{x}_i - \vec{x}_j) \cdot (\vec{x}_k - \vec{x}_j) }{ \|\vec{x}_i - \vec{x}_j\|_2 \cdot \|\vec{x}_k - \vec{x}_j\|_2 } \right)
+$$
+
+Only triplets involving backbone atoms were considered, including intra-residue angles and inter-residue connections.
+
+**Torsion angles analysis**
+Torsion angles (dihedral angles) described rotational relationships between four sequential atoms, critical for capturing 3D folding patterns. The three canonical backbone torsions were computed:
+
+  - $\phi$: Rotation on the $N-CA$ bond
+  - $\psi$: Rotation on the $CA–C$ bond
+  - $\omega$: from $CA_{i–1}–C_{i–1}–N_i–CA_i$, reflecting the cis/trans conformation across the peptide bond. 
 
 For atoms $(i, j, k, l)$ , the torsion angle $\phi$ were calculated using the angle between the planes formed by $(i, j, k)$ and $(j, k, l)$:
 
-  Let $\vec{b}_1 = \vec{x}_j - \vec{x}_i,  \vec{b}_2 = \vec{x}_k - \vec{x}_j,  \vec{b}_3 = \vec{x}_l - \vec{x}_k$
+Let $\vec{b}_1 = \vec{x}_j - \vec{x}_i,  \vec{b}_2 = \vec{x}_k - \vec{x}_j,  \vec{b}_3 = \vec{x}_l - \vec{x}_k$
 
-  $$
-  \phi = \text{atan2}\left( \frac{ \vec{b}_2 \cdot (\vec{b}_1 \times \vec{b}_3) }{ \|\vec{b}_1 \times \vec{b}_2\|_2 \cdot \|\vec{b}_2 \times \vec{b}_3\|_2 }, (\vec{b}_1 \times \vec{b}_2) \cdot (\vec{b}_2 \times \vec{b}_3) \right)
-  $$
+$$
+\phi = \text{atan2}\left( \frac{ \vec{b}_2 \cdot (\vec{b}_1 \times \vec{b}_3) }{ \|\vec{b}_1 \times \vec{b}_2\|_2 \cdot \|\vec{b}_2 \times \vec{b}_3\|_2 }, (\vec{b}_1 \times \vec{b}_2) \cdot (\vec{b}_2 \times \vec{b}_3) \right)
+$$
 
-  where $\vec{x}_i$, $\vec{x}_j$, $\vec{x}_k$, $\vec{x}_l$ were the 3D coordinates of the respective atoms. This formulation was applied uniformly across all torsion types.
+where $\vec{x}_i$, $\vec{x}_j$, $\vec{x}_k$, $\vec{x}_l$ were the 3D coordinates of the respective atoms. This formulation was applied uniformly across all torsion types.
 
-Lastly the physiochemical features were computed. Charges were estimated using predefined rules:
+### 3.4 Physicochemical property integration:
+
+Charges were estimated using predefined rules based on atom types:
 
 $$
 q_i = 
@@ -191,38 +209,80 @@ $$
 \end{cases}
 $$
 
-The graph structure of the NetworkX graph obtained is summarized in [Table 1](#table-1)
+### 3.5 Graph structure and feature integration
 
-<a id="table-1"></a>
-**Table 1:** Protein Graph Representation
+The resulting NetworkX graph structure incorporated comprehensive protein representations as summarized in the following node and edge attribute framework:
 
-| Component | Attribute        | Description                                                                 |
-|-----------|------------------|-----------------------------------------------------------------------------|
-| Node      | `Node ID`        | Unique node identifier: `"chain_id:residue_name:residue_number"`            |
-| Node      | `chain_id`       | Protein chain identifier                                                    |
-| Node      | `residue_number` | Sequential position of the residue in the protein                           |
-| Node      | `residue_name`   | Three-letter amino acid code                                                |
-| Node      | `ss`             | Secondary structure class (DSSP code: H, E, B, G, T, S, ?)                   |
-| Node      | `has_backbone`   | Boolean indicating presence of backbone atoms (N, CA, C, O)                 |
-| Node      | `coords`         | 3D coordinates of the CA atom                                               |
-| Node      | `CA`, `N`, `C`, `O` | Optional atomic coordinates if available                                    |
-| Edge      | `kind`           | Type of connection: `{peptide_bond}` or `{contact}`                        |
-| Edge      | `distance`       | Distance between CA atoms for contact edges (Ångströms)                    |
+**Node Attributes:**
+- **Node ID**: Unique identifier following format "chain_id:residue_name:residue_number"
+- **Chain ID**: Protein chain identifier
+- **Residue Number**: Sequential position in protein
+- **Residue Name**: Three-letter amino acid code
+- **Secondary Structure**: DSSP classification (H, E, B, G, T, S, ?)
+- **Backbone Presence**: Boolean indicating availability of backbone atoms (N, CA, C, O)
+- **Coordinates**: 3D coordinates of CA atom
+- **Optional Atomic Coordinates**: Full atomic coordinates when available
+
+**Edge Attributes:**
+- **Connection Type**: Classification as {peptide_bond} or {contact}
+- **Distance**: C-alpha distances for contact edges (measured in Ångströms)
+
+### 3.6 Additional datasets for model validation and testing 
+
+In addition to the nanobody dataset, which we ultimately used to develop and test our models, we employed several additional datasets to enhance model comprehension and assess methodological limits.
+**Synthetic Graph Validation Dataset**:To isolate our core methodology from biological complexity, we developed a controlled validation framework using synthetic graphs with known, controllable properties. We generated 2,500 synthetic graphs across five topological structures (circles, stars, grids, crosses, and line structures) with 8-20 nodes per graph. Node features included amino acid type encoding (21-dimensional one-hot), color features (5 categories), physicochemical properties (size, charge, hydrophobicity), and structural features (coordinates, degree, clustering coefficient).
+**Biological Validation Datasets**: We also utilized the SCOP dataset [[10]](#ref10) for diagnostic classification experiments to assess our graph representation capabilities, and an additional dataset of fluorescent proteins (which we termed "fluobodies") from the protein data bank.
+
+### 3.7 Data quality
+
+Our nanobody-focused approach provided several methodological advantages including size consistency (~15kDa, 120-130 residues), high-resolution structural data from X-ray/cryo-EM sources, and consistent immunoglobulin fold architecture while maintaining functional diversity. However, the shared scaffold architecture and potential engineering bias toward stable conformations may limit generalization to diverse protein families.
+To support our methodological development, we employed additional datasets for different purposes: synthetic graphs with controlled topological properties to test our algorithms on simpler, known structures before tackling complex biological data, SCOP dataset entries for diagnostic classification experiments, and fluorescent proteins (fluobodies) as an alternative biological dataset. These limitations were considered acceptable for our methodological exploration phase focused on investigating generation techniques rather than comprehensive biological coverage.
+
+</div>
 
 
-## Data quality
+  
 
-For the first stage opf the project a datsset composed of nanobodies only was used. While this gave substantial advantages it carried also some limitations. Nanobodies are small in size ( ~15kDa, ~120-130 residues) but they maintain a consistenmt immunoglobulin fold architecture. They are naturally evolved, stable proteins which have been selected for proper folding and function, allowing the models to learn from biologically viable conformation. PDB nanobodiy structures are high-resolution X-ray or cryo-EM structures of high quality, this provides stable ground trith data for trainingm which is crucial for physics-informed approaches of common usew in the field. Despite their small size, nanobodies exhibit wide sequence and binding diversity while maintaining the same overall fold, exposing the models to functional variations without the complexity of completely different protein architecture. 
-While though nanobodies are diverse in sequence, they share the same immunoglobulin scaffold which could limit the generalizatiopn ability of the trained models, additionally many PDB nanobodies come from camelids or have been engineered for stability, potentially biasing the training data toward unusually stable conformations which may not represent typical protein behaviour. This could be a potential drwback for a physics informed neural network but it's not an applicable risk for this stage of the project focused primarily on the investigation of the different generation techniques from data preprocessed for a physics informed network. 
+  
+ 
+
+
+
+
+
 
 
 ## References
 
 <a id="ref1"></a>
-[1] Berman, H. M., Westbrook, J., Feng, Z., Gilliland, G., Bhat, T. N., Weissig, H., Shindyalov, I. N., & Bourne, P. E. (2000). The Protein Data Bank. Nucleic Acids Research, 28(1), 235-242. https://doi.org/10.1093/nar/28.1.235
+[1] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
 
 <a id="ref2"></a>
-[2] Chang A., Jeske L., Ulbrich S., Hofmann J., Koblitz J., Schomburg I., Neumann-Schaal M., Jahn D., Schomburg D. BRENDA, the ELIXIR core data resource in 2021: new developments and updates. (2021), Nucleic Acids Res., 49:D498-D508. DOI: 10.1093/nar/gkaa1025 PubMed: 33211880
+[2] Graphein - a Python Library for Geometric Deep Learning and Network Analysis on Protein Structures
+Arian R. Jamasb, Pietro Lió, Tom L. Blundell
+bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 
 <a id="ref3"></a>
-[3] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
+[3] Google Colab. (2017). Colaboratory: A Google research project. Google Research. https://colab.research.google.com/
+
+<a id="ref4"></a>
+[4] UBELIX (https://www.id.unibe.ch/hpc), the HPC cluster at the University of Bern.
+
+<a id="ref5"></a>
+[5] Biewald, L. (2020). Experiment tracking with Weights and Biases. Software available from wandb.com. URL: https://www.wandb.com/
+
+<a id="ref6"></a>
+[6] Casual Labs. (2025). GRAN-Nanobody-Proteins Dataset. Hugging Face. https://huggingface.co/Casual-Labs/gran-nanobody-proteins
+
+<a id="ref7"></a>
+[7] Berman, H. M., Westbrook, J., Feng, Z., Gilliland, G., Bhat, T. N., Weissig, H., Shindyalov, I. N., & Bourne, P. E. (2000). The Protein Data Bank. Nucleic Acids Research, 28(1), 235-242. https://doi.org/10.1093/nar/28.1.235
+
+<a id="ref8"></a>
+[8] Chang A., Jeske L., Ulbrich S., Hofmann J., Koblitz J., Schomburg I., Neumann-Schaal M., Jahn D., Schomburg D. BRENDA, the ELIXIR core data resource in 2021: new developments and updates. (2021), Nucleic Acids Res., 49:D498-D508. DOI: 10.1093/nar/gkaa1025 PubMed: 33211880
+
+<a id="ref9"></a>
+[9] Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 https://doi.org/10.1093/bioinformatics/btp163 pmid:19304878
+
+<a id="ref10"></a>
+[10] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
+
