@@ -261,14 +261,11 @@ The situation becomes even more complex when the contact matrices are truncated 
 
 #### Gradient-Based Optimization
 
-The optimization process itself takes place in a second stage, and is based on the prototypes obtained earlier. 
-
-The results obtained differ greatly from the first prototypes:
-<ol type="1">
-<li>Mean absolute error is greatly reduced; error curves drop significantly between 0 and 20% coverage; in the case of protein, a plateau is reached around 60% coverage;</li>
-<li>The width of the beam of curves (figure TC) indicates that the number of domains has a significant impact on the quality of reconstructions; the more contact matrices there are, the better the reconstruction;</li>
-<li>The best prototypes do not give the best reconstructions: partitioning by percentiles is often the most efficient, while partitioning by minima is not very efficient, if not clearly inefficient.</li>
-</ol>
+Our systematic analysis revealed significant improvements over MDS prototypes:
+- **Error Reduction**: Mean absolute error greatly reduced with significant improvement between 0-20% coverage
+- **Coverage Optimization**: For protein structures, performance plateaued around 60% coverage
+- **Domain Number Impact**: More contact matrix domains consistently improved reconstruction quality
+- **Partitioning Strategy Reversal**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
 
 ![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
 
