@@ -57,6 +57,7 @@ We present a comprehensive methodological exploration of computational approache
   - [Optimization Pipeline](#optimization-pipeline)
     - [MDS pipeline](#mds-pipeline)
     - [Gradient-Based Optimization](#gradient-based-optimization)
+  - [Empirical Parameters](#empirical-parameters)
   - [Model](#model)
   - [Results](#results)
 - [References](#references)
@@ -269,6 +270,14 @@ The results obtained differ greatly from the first prototypes:
 </ol>
 
 ![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
+
+### Empirical Parameters
+
+The previous comparative study gives us an empirical framework for defining some important process parameters:
+<ol type="-">
+  <li>Chunk length : the best results are found above 60% coverage; consequently, the length of the subsequences should be between 30% and 100% of the maximum length studied; this also implies constraints on the training dataset: the length of the shortest chain should correspond to 30% of the longest chain;</li>
+  <li>Contact maps boundaries : the 6-domain percentile partitioning is used.</li>
+</ol>
 
 ### Model
 
