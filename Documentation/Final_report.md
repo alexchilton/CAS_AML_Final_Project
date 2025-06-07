@@ -269,14 +269,18 @@ Our systematic analysis revealed significant improvements over MDS prototypes:
 
 ![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
 
-### Empirical Parameters and Datasets
+### Empirical Parameter Optimization:
+Our comparative study established an empirical framework for critical process parameters:
 
-The previous comparative study gives us an empirical framework for defining some important process parameters:
-<ol type="-">
-  <li>Chunk length : the best results are found above 60% coverage; consequently, the length of the subsequences should be between 30% and 100% of the maximum length studied;</li>
-  <li>Chunk length implies constraints on the training dataset itself: the length of the shortest chain should correspond to 30% of the longest chain;</li>
-  <li>Contact maps boundaries : the 6-domain percentile partitioning is used.</li>
-</ol>
+*Chunk Length Optimization:*
+- Optimal results achieved above 60% coverage
+- Consequently, subsequence length should be 30% at least of maximum studied length
+- Training dataset constraint: shortest chain length should correspond to 30% at least of longest chain
+
+*Contact Domain Configuration:*
+- 6-domain percentile partitioning identified as optimal
+- Balances reconstruction accuracy with computational efficiency
+- Provides consistent performance across different structure types
 
 ### Model
 
