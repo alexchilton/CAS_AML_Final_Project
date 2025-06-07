@@ -286,6 +286,8 @@ Our comparative study established an empirical framework for critical process pa
 
 ### Results
 
+![Fluoprotein reconstruction](figures/FLUOPROTEIN_result.png)
+
 ## References
 
 <a id="ref1"></a>
