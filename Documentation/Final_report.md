@@ -269,7 +269,8 @@ Our systematic analysis revealed significant improvements over MDS prototypes:
 
 ![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
 
-### Empirical Parameter Optimization:
+### Empirical Parameter Optimization
+
 Our comparative study established an empirical framework for critical process parameters:
 
 *Chunk Length Optimization:*
