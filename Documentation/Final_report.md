@@ -57,7 +57,8 @@ We present a comprehensive methodological exploration of computational approache
   - [Optimization Pipeline](#optimization-pipeline)
     - [MDS pipeline](#mds-pipeline)
     - [Gradient-Based Optimization](#gradient-based-optimization)
-  - [Empirical Parameters](#empirical-parameters)
+  - [Empirical Parameters and Datasets](#empirical-parameters-and-datasets)
+  - [Datasets](#datasets)
   - [Model](#model)
   - [Results](#results)
 - [References](#references)
@@ -271,7 +272,7 @@ The results obtained differ greatly from the first prototypes:
 
 ![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
 
-### Empirical Parameters
+### Empirical Parameters and Datasets
 
 The previous comparative study gives us an empirical framework for defining some important process parameters:
 <ol type="-">
