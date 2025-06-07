@@ -52,6 +52,7 @@ We present a comprehensive methodological exploration of computational approache
   - [Synthetic datasets](#synthetic-datasets)
   - [Protein Structure Preprocessing](#protein-structure-preprocessing)
 - [Data quality](#data-quality)
+- [Protein structural reconstruction with Gradient-Based Optimization](#protein-structure-reconstruction)
 - [References](#references)
 
 <div style="page-break-after: always;"></div>
@@ -215,6 +216,9 @@ The graph structure of the NetworkX graph obtained is summarized in [Table 1](#t
 For the first stage opf the project a datsset composed of nanobodies only was used. While this gave substantial advantages it carried also some limitations. Nanobodies are small in size ( ~15kDa, ~120-130 residues) but they maintain a consistenmt immunoglobulin fold architecture. They are naturally evolved, stable proteins which have been selected for proper folding and function, allowing the models to learn from biologically viable conformation. PDB nanobodiy structures are high-resolution X-ray or cryo-EM structures of high quality, this provides stable ground trith data for trainingm which is crucial for physics-informed approaches of common usew in the field. Despite their small size, nanobodies exhibit wide sequence and binding diversity while maintaining the same overall fold, exposing the models to functional variations without the complexity of completely different protein architecture. 
 While though nanobodies are diverse in sequence, they share the same immunoglobulin scaffold which could limit the generalizatiopn ability of the trained models, additionally many PDB nanobodies come from camelids or have been engineered for stability, potentially biasing the training data toward unusually stable conformations which may not represent typical protein behaviour. This could be a potential drwback for a physics informed neural network but it's not an applicable risk for this stage of the project focused primarily on the investigation of the different generation techniques from data preprocessed for a physics informed network. 
 
+## Protein Structure Reconstruction using Gradient-Based Optimization
+
+text to come here
 
 ## References
 
