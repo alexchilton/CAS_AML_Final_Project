@@ -228,7 +228,7 @@ While though nanobodies are diverse in sequence, they share the same immunoglobu
 
 ### Optimization Pipeline
 
-The optimization pipeline, designed to “reconstruct” a 3d structure close to the original, gives variable results depending on the type of data on the one hand, and, on the other, on how the data is broken down into contact matrices. Part of our study focuses specifically on this point, in order to understand how the quality of reconstructions changes, and under what conditions. This insight will be helpful for choosing the right parameters for data preparation.
+The optimization pipeline, designed to “reconstruct” a 3d structure close to the original, gives variable results depending on the type of data on the one hand, and, on the other, on how the data is broken down into contact matrices. Part of our study focuses specifically on this point, in order to understand how the quality of reconstructions changes, and under what conditions. This will give us a first empirical framework for parameters definition.
 
 Sample preliminary tests were carried out with three distinct spatial structures: a homogeneous point cloud, a heterogeneous cloud and a nanoprotein. These structures are identical in length (120 points), and comparable in scale (approx. 35 distance units). Their spatial distribution differs: uniform, clustered and “organic”.
 
