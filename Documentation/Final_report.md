@@ -230,7 +230,11 @@ While though nanobodies are diverse in sequence, they share the same immunoglobu
 
 #### MDS pipeline
 
+![MDS reconstruction accuracy](figures/mds_accuracy_grid.png)
+
 #### Gradient-Based Optimization
+
+![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
 
 ### Model
 
