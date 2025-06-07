@@ -249,14 +249,6 @@ The specific distribution of each structure leads us to consider several approac
   <li><u>Structural</u>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.</li>
 </ol>
 
-As mentioned above, the optimization process consists of two distinct stages: 
-<ol type="1">
-  <li>data prototyping using MDS</li>
-  <li>prototype optimization using gradients</li> 
-</ol>
-
-These two steps are shortly discussed below.
-
 #### MDS pipeline
 
 Our analysis revealed that coordinate recovery was straightforward when complete distance matrices were available, with Multidimensional Scaling achieving extremely low error (MAE = 0.0000 for uniform structures) in very short process time. However, when using contact matrices with information loss, MDS relied on prototype distance matrices based on random sampling from contact domains. We found that:
