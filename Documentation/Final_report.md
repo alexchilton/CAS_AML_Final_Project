@@ -57,7 +57,7 @@ We present a comprehensive methodological exploration of computational approache
   - [Optimization Pipeline](#optimization-pipeline)
     - [MDS pipeline](#mds-pipeline)
     - [Gradient-Based Optimization](#gradient-based-optimization)
-  - [Empirical Parameters and Datasets](#empirical-parameters-and-datasets)
+  - [Empirical Parameter Optimization](#empirical-parameter-optimization)
   - [Datasets](#datasets)
   - [Model](#model)
   - [Results](#results)
