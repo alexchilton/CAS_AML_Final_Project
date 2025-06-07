@@ -240,9 +240,9 @@ The specific distribution of each structure leads us to consider several approac
 </ol>
 
 As mentioned above, the optimization process consists of two distinct stages: 
-<ol>
-  <li>(1) data prototyping using MDS</li>
-  <li>(2) prototype optimization using gradients</li> 
+<ol type="1">
+  <li>data prototyping using MDS</li>
+  <li>prototype optimization using gradients</li> 
 </ol>
 
 These two steps are shortly discussed below.
