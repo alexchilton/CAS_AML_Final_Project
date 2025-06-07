@@ -286,7 +286,7 @@ Our comparative study established an empirical framework for critical process pa
 
 ### Results
 
-<img src="./figures/NANOBODIES%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 700px;">
+<img src="./figures/NANOBODIES%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
 
 <img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
