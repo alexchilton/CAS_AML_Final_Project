@@ -3,7 +3,7 @@
 <span style="font-size: 0.8em;">alex_chilton@gmx.co.uk</span>   
 
 **Lauro Foletti**  
-<span style="color: gray; font-size: 0.8em;">(addresse)</span>   
+<span style="color: gray; font-size: 0.8em;">rue de la Balance 1</br>CH &mdash; 2000 Neuchâtel</span>   
 <span style="font-size: 0.8em;">lauro.foletti@gmail.com</span> 
 
 **Lara Nonis**  
