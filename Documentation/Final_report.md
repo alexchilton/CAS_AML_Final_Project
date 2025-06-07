@@ -233,9 +233,11 @@ The optimization pipeline, designed to “reconstruct” a 3d structure close to
 Preliminary tests were carried out with three distinct spatial structures: a homogeneous point cloud, a heterogeneous cloud and a nanoprotein. These structures are identical in length (120 points), and comparable in scale (approx. 35 distance units). Their spatial distribution differs: uniform, clustered and “organic”.
 
 The specific distribution of each structure leads us to consider several approaches to domain partitioning : 
-a. <u>Percentiles</u>. A quantitative boundary ensures the homogeneous distribution of contacts between domains;
-b. <u>Sectors</u>. Qualitative demarcation, distributing distances between sectors of equal width;
-c. <u>Structural</u>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.
+<ol type="a">
+  <li><u>Percentiles</u>. A quantitative boundary ensures the homogeneous distribution of contacts between domains;</li>
+  <li><u>Sectors</u>. Qualitative demarcation, distributing distances between sectors of equal width;</li>
+  <li><u>Structural</u>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.</li>
+</ol>
 
 As mentioned above, the optimization process consists of two distinct stages: (1) data prototyping using MDS and (2) prototype optimization using gradients. These two steps are shortly discussed below.
 
