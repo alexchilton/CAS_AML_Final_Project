@@ -249,6 +249,12 @@ These two steps are shortly discussed below.
 
 #### MDS pipeline
 
+Coordinate recovery is easy when complete distance matrices are available, expressing all relationships. In this case, a simple dimensionality reduction using MDS is all that's needed to recover a three-dimensional expression close to the basic structure, with a sometimes undetectable error (MAE = 0.0000 in the case of the uniform blob); this operation is extremely fast on our small matrices.
+
+The situation becomes more complex when the basic data is expressed in the form of contact matrices, with a consequent loss of information. MDS then relies on a prototype version of the distance matrix, based on random values taken from the corresponding domains. The error then increases rapidly, but varies according to the domain partition. For all 3 structures, partitioning into sectors of identical width gives the best results, closely followed by partitioning into percentiles, while structural partitioning gives the least accurate results.
+
+The situation becomes even more complex when the contact matrices are truncated and the information partial. The error increases significantly, but partition differences have less impact on the results. Generally speaking, and unsurprisingly, the quality of reconstructions depends mainly on bandwidth. The type of partitioning plays a secondary role, which is clearly visible in some cases: minima partitioning achieves significantly better results for all 3 structures when coverage is below 70%. Above 90% coverage, partitioning by distance gives the best results. The number of partitions plays only a minor role.
+
 ![MDS reconstruction accuracy](figures/mds_accuracy_grid.png)
 
 #### Gradient-Based Optimization
