@@ -133,12 +133,12 @@ To support our methodological development, we employed additional datasets for d
 
 ### 6.1 Parsing
 
-PDB files were parsed using Biopython [[13]](#ref13). We evaluated several parsing strategies considering atoms only and their position, aminoacid types and the neighborhood informations (number of surrounding aminoacids with average and max distance). Additional small molecules and external groups were removed, to focus on the protein structure only. Distances and positions in the 3D space were computed through the alpha carbon mapped with the amino acid mass to have additional information on the residue in a specific position, with relatively small dataframes. The so obtained matrices were converted in graphs.
+PDB files were parsed using BioPython [[13]](#ref13). We evaluated several parsing strategies considering atoms only and their position, aminoacid types and the neighborhood informations (number of surrounding aminoacids with average and max distance). Additional small molecules and external groups were removed, to focus on the protein structure only. Distances and positions in the 3D space were computed through the alpha carbon mapped with the amino acid mass to have additional information on the residue in a specific position, with relatively small dataframes. The so obtained matrices were converted in graphs and compared to the original molecular representation by PyMOL [[14]](#ref14).
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_a.png" alt="First parsing" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 1:</strong> Comparison between molecular and graph-based representations of the same protein structure. Left: PyMOL molecular visualization showing secondary structure elements. Right: NetworkX graph representation displaying nodes (residues) connected by spatial proximity edges. The graph representation captures overall protein connectivity but does not clearly preserve the distinct secondary structure organization visible in the molecular model, illustrating the information loss during graph conversion..
+    <strong>Figure 1:</strong> Comparison between molecular and graph-based representations of the same protein structure. Left: PyMOL  molecular visualization showing secondary structure elements. Right: NetworkX graph representation displaying nodes (residues) connected by spatial proximity edges. The graph representation captures overall protein connectivity but does not clearly preserve the distinct secondary structure organization visible in the molecular model, illustrating the information loss during graph conversion..
   </p>
 </div>
 
@@ -167,7 +167,7 @@ Upon success of the single chain strategy the same logic was implemented into th
 
 ### 6.2 Preprocessing and feature engineering 
 
-Using BioPython [[13]](#ref13), we parsed the structures at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form: 
+Using BioPython, we parsed the structures at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form: 
 
 $$
 a_i = (\text{chain\_id}, r_i, t_i, a_i^n, e_i, \vec{x}_i)
@@ -180,7 +180,7 @@ where:
 - $e_i$ is the element,
 - $\vec{x}_i \in \mathbb{R}^3$ is the atomic position.
 
-Residue-level secondary structures were computed using DSSP [[14]](#ref14), resulting in a mapping:
+Residue-level secondary structures were computed using DSSP, resulting in a mapping:
 
 $$
 (r_i, \text{chain\_id}) \mapsto s_i \in \{H, E, C, G, I, T, S, ?\}
@@ -277,7 +277,7 @@ In addition to the nanobody dataset, which we ultimately used to develop and tes
 
 **Synthetic Graph Validation Dataset**:To isolate our core methodology from biological complexity, we developed a controlled validation framework using synthetic graphs with known, controllable properties. We generated 2,500 synthetic graphs across five topological structures (circles, stars, grids, crosses, and line structures) with 8-20 nodes per graph. Node features included amino acid type encoding (21-dimensional one-hot), color features (5 categories), physicochemical properties (size, charge, hydrophobicity), and structural features (coordinates, degree, clustering coefficient).  
 
-**Biological Validation Datasets**: We also utilized the SCOP dataset [[14]](#ref14) for diagnostic classification experiments to assess our graph representation capabilities, and an additional dataset of fluorescent proteins (which we termed "fluobodies") from the protein data bank.
+**Biological Validation Datasets**: We also utilized the SCOP dataset [[15]](#ref15) for diagnostic classification experiments to assess our graph representation capabilities, and an additional dataset of fluorescent proteins (which we termed "fluobodies") from the protein data bank.
 
 </div>
 
@@ -311,7 +311,6 @@ VAEs have shown success in molecular generation tasks, and the graph structure s
 <a id="ref5"></a>
 [5] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
 
-
 <a id="ref6"></a>
 [6] Graphein - a Python Library for Geometric Deep Learning and Network Analysis on Protein Structures
 Arian R. Jamasb, Pietro Lió, Tom L. Blundell
@@ -339,7 +338,11 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 [13] Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 https://doi.org/10.1093/bioinformatics/btp163 pmid:19304878
 
 <a id="ref14"></a>
-[14] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
+[14] PyMOL, The PyMOL Molecular Graphics System, Version 3.0 Schrödinger, LLC.
+
+
+<a id="ref15"></a>
+[15] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
 
 
 
