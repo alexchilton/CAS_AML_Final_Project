@@ -163,8 +163,6 @@ Ultimately the proteins were preprocessed in different steps, identifying the al
 
 Upon success of the single chain strategy the same logic was implemented into the final preprocessing to graphs and associated dictionaries. 
 
-</div>
-
 ### 6.2 Preprocessing and feature engineering 
 
 Using BioPython, we parsed the structures at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form: 
@@ -283,6 +281,8 @@ In addition to the nanobody dataset, which we ultimately used to develop and tes
 
 ## 7. Model flow
 
+<div style="text-align: justify;">
+
 Building upon our systematic preprocessing foundation, we explored multiple computational approaches to protein structure generation. These explorations encompassed both theoretical innovations and practical implementations, ranging from contact map-based representations to advanced graph neural network architectures. Each approach was designed to address specific challenges in protein structure generation while building upon insights gained from previous attempts.
 
 ### 7.1 Graph Variational Autoencoder (GraphVAE)
@@ -331,7 +331,7 @@ Where:
 
 The training involved a learning rate schedule with a reduction factor of 0.5 and 3-epochs patience. Gradient clipping was applied with max_norm=0.1 to prevent the exploding gradient issue. 
 
-For the generator part we used latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ with temperature scaling 
+For the generator part we used latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ with temperature scaling (NOTE FOR LARA: continue from here)
 
 
 **Main benefits**:  
@@ -347,7 +347,7 @@ Unlike traditional VAEs operating on fixed size inputs, our architecture handled
 
 
 
-
+</div>
 
 ## References
 
@@ -355,14 +355,13 @@ Unlike traditional VAEs operating on fixed size inputs, our architecture handled
 [1] Nelson, David L., and Michael M. Cox. Lehninger Principles of Biochemistry. 6th ed. W. H. Freeman, 2012.
 
 <a id="ref2"></a>
-[2]Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., ... & Chintala, S. (2019). PyTorch: An imperative style, high-performance deep learning library. Advances in neural information processing systems, 32.
+[2] Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., ... & Chintala, S. (2019). PyTorch: An imperative style, high-performance deep learning library. Advances in neural information processing systems, 32.
 
 <a id="ref3"></a>
 [3] Fey, M., & Lenssen, J. E. (2019). Fast graph representation learning with PyTorch Geometric. arXiv preprint arXiv:1903.02428.
 
 <a id="ref4"></a>
-[4]Aric A. Hagberg, Daniel A. Schult and Pieter J. Swart, “Exploring network structure, dynamics, and function using NetworkX”, in Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15, Aug 2008
-
+[4] Aric A. Hagberg, Daniel A. Schult and Pieter J. Swart, “Exploring network structure, dynamics, and function using NetworkX”, in Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15, Aug 2008
 
 <a id="ref5"></a>
 [5] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
@@ -396,20 +395,25 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 <a id="ref14"></a>
 [14] PyMOL, The PyMOL Molecular Graphics System, Version 3.0 Schrödinger, LLC.
 
-
 <a id="ref15"></a>
 [15] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
 
 <a id="ref16"></a>
-[16]De Cao, Nicola & Kipf, Thomas. (2018). MolGAN: An implicit generative model for small molecular graphs. 10.48550/arXiv.1805.11973. 
+[16] De Cao, Nicola & Kipf, Thomas. (2018). MolGAN: An implicit generative model for small molecular graphs. 10.48550/arXiv.1805.11973. 
 
 <a id="ref17"></a>
-[17]Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
+[17] Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
+
+<div style="page-break-after: always;"></div>
 
 ## List of Figures
 
+<div style="page-break-after: always;"></div>
+
 
 ## List of Tables
+
+<div style="page-break-after: always;"></div>
 
 
 ## Appendix
