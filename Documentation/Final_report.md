@@ -3,7 +3,7 @@
 <span style="font-size: 0.8em;">alex_chilton@gmx.co.uk</span>   
 
 **Lauro Foletti**  
-<span style="color: gray; font-size: 0.8em;">(addresse)</span>   
+<span style="color: gray; font-size: 0.8em;">Rue de la Balance 1</br>CH &mdash; 2000 Neuchâtel</span>   
 <span style="font-size: 0.8em;">lauro.foletti@gmail.com</span> 
 
 **Lara Nonis**  
@@ -46,6 +46,7 @@ We present a comprehensive methodological exploration of computational approache
   - [1.1 Biological and computational context](#11-biological-and-computational-context)
   - [1.2 Project objectives and evolution](#12-project-objectives-and-evolution)
   - [1.3 Methodological framework](#13-methodological-framework)
+<<<<<<< HEAD
 - [2. Infrastructure and development environment](#2-infrastructure-and-development-environment)
 - [3. Data](#3-data)
   - [3.1 Primary data source](#31-primary-data-source)
@@ -58,6 +59,23 @@ We present a comprehensive methodological exploration of computational approache
 - [4. Methodological exploration](#4-methodological-exploration)
   - [4.1 Simple graph attention network VAE architecture](#41-simple-graph-attention-network-vae-architecture)
   - [4.3 Graph neural network exploration and validation framework](#43-graph-neural-network-exploration-and-validation-framework)
+=======
+- [System requirements](#system-requirements)
+- [Data](#data)
+  - [Webscrapring](#webscrapring)
+  - [Synthetic datasets](#synthetic-datasets)
+  - [Protein Structure Preprocessing](#protein-structure-preprocessing)
+- [Data quality](#data-quality)
+- [Protein structure prediction](#protein-structure-prediction)
+  - [General architecture](#general-architecture)
+  - [Optimization Pipeline](#optimization-pipeline)
+    - [MDS pipeline](#mds-pipeline)
+    - [Gradient-Based Optimization](#gradient-based-optimization)
+  - [Empirical Parameter Optimization](#empirical-parameter-optimization)
+  - [Datasets](#datasets)
+  - [Model](#model)
+  - [Results](#results)
+>>>>>>> e71b421a070526c1f677974fc14054cf52aeeadd
 - [References](#references)
 
 <div style="page-break-after: always;"></div>
@@ -253,6 +271,76 @@ graph structure seemed well-suited to capture protein spatial relationships.
 
 
 
+## Protein Structure Prediction
+
+### General architecture
+
+### Optimization Pipeline
+
+The preliminary encoding of distance matrices into contact matrices involves a significant loss of information. Continuous values are eliminated in favor of indicative binary values, reducing them to very rough approximations. Under certain conditions, however, these approximations can be combined in such a way as to recover close original values, making the encoding process partially - and surprisingly, reversible. The binary and categorical aspect of contact matrices can be directly assimilated to probability mass distributions, enabling the use of sigmoids for optimization.
+
+Interesting results were obtained with combining two operations: 
+
+1.	Logit initialization. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these three values constitute a first approximation of the 3D coordinates and are used to initialize a table of logits;
+
+2.	Optimization. Logits are fed into an optimization loop, which translates them into relative distances and compares them with contact information. This optimization process relies entirely on a double sigmoid which “validates” the proposed values when they fall within the expected range, and penalizes them when they fall outside it, all in a continuous and differentiable manner (soft ranges). Proposed values are compared with target values by BCE.
+
+3.	The process returns a set of three-dimensional coordinates whose relative distances correspond as closely as possible to the contact maps.
+
+Sample preliminary tests were carried out with three distinct spatial structures: a homogeneous point cloud, a heterogeneous cloud and a nanoprotein. These structures are identical in length (120 points), and comparable in scale (approx. 35 distance units). Their spatial distribution differs: uniform, clustered and “organic”.
+
+The specific distribution of each structure leads us to consider several approaches to domain partitioning : 
+<ol type="a">
+  <li><u>Percentiles</u>. A quantitative boundary ensures the homogeneous distribution of contacts between domains;</li>
+  <li><u>Sectors</u>. Qualitative demarcation, distributing distances between sectors of equal width;</li>
+  <li><u>Structural</u>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.</li>
+</ol>
+
+#### MDS pipeline
+
+Our analysis revealed that coordinate recovery was straightforward when complete distance matrices were available, with Multidimensional Scaling achieving extremely low error (MAE = 0.0000 for uniform structures) in very short process time. However, when using contact matrices with information loss, MDS relied on prototype distance matrices based on random sampling from contact domains. We found that:
+- Partitioning into sectors of identical width gave optimal results
+- Percentile partitioning followed closely in performance  
+- Structural partitioning yielded least accurate results
+  
+![MDS reconstruction accuracy](figures/mds_accuracy_grid.png)
+
+#### Gradient-Based Optimization
+
+Our systematic analysis revealed significant improvements over MDS prototypes using Gradient-Based Optimization:
+- **Error Reduction**: Mean absolute error greatly reduced with significant improvement between 0-20% coverage
+- **Coverage Optimization**: For protein structures, performance plateaued around 60% coverage
+- **Domain Number Impact**: More contact matrix domains consistently improved reconstruction quality
+- **Partitioning Strategy Reversal**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
+
+![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
+
+### Empirical Parameter Optimization
+
+Our comparative study established an empirical framework for critical process parameters:
+
+*Chunk Length Optimization:*
+- Optimal results achieved above 60% coverage
+- Consequently, subsequence length should be 30% at least of maximum studied length
+- Training dataset constraint: shortest chain length should correspond to 30% at least of longest chain
+
+*Contact Domain Configuration:*
+- 6-domain percentile partitioning identified as optimal
+- Balances reconstruction accuracy with computational efficiency
+- Provides consistent performance across different structure types
+
+### Model
+
+### Results
+
+<img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein lengths" style="width: 700px;">
+<img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
+
+<img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
+<img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Ground truth" style="width: 1200px;">
+<img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Ground truth" style="width: 1200px;">
+
+<img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
 ## References
 
@@ -265,6 +353,7 @@ Arian R. Jamasb, Pietro Lió, Tom L. Blundell
 bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 
 <a id="ref3"></a>
+<<<<<<< HEAD
 [3] Google Colab. (2017). Colaboratory: A Google research project. Google Research. https://colab.research.google.com/
 
 <a id="ref4"></a>
@@ -288,3 +377,6 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 <a id="ref10"></a>
 [10] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
 
+=======
+[3] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
+>>>>>>> e71b421a070526c1f677974fc14054cf52aeeadd
