@@ -49,24 +49,15 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [3. Data](#3-data)
 - [4. Metadata](#4-metadata)
 - [5. Data quality](#5-data-quality)
-- [6. Project flow](#6-project-flow)
+- [6. Data flow](#6-data-flow)
   - [6.1 Parsing](#61-parsing)
-  - [3.2 Preprocessing and feature engineering](#32-preprocessing-and-feature-engineering)
-  - [3.3 Geometric feature engineering and structural analysis](#33-geometric-feature-engineering-and-structural-analysis)
-  - [3.4 Physicochemical property integration:](#34-physicochemical-property-integration)
-  - [3.5 Graph structure and feature integration](#35-graph-structure-and-feature-integration)
-  - [3.6 Additional datasets for model validation and testing](#36-additional-datasets-for-model-validation-and-testing)
-- [4. Methodological exploration](#4-methodological-exploration)
-  - [4.1 Simple graph attention network VAE architecture](#41-simple-graph-attention-network-vae-architecture)
-  - [4.3 Graph neural network exploration and validation framework](#43-graph-neural-network-exploration-and-validation-framework)
-- [Protein Structure Prediction](#protein-structure-prediction)
-  - [General architecture](#general-architecture)
-  - [Optimization Pipeline](#optimization-pipeline)
-    - [MDS pipeline](#mds-pipeline)
-    - [Gradient-Based Optimization](#gradient-based-optimization)
-  - [Empirical Parameter Optimization](#empirical-parameter-optimization)
-  - [Model](#model)
-  - [Results](#results)
+  - [6.2 Preprocessing and feature engineering](#62-preprocessing-and-feature-engineering)
+    - [6.2.1 Geometric feature engineering and structural analysis](#621-geometric-feature-engineering-and-structural-analysis)
+    - [6.2.2 Physicochemical property integration:](#622-physicochemical-property-integration)
+    - [6.2.3 Graph structure and feature integration](#623-graph-structure-and-feature-integration)
+  - [6.3 Additional datasets for model validation and testing](#63-additional-datasets-for-model-validation-and-testing)
+- [7. Model flow](#7-model-flow)
+  - [7.1 Graph Variational Autoencoder (GraphVAE)](#71-graph-variational-autoencoder-graphvae)
 - [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
@@ -113,8 +104,8 @@ The trained best model wand associated metadata will be made publicly available 
 
 <div style="text-align: justify;">
 
-Data were obtained from the Protein Data Bank (PDB) [[11]](#ref11) using the official API with carefully defined selection criteria.
-The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. In a secondary phase, we extended the pipeline to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[12]](#ref12) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features, envisioning subsequent phases of the project and the requirements of a PINN within a supervised learning framework. 
+Data were obtained from the RCSB Protein Data Bank (PDB) [[11]](#ref11) using the official API with carefully defined selection criteria. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. Search included multiple criteria to catch as many nanobodies as possible including among others the family (Camelidae), mentions (VHH) or labels. The script was designed to retrieve all matching strucures, handling pagination and downloading each PDB file (containing 3D protein structure data) individually.   
+In a secondary phase, we extended the pipeline to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[12]](#ref12) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features, envisioning subsequent phases of the project and the requirements of a PINN within a supervised learning framework. 
 
 </div>
 
@@ -136,55 +127,47 @@ To support our methodological development, we employed additional datasets for d
 
 </div>
 
-## 6. Project flow
+## 6. Data flow
 
 <div style="text-align: justify;">
 
 ### 6.1 Parsing
 
-PDB files were parsed using Biopython [[13]](#ref13). We evaluated several parsing strategies considering atoms only and their position, amino-acid types and the neighborhood informations (number of surrounding aminoacids with average and max distance). Additional small molecules and external groups were removed, to focus on the protein structure only. Distances and positions in the 3D space were computed through the position of the alpha carbon mapped with the amino-acid mass to have additional information on the aminoacid residue in that position, with relatively small dataframes. The so obtained frames were converted in graphs.
+PDB files were parsed using Biopython [[13]](#ref13). We evaluated several parsing strategies considering atoms only and their position, aminoacid types and the neighborhood informations (number of surrounding aminoacids with average and max distance). Additional small molecules and external groups were removed, to focus on the protein structure only. Distances and positions in the 3D space were computed through the alpha carbon mapped with the amino acid mass to have additional information on the residue in a specific position, with relatively small dataframes. The so obtained matrices were converted in graphs.
 
-<figure>
-  <img src="figures/figure_a.png" alt="Figure description">
-  <figcaption>Figure 1: Comparison between molecular and graph-based representations of the same protein structure. Left: PyMOL molecular visualization showing secondary structure elements. Right: NetworkX graph representation displaying nodes (residues) connected by spatial proximity edges. The graph representation captures overall protein connectivity but does not clearly preserve the distinct secondary structure organization visible in the molecular model, illustrating the information loss during graph conversion.  </figcaption>
-</figure>
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/figure_a.png" alt="First parsing" width="600">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 1:</strong> Comparison between molecular and graph-based representations of the same protein structure. Left: PyMOL molecular visualization showing secondary structure elements. Right: NetworkX graph representation displaying nodes (residues) connected by spatial proximity edges. The graph representation captures overall protein connectivity but does not clearly preserve the distinct secondary structure organization visible in the molecular model, illustrating the information loss during graph conversion..
+  </p>
+</div>
 
-Upon the first visualization we could observe among the mojor issues the existance of several chains, not belonging to the same proteins but being clusers instead, which were treated by the preprocessing as one molecule. We therefore prepocessed the pdb files to have indipendent chains (each representing one unique nanobody) and converted in heterogeneous graphs.   
-  
+Upon the first visualization we could observe among the issues the existance of several chains, not belonging to the same proteins but being clusers instead, which were treated by the preprocessing as one molecule. We therefore preprocessed the pdb files to have indipendent chains (each representing one unique nanobody) and converted in heterogeneous graphs.   
 
-<figure>
-  <img src="figures/figure_b.png" alt="Figure description">
-  <figcaption>Figure 2: Comparison of protein representation formats: NetworkX graph visualization (left) and PyMOL molecular structure (right) of the same nanobody. The graph format preserves connectivity and secondary structure patterns while simplifying atomic detail.  </figcaption>
-</figure>
-
-Ultimately the proteins were preprocessed in different steps, identifying the alpha carbon first, mapping the amino-acid types and the respective coordinates and computing the non-covalent intereactions. The reconstruction can be visualized in the following 3D representation:
-
-<figure>
-  <img src="figures/figure_c.png" alt="Figure description">
-  <figcaption>Figure 3: 3D visualization of a protein structure showing amino acid residues as colored spheres according to type, connected by backbone bonds (gray lines) and non-covalent interactions (pink dashed lines). The compact, folded structure demonstrates typical protein architecture with diverse amino acid types distributed throughout the 3D space.  </figcaption>
-</figure>
-
-
-
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/figure_b.png" alt="Second parsing" width="600">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 2:</strong> Comparison of protein representation formats: NetworkX graph visualization (left) and PyMOL molecular structure (right) of the same nanobody. The graph format preserves connectivity and secondary structure patterns while simplifying atomic detail..
+  </p>
 </div>
 
 
+Ultimately the proteins were preprocessed in different steps, identifying the alpha carbon first, mapping the amino-acid types and the respective coordinates and computing the non-covalent intereactions. The reconstruction can be visualized in the following 3D representation:
 
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/figure_c.png" alt="3D protein structure" width="600">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 3:</strong> 3D visualization of a protein structure showing amino acid residues as colored spheres according to type, connected by backbone bonds (gray lines) and non-covalent interactions (pink dashed lines). The compact, folded structure demonstrates typical protein architecture with diverse amino acid types distributed throughout the 3D space.
+  </p>
+</div>
 
+Upon success of the single chain strategy the same logic was implemented into the final preprocessing to graphs and associated dictionaries. 
 
+</div>
 
+### 6.2 Preprocessing and feature engineering 
 
-
-
-
-
-
-
-
-
-### 3.2 Preprocessing and feature engineering 
-
-Using BioPython [[9]](#ref9), we parsed the structures at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form: 
+Using BioPython [[13]](#ref13), we parsed the structures at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form: 
 
 $$
 a_i = (\text{chain\_id}, r_i, t_i, a_i^n, e_i, \vec{x}_i)
@@ -197,7 +180,7 @@ where:
 - $e_i$ is the element,
 - $\vec{x}_i \in \mathbb{R}^3$ is the atomic position.
 
-Residue-level secondary structures were computed using DSSP [[4]](#ref4), resulting in a mapping:
+Residue-level secondary structures were computed using DSSP [[14]](#ref14), resulting in a mapping:
 
 $$
 (r_i, \text{chain\_id}) \mapsto s_i \in \{H, E, C, G, I, T, S, ?\}
@@ -211,9 +194,9 @@ $$
 \|\vec{x}_i^{CA} - \vec{x}_j^{CA}\|_2 < \delta \quad \text{with} \quad \delta = 7.0\,\text{\AA}
 $$
 
-### 3.3 Geometric feature engineering and structural analysis
+#### 6.2.1 Geometric feature engineering and structural analysis
 
-To characterize the 3D conformation of th protein chain we computed bond lengths, bond angles and torsion angles. These calculations were restricted to backbone atoms only (N, CA, C, O) to balance computational efficiency with essential structural information retention, though the underlying implementation was designed to support full-atom calculations for future extension.
+To characterize the 3D conformation of the protein chain we computed bond lengths, bond angles and torsion angles. These calculations were restricted to backbone atoms only (N, CA, C, O) to balance computational efficiency with essential structural information retention, though the underlying implementation was designed to support full-atom calculations for future extension.
 
 Bond lengths were defined as Euclidean distances between bonded atoms:
 
@@ -247,7 +230,7 @@ $$
 
 where $\vec{x}_i$, $\vec{x}_j$, $\vec{x}_k$, $\vec{x}_l$ were the 3D coordinates of the respective atoms. This formulation was applied uniformly across all torsion types.
 
-### 3.4 Physicochemical property integration:
+#### 6.2.2 Physicochemical property integration:
 
 Charges were estimated using predefined rules based on atom types:
 
@@ -270,7 +253,7 @@ $$
 \end{cases}
 $$
 
-### 3.5 Graph structure and feature integration
+#### 6.2.3 Graph structure and feature integration
 
 The resulting NetworkX graph structure incorporated comprehensive protein representations as summarized in the following node and edge attribute framework:
 
@@ -288,106 +271,27 @@ The resulting NetworkX graph structure incorporated comprehensive protein repres
 - **Connection Type**: Classification as {peptide_bond} or {contact}
 - **Distance**: C-alpha distances for contact edges (measured in Ångströms)
 
-### 3.6 Additional datasets for model validation and testing 
+### 6.3 Additional datasets for model validation and testing 
 
 In addition to the nanobody dataset, which we ultimately used to develop and test our models, we employed several additional datasets to enhance model comprehension and assess methodological limits.  
-**Synthetic Graph Validation Dataset**:To isolate our core methodology from biological complexity, we developed a controlled validation framework using synthetic graphs with known, controllable properties. We generated 2,500 synthetic graphs across five topological structures (circles, stars, grids, crosses, and line structures) with 8-20 nodes per graph. Node features included amino acid type encoding (21-dimensional one-hot), color features (5 categories), physicochemical properties (size, charge, hydrophobicity), and structural features (coordinates, degree, clustering coefficient).  
-**Biological Validation Datasets**: We also utilized the SCOP dataset [[10]](#ref10) for diagnostic classification experiments to assess our graph representation capabilities, and an additional dataset of fluorescent proteins (which we termed "fluobodies") from the protein data bank.
 
+**Synthetic Graph Validation Dataset**:To isolate our core methodology from biological complexity, we developed a controlled validation framework using synthetic graphs with known, controllable properties. We generated 2,500 synthetic graphs across five topological structures (circles, stars, grids, crosses, and line structures) with 8-20 nodes per graph. Node features included amino acid type encoding (21-dimensional one-hot), color features (5 categories), physicochemical properties (size, charge, hydrophobicity), and structural features (coordinates, degree, clustering coefficient).  
+
+**Biological Validation Datasets**: We also utilized the SCOP dataset [[14]](#ref14) for diagnostic classification experiments to assess our graph representation capabilities, and an additional dataset of fluorescent proteins (which we termed "fluobodies") from the protein data bank.
 
 </div>
 
-## 4. Methodological exploration 
+## 7. Model flow
 
 Building upon our systematic preprocessing foundation, we explored multiple computational approaches to protein structure generation. These explorations encompassed both theoretical innovations and practical implementations, ranging from contact map-based representations to advanced graph neural network architectures. Each approach was designed to address specific challenges in protein structure generation while building upon insights gained from previous attempts.
 
-### 4.1 Simple graph attention network VAE architecture
+### 7.1 Graph Variational Autoencoder (GraphVAE)
+
+VAEs have shown success in molecular generation tasks, and the graph structure seemed well-suited to capture protein spatial relationships.
 
 
 
 
-### 4.3 Graph neural network exploration and validation framework
-
-Building on our preprocessed graph representations, and in parallel to the feature map exploration we 
- 
-VAEs have shown success in molecular generation tasks, and the 
-graph structure seemed well-suited to capture protein spatial relationships. 
-
-
-
-
-
-
-## Protein Structure Prediction
-
-### General architecture
-
-### Optimization Pipeline
-
-The preliminary encoding of distance matrices into contact matrices involves a significant loss of information. Continuous values are eliminated in favor of indicative binary values, reducing them to very rough approximations. Under certain conditions, however, these approximations can be combined in such a way as to recover close original values, making the encoding process partially - and surprisingly, reversible. The binary and categorical aspect of contact matrices can be directly assimilated to probability mass distributions, enabling the use of sigmoids for optimization.
-
-Interesting results were obtained with combining two operations: 
-
-1.	Logit initialization. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these three values constitute a first approximation of the 3D coordinates and are used to initialize a table of logits;
-
-2.	Optimization. Logits are fed into an optimization loop, which translates them into relative distances and compares them with contact information. This optimization process relies entirely on a double sigmoid which “validates” the proposed values when they fall within the expected range, and penalizes them when they fall outside it, all in a continuous and differentiable manner (soft ranges). Proposed values are compared with target values by BCE.
-
-3.	The process returns a set of three-dimensional coordinates whose relative distances correspond as closely as possible to the contact maps.
-
-Sample preliminary tests were carried out with three distinct spatial structures: a homogeneous point cloud, a heterogeneous cloud and a nanoprotein. These structures are identical in length (120 points), and comparable in scale (approx. 35 distance units). Their spatial distribution differs: uniform, clustered and “organic”.
-
-The specific distribution of each structure leads us to consider several approaches to domain partitioning : 
-<ol type="a">
-  <li><u>Percentiles</u>. A quantitative boundary ensures the homogeneous distribution of contacts between domains;</li>
-  <li><u>Sectors</u>. Qualitative demarcation, distributing distances between sectors of equal width;</li>
-  <li><u>Structural</u>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.</li>
-</ol>
-
-#### MDS pipeline
-
-Our analysis revealed that coordinate recovery was straightforward when complete distance matrices were available, with Multidimensional Scaling achieving extremely low error (MAE = 0.0000 for uniform structures) in very short process time. However, when using contact matrices with information loss, MDS relied on prototype distance matrices based on random sampling from contact domains. We found that:
-- Partitioning into sectors of identical width gave optimal results
-- Percentile partitioning followed closely in performance  
-- Structural partitioning yielded least accurate results
-  
-![MDS reconstruction accuracy](figures/mds_accuracy_grid.png)
-
-#### Gradient-Based Optimization
-
-Our systematic analysis revealed significant improvements over MDS prototypes using Gradient-Based Optimization:
-- **Error Reduction**: Mean absolute error greatly reduced with significant improvement between 0-20% coverage
-- **Coverage Optimization**: For protein structures, performance plateaued around 60% coverage
-- **Domain Number Impact**: More contact matrix domains consistently improved reconstruction quality
-- **Partitioning Strategy Reversal**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
-
-![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
-
-### Empirical Parameter Optimization
-
-Our comparative study established an empirical framework for critical process parameters:
-
-*Chunk Length Optimization:*
-- Optimal results achieved above 60% coverage
-- Consequently, subsequence length should be 30% at least of maximum studied length
-- Training dataset constraint: shortest chain length should correspond to 30% at least of longest chain
-
-*Contact Domain Configuration:*
-- 6-domain percentile partitioning identified as optimal
-- Balances reconstruction accuracy with computational efficiency
-- Provides consistent performance across different structure types
-
-### Model
-
-### Results
-
-<img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein lengths" style="width: 700px;">
-<img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
-
-<img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
-<img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Ground truth" style="width: 1200px;">
-<img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Ground truth" style="width: 1200px;">
-
-<img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
 ## References
 
@@ -434,16 +338,8 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 <a id="ref13"></a>
 [13] Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 https://doi.org/10.1093/bioinformatics/btp163 pmid:19304878
 
-
-
-_______________________
-
-
-
-
-<a id="ref10"></a>
-[10] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
-
+<a id="ref14"></a>
+[14] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
 
 
 
