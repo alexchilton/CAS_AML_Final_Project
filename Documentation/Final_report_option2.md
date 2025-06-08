@@ -81,8 +81,8 @@ We initally conceptualized this project to develop a phisically informed neural 
 More specifically the preliminary studies involved:   
 - **Parsing of cristallographic / X-ray experimental data (PDB files)**: to extract meaningful information for the subsequent phases of the project;
 - **Preprocessing and pre-calculation**: of all the properties potentially required to describe the 3D structure of the protein and could play a role in the interaction with the environment;
+- **Models exploration**: with state of the art generative models commonly used in the chemical field or in the image processing environment. 
 - **Development of a loss function**: to constrain physically the neural network and drive the generation through biologically plausible structures
-- **Exploration of the generation techniques**: with state of the art generative models commonly used in the chemical field or in the image processing environment. 
 
 The present report will focus on the pre-studies leaving the ultimate goal for future development on the project. 
 
@@ -287,7 +287,63 @@ Building upon our systematic preprocessing foundation, we explored multiple comp
 
 ### 7.1 Graph Variational Autoencoder (GraphVAE)
 
-VAEs have shown success in molecular generation tasks, and the graph structure seemed well-suited to capture protein spatial relationships.
+VAEs have shown success in molecular generation tasks [[16]](#ref16) [[17]](#ref17), and the graph structure seemed well-suited to capture protein spatial relationships. 
+
+We built a custom GraphVAE following the standard variational auto-encoder structure with the following parameters: 
+- input: 8-dimensional node features representing physicochemical properties
+- hidden channels: 64-dimensional intermediate representations
+- latent space: 16-dimensional bottleneck latent space (z)
+- 4 attention heads for multi-head attention mechanism
+- 1 dimensional edge attribute (distances)
+
+The model was developed to handle variable-sized protein graphs without padding artifacts. The attention mechanism with 4 heads allowed the model to capture multiple types of relationships simultaneously within the protein structure.   
+
+We built the loss function as a composite element including reconstruction loss ($\mathcal{L}$ _recon), KL divergence loss ($\mathcal{L}$ _KL ) and rthogonal regularization ($\mathcal{L}$_ortho ). The reconstruction loss employed task-specific weighting to balance off different protein properties encoded in the graph structure. The KL parameter included a $\beta$-VAE with cyclical annealing to balance reconstruction quality and latent space organization with a warmup period t of 25 epochs: 
+
+$$
+\beta(t) = 
+\begin{cases}
+\beta_{\text{min}} + (\beta_{\text{max}} - \beta_{\text{min}}) \cdot \dfrac{t}{t_{\text{warmup}}} & \text{if } t < t_{\text{warmup}} \\
+\beta_{\text{max}} & \text{if } t \geq t_{\text{warmup}}
+\end{cases}
+$$
+
+the orthogonal regularization enforced normalization in the latent space representation: 
+
+$$
+\mu_{\text{normalized}} = \mathrm{F.normalize}(\mu, p=2, \text{dim}=1)
+$$
+
+$$
+C = \frac{\mu_{\text{normalized}}^\top \mu_{\text{normalized}}}{\text{batch\_size}}
+$$
+
+$$
+\mathcal{L}_{\text{ortho}} = \lambda_{\text{ortho}} \cdot \left\| C - I \right\|_F^2
+$$
+
+Where:
+
+- \( \lambda_{\text{ortho}} = 0.1 \): Orthogonality strength parameter  
+- \( C \): Correlation matrix of normalized latent means  
+- \( I \): Identity matrix  
+- \( \left\| \cdot \right\|_F \): Frobenius norm 
+
+The training involved a learning rate schedule with a reduction factor of 0.5 and 3-epochs patience. Gradient clipping was applied with max_norm=0.1 to prevent the exploding gradient issue. 
+
+For the generator part we used latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ with temperature scaling 
+
+
+**Main benefits**:  
+Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model  was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads.  
+
+
+
+
+
+
+
+
 
 
 
@@ -344,7 +400,11 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 <a id="ref15"></a>
 [15] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
 
+<a id="ref16"></a>
+[16]De Cao, Nicola & Kipf, Thomas. (2018). MolGAN: An implicit generative model for small molecular graphs. 10.48550/arXiv.1805.11973. 
 
+<a id="ref17"></a>
+[17]Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
 
 ## List of Figures
 
