@@ -32,7 +32,7 @@ Methodological Exploration of Protein Structure Generation from PDB Representati
 ## Abstract
 <div style="text-align: justify;">
 
-We present a comprehensive methodological exploration of computational approaches for generating plausible three-dimensional protein structures from PDB-derived representations. While originally conceived for Physics-Informed Neural Network applications targeting environmental perturbation prediction, our research evolved to address fundamental challenges in protein structure generation methodologies. Our work encompassed systematic data preprocessing using Linux-based computational biology libraries, followed by extensive exploration of multiple generative approaches including contact map-based Variational Autoencoders with gradient optimization, Graph Attention Network architectures, synthetic graph validation frameworks, and Graph Recurrent Attention Network-inspired dual output systems. Our investigation demonstrates the complexity of computational protein generation while establishing methodological foundations for future Physics-Informed Neural Network development. The most successful approach achieved 99.51% contact map accuracy with visually plausible 3D structures, providing strong foundations for advancing toward environmental perturbation modeling applications.
+We present a comprehensive methodological exploration of computational approaches for generating plausible three-dimensional protein structures from PDB-derived representations. While originally conceived for Physics-Informed Neural Network applications targeting environmental perturbation prediction, our research evolved to address fundamental challenges in protein structure generation methodologies. Our work encompassed systematic data preprocessing using computational biology libraries, followed by extensive exploration of multiple generative approaches including contact map-based Variational Autoencoders with gradient optimization, Graph Attention Network architectures, synthetic graph validation frameworks, and Graph Recurrent Attention Network-inspired dual output systems. Our investigation demonstrates the complexity of computational protein generation while establishing methodological foundations for future Physics-Informed Neural Network development. The most successful approach achieved 99.51% contact map accuracy with visually plausible 3D structures, providing strong foundations for advancing toward environmental perturbation modeling applications.
 
 </div>
 
@@ -55,6 +55,9 @@ We present a comprehensive methodological exploration of computational approache
   - [3.5 Graph structure and feature integration](#35-graph-structure-and-feature-integration)
   - [3.6 Additional datasets for model validation and testing](#36-additional-datasets-for-model-validation-and-testing)
   - [3.7 Data quality](#37-data-quality)
+- [4. Methodological exploration](#4-methodological-exploration)
+  - [4.1 Simple graph attention network VAE architecture](#41-simple-graph-attention-network-vae-architecture)
+  - [4.3 Graph neural network exploration and validation framework](#43-graph-neural-network-exploration-and-validation-framework)
 - [References](#references)
 
 <div style="page-break-after: always;"></div>
@@ -91,15 +94,13 @@ Our objective was to characterize the respective modeling capabilities, limitati
 
 ## 2. Infrastructure and development environment
 
-**Core framework**: We used PyTorch as the primary deep learning framework, with PyTorch Geometric providing specialized graph neural network operations for protein graph processing. A Linux-based environment was required due to dependencies on external tools used by DSSP [[1]](#ref1) and Graphein [[2]](#ref2). For implementation, we leveraged Google Colab [[3]](#ref3) with GPU acceleration (Tesla T4, 15GB memory) and UBELIX [[4]](#ref4) for processing datasets across multiple nodes. We used different Python versions for different implementation phases: Python 3.9 for preprocessing and Python 3.11 or later for all other implementations, with required libraries detailed in requirements.txt.
-
-**Experiment tracking**: we used Weights & Biases [[5]](#ref5) integration for experiment logging and visualization, tracking training metrics, loss components, and model performance across different architectural approaches. 
-
-**Data and Model Distribution**: We made the trained best model and associated metadata publicly available via Hugging Face [[6]](#ref6) to ensure reproducibility and facilitate further research. 
-
 <div style="text-align: justify;">
 
-(to be completed yet)
+**Core framework**: We used PyTorch as the primary deep learning framework, with PyTorch Geometric providing specialized graph neural network operations for protein graph processing. A Linux-based environment was required due to dependencies on external tools used by DSSP [[1]](#ref1) and Graphein [[2]](#ref2). For implementation, we leveraged Google Colab [[3]](#ref3) with GPU acceleration (Tesla T4, 15GB memory) and UBELIX [[4]](#ref4) for processing datasets across multiple nodes. We used different Python versions for different implementation phases: Python 3.9 for preprocessing and Python 3.11 or later for all other implementations, with required libraries detailed in requirements.txt.  
+
+**Experiment tracking**: we used Weights & Biases [[5]](#ref5) integration for experiment logging and visualization, tracking training metrics, loss components, and model performance across different architectural approaches.   
+
+**Data and Model Distribution**: We made the trained best model and associated metadata publicly available via Hugging Face [[6]](#ref6) to ensure reproducibility and facilitate further research. 
 
 </div>
 
@@ -114,8 +115,6 @@ The initial working dataset was restricted to nanobodies, selected for their rel
 
 ### 3.2 Preprocessing and feature engineering 
 
-**Atomic-level feature extraction and molecular representation**
-
 Using BioPython [[9]](#ref9), we parsed the structures at the atomic level, where each standard residue was extracted and stored by chain as a tuple representation of the form: 
 
 $$
@@ -129,7 +128,6 @@ where:
 - $e_i$ is the element,
 - $\vec{x}_i \in \mathbb{R}^3$ is the atomic position.
 
-**Secondary Structure Integration:**
 Residue-level secondary structures were computed using DSSP [[4]](#ref4), resulting in a mapping:
 
 $$
@@ -137,8 +135,6 @@ $$
 $$
 
 where $s_i$ denoted the DSSP-assigned secondary structure class.
-
-**Graph construction methodology**
 
 Subsequently, residue-level protein graphs $G = (V, E)$ were built where $V$ represented nodes features and $E$ represented edge features (either peptide bonds or spatial proximity). We defined Edges $(i, j) \in \mathbb{E}$ by the following:
 
@@ -148,10 +144,8 @@ $$
 
 ### 3.3 Geometric feature engineering and structural analysis
 
-**Backbone geometry characterization**
 To characterize the 3D conformation of th protein chain we computed bond lengths, bond angles and torsion angles. These calculations were restricted to backbone atoms only (N, CA, C, O) to balance computational efficiency with essential structural information retention, though the underlying implementation was designed to support full-atom calculations for future extension.
 
-**Bond length calculation**
 Bond lengths were defined as Euclidean distances between bonded atoms:
 
 $$
@@ -160,17 +154,15 @@ $$
 
 calculated between pairs of backbone atoms within the same residue or between sequential residues
 
-**Bond angles computation**
 For triplets of atoms (i, j, k), bond angles $\theta_{ijk}$ provided measures of angles formed by three consecutive atoms:
 
 $$
 \theta_{ijk} = \cos^{-1}\left( \frac{ (\vec{x}_i - \vec{x}_j) \cdot (\vec{x}_k - \vec{x}_j) }{ \|\vec{x}_i - \vec{x}_j\|_2 \cdot \|\vec{x}_k - \vec{x}_j\|_2 } \right)
 $$
 
-Only triplets involving backbone atoms were considered, including intra-residue angles and inter-residue connections.
+We considered only triplets involving backbone atoms, including intra-residue angles and inter-residue connections.
 
-**Torsion angles analysis**
-Torsion angles (dihedral angles) described rotational relationships between four sequential atoms, critical for capturing 3D folding patterns. The three canonical backbone torsions were computed:
+Torsion angles (dihedral angles) described rotational relationships between four sequential atoms, critical for capturing 3D folding patterns. We computed all the three canonical backbone torsions:
 
   - $\phi$: Rotation on the $N-CA$ bond
   - $\psi$: Rotation on the $CA–C$ bond
@@ -213,8 +205,8 @@ $$
 
 The resulting NetworkX graph structure incorporated comprehensive protein representations as summarized in the following node and edge attribute framework:
 
-**Node Attributes:**
-- **Node ID**: Unique identifier following format "chain_id:residue_name:residue_number"
+**Node Attributes:**  
+- **Node ID**: Unique identifier following the format "chain_id:residue_name:residue_number"  
 - **Chain ID**: Protein chain identifier
 - **Residue Number**: Sequential position in protein
 - **Residue Name**: Three-letter amino acid code
@@ -223,14 +215,14 @@ The resulting NetworkX graph structure incorporated comprehensive protein repres
 - **Coordinates**: 3D coordinates of CA atom
 - **Optional Atomic Coordinates**: Full atomic coordinates when available
 
-**Edge Attributes:**
+**Edge Attributes:**  
 - **Connection Type**: Classification as {peptide_bond} or {contact}
 - **Distance**: C-alpha distances for contact edges (measured in Ångströms)
 
 ### 3.6 Additional datasets for model validation and testing 
 
-In addition to the nanobody dataset, which we ultimately used to develop and test our models, we employed several additional datasets to enhance model comprehension and assess methodological limits.
-**Synthetic Graph Validation Dataset**:To isolate our core methodology from biological complexity, we developed a controlled validation framework using synthetic graphs with known, controllable properties. We generated 2,500 synthetic graphs across five topological structures (circles, stars, grids, crosses, and line structures) with 8-20 nodes per graph. Node features included amino acid type encoding (21-dimensional one-hot), color features (5 categories), physicochemical properties (size, charge, hydrophobicity), and structural features (coordinates, degree, clustering coefficient).
+In addition to the nanobody dataset, which we ultimately used to develop and test our models, we employed several additional datasets to enhance model comprehension and assess methodological limits.  
+**Synthetic Graph Validation Dataset**:To isolate our core methodology from biological complexity, we developed a controlled validation framework using synthetic graphs with known, controllable properties. We generated 2,500 synthetic graphs across five topological structures (circles, stars, grids, crosses, and line structures) with 8-20 nodes per graph. Node features included amino acid type encoding (21-dimensional one-hot), color features (5 categories), physicochemical properties (size, charge, hydrophobicity), and structural features (coordinates, degree, clustering coefficient).  
 **Biological Validation Datasets**: We also utilized the SCOP dataset [[10]](#ref10) for diagnostic classification experiments to assess our graph representation capabilities, and an additional dataset of fluorescent proteins (which we termed "fluobodies") from the protein data bank.
 
 ### 3.7 Data quality
@@ -240,11 +232,21 @@ To support our methodological development, we employed additional datasets for d
 
 </div>
 
+## 4. Methodological exploration 
 
-  
+Building upon our systematic preprocessing foundation, we explored multiple computational approaches to protein structure generation. These explorations encompassed both theoretical innovations and practical implementations, ranging from contact map-based representations to advanced graph neural network architectures. Each approach was designed to address specific challenges in protein structure generation while building upon insights gained from previous attempts.
 
-  
+### 4.1 Simple graph attention network VAE architecture
+
+
+
+
+### 4.3 Graph neural network exploration and validation framework
+
+Building on our preprocessed graph representations, and in parallel to the feature map exploration we 
  
+VAEs have shown success in molecular generation tasks, and the 
+graph structure seemed well-suited to capture protein spatial relationships. 
 
 
 
