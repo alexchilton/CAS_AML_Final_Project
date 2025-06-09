@@ -358,15 +358,32 @@ While idealistically well engineered, being able to handle different protein siz
 
 ### 7.2 Hybrid Learning Inversion Framework
 
-An alternative methodology demonstrating comparable performance was investigated, wherein the neural network operates as a component of a broader hybrid framework. This framework comprises four key stages: (i) data fragmentation and embedding, (ii) variational autoencoder, (iii) embedding combination, and (iiii) data recovery through gradient-based optimization.
+An alternative methodology demonstrating comparable performance was investigated, wherein the neural network operates as a component of a broader hybrid framework. This framework comprises five key stages: (i) data fragmentation, (ii) embedding, (iii) variational autoencoder, (iv) prototyping, and (v) data recovery through gradient-based optimization.
 
-#### 7.2.1 Data Fragmentation and Embedding
+#### 7.2.1 Data Fragmentation
 
-#### 7.2.2 Variational AutoEncoder (VAE)
+Rather than using full-length amino acid sequences as input, each sequence is fragmented into fixed-length subsequences of length L, where L represents a fraction of the maximum protein length. Each amino acid is thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping is applied, resulting in a consistent probability distribution across all subsequences.
 
-#### 7.2.3 Embedding Combination
+The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter can vary a lot depending on the dataset and the distribution of protein lengths.
 
-#### 7.2.4 Data Recovery through gradient-based optimization
+<img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein lengths" style="width: 700px;">
+
+#### 7.2.2 Embedding
+
+<img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
+
+Our comparative study :
+
+*Contact Domain Configuration:*
+- 6-domain percentile partitioning identified as optimal
+- Balances reconstruction accuracy with computational efficiency
+- Provides consistent performance across different structure types
+
+#### 7.2.3 Variational AutoEncoder (VAE)
+
+#### 7.2.4 Prototyping
+
+#### 7.2.5 Data Recovery through gradient-based optimization
 
 **Results**:
 
