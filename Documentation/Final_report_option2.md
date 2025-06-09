@@ -61,9 +61,12 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
   - [7.2 Hybrid Learning Inversion Framework](#72-hybrid-learning-inversion-framework)
     - [7.2.1 Data Fragmentation](#721-data-fragmentation)
     - [7.2.2 Embedding](#722-embedding)
-    - [7.2.3 Variational AutoEncoder (VAE)](#723-variational-autoencoder-vae)
+    - [7.2.3 Modified Variational AutoEncoder (VAE)](#723-modified-variational-autoencoder-vae)
     - [7.2.4 Prototyping](#724-prototyping)
     - [7.2.5 Data Recovery through gradient-based optimization](#725-data-recovery-through-gradient-based-optimization)
+- [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
+- [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
+  - [7.4.1 Model architecture](#741-model-architecture)
 - [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
@@ -396,6 +399,94 @@ Training was performed separately on two datasets, each comprising 20,000 sample
 
 <img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
+## 7.3 Additional diagnostic experiments 
+
+Following the drawbacks of the first VAE implementation and the positive results upon the optimization pipeline we conducted a short investigation of the GAT-VAE using the SCOP dataset and the Synthetic Graph Validation Dataset using a classification instead of a more complex generation task.  
+For this goal we used a 28-dimensional input head, 3-layer SAGEConv with residual connections and batch normalization as encoder and a 7 class output (corresponding ot the 7 classes of the SCOP dataset). the dataset were further preprocessed with the newly experimented 50-residue blocks and step size 1. **(LARA STILL TO FINISH)**
+
+## 7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture
+
+Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on time series data [[18]](#ref18) and the conceptual similarity of modeling proteins as sequential chains of amino acids, rather than as complete structural graphs.
+
+### 7.4.1 Model architecture
+
+The model was built for protein graphs as described , each node was characterized by a 38-dimensional feature vector comprising 7 physiochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
+The graph encoder employed a a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention head with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
+
+Following processing, a global graph representation was obtained by mean pooling:  
+
+$$
+\mathbf{h}_G = \frac{1}{|V|} \sum \mathbf{h}_i^{(\text{final})}
+$$
+
+Where:
+
+- \( \mathbf{h}_G \): Global graph embedding  
+- \( |V| \): Number of nodes in the graph  
+- \( \mathbf{h}_i^{(\text{final})} \): Final hidden representation of node \( i \) 
+
+that initialized a gated recurrent unit (GRU)-based autoregressive sequence decoder:
+
+$$
+\mathbf{h}_t = \mathrm{GRU}(\mathbf{x}_{t-1}, \mathbf{h}_{t-1})
+$$
+
+$$
+p(a_t \mid a_{<t}) = \mathrm{softmax}(W_{\text{seq}} \, \mathbf{h}_t + \mathbf{b}_{\text{seq}})
+$$
+
+Where:
+
+- \( \mathbf{h}_t \): Hidden state at time step \( t \)  
+- \( \mathbf{x}_{t-1} \): Input at time step \( t-1 \) (embedding of the previously generated amino acid)  
+- \( \mathbf{h}_{t-1} \): Hidden state at time step \( t-1 \)  
+- \( a_t \): Action (or output) at time step \( t \)  
+- \( a_{<t} \): Sequence of actions preceding time \( t \)  
+- \( W_{\text{seq}} \), \( \mathbf{b}_{\text{seq}} \): Trainable weight matrix and bias vector  
+- \( \mathrm{softmax} \): Normalized exponential function for computing class probabilities 
+
+During training, teacher forcing was employed using ground truth sequences to reduce compounding errors [[19]](#ref19). For inference multinomial sampling was performed from the predicted distributions.  
+The dual output was represented by the amino acid sequence (via the sequence generation branch) and a 3D adjacency matrix (from the structure gneration branch), with an auxilliary prediction head to estimate secondary structure probability for each residue. This provided additional structure supervision and enabled structure aware sequence generation. 
+
+As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entyropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, simmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized and explicitated in the following equation: 
+
+$$
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{seq}} + \mathcal{L}_{\text{adj}} + 0.5 \times \mathcal{L}_{\text{ss}}
+$$
+
+
+$$
+\begin{aligned}
+\mathcal{L}_{\text{total}} =\ & 
+-\frac{1}{T} \sum_{t=1}^{T} \log p(a_t^{\text{true}} \mid a_{<t}) \\
+& + \Big[1.0 \times \text{BCE}(A_{\text{pred}} \odot M,\ A_{\text{true}} \odot M) \\
+& \quad + 0.3 \times \frac{1}{2} \big(\text{MSE}(\text{diag}_1(A_{\text{pred}}),\ 0.9 \cdot \mathbf{1}) + \text{MSE}(\text{diag}_2(A_{\text{pred}}),\ 0.7 \cdot \mathbf{1})\big) \\
+& \quad + 0.3 \times \frac{1}{N^2} \sum_{i,j} \left|A_{\text{pred}}[i,j] - A_{\text{pred}}[j,i]\right| \\
+& \quad + 0.4 \times \big(0.3 \cdot \mathcal{L}_{\text{local}} + 0.3 \cdot \mathcal{L}_{\text{medium}} + 0.4 \cdot \mathcal{L}_{\text{long}}\big)\Big] \\
+& + 0.5 \times \left[-\frac{1}{N} \sum_{i=1}^{N} \log p(ss_i^{\text{true}} \mid \mathbf{h}_i)\right]
+\end{aligned}
+$$
+
+Where:
+- \( \mathcal{L}_{\text{seq}} \): Loss for sequence generation branch  
+- \( \mathcal{L}_{\text{adj}} \): Loss for structure generation branch 
+- \( \mathcal{L}_{\text{ss}} \): Loss for secondary structure prediction  
+- Coefficient \( 0.5 \): Weighting factor applied to balance the secondary structure loss
+- \( T \): Length of the output sequence  
+- \( a_t^{\text{true}} \): Ground truth token at step \( t \)  
+- \( a_{<t} \): Sequence of preceding tokens  
+- \( A_{\text{pred}} \), \( A_{\text{true}} \): Predicted and true adjacency matrices  
+- \( M \): Binary mask matrix  
+- \( \odot \): Element-wise (Hadamard) product  
+- \( \text{BCE} \): Binary cross-entropy loss  
+- \( \text{MSE} \): Mean squared error  
+- \( \text{diag}_k(A) \): \( k \)-th diagonal of matrix \( A \)  
+- \( N \): Number of nodes in the graph  
+- \( \mathcal{L}_{\text{local}} \), \( \mathcal{L}_{\text{medium}} \), \( \mathcal{L}_{\text{long}} \): Losses for different edge distance regimes  
+- \( ss_i^{\text{true}} \): Ground truth secondary structure label for node \( i \)  
+- \( \mathbf{h}_i \): Final node embedding of node \( i \)
+
+
 </div>
 
 ## References
@@ -452,6 +543,12 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 
 <a id="ref17"></a>
 [17] Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
+
+<a id="ref18"></a>
+[18] Cirstea, Razvan Gabriel & Guo, Chenjuan & Yang, Bin. (2021). Graph Attention Recurrent Neural Networks for Correlated Time Series Forecasting. 10.48550/arXiv.2103.10760. 
+
+<a id="ref19"></a>
+[19] Lamb, Alex & Goyal, Anirudh & Zhang, Ying & Zhang, Saizheng & Courville, Aaron & Bengio, Y.. (2016). Professor Forcing: A New Algorithm for Training Recurrent Networks. 10.48550/arXiv.1610.09038. 
 
 <div style="page-break-after: always;"></div>
 

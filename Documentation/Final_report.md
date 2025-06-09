@@ -46,7 +46,6 @@ We present a comprehensive methodological exploration of computational approache
   - [1.1 Biological and computational context](#11-biological-and-computational-context)
   - [1.2 Project objectives and evolution](#12-project-objectives-and-evolution)
   - [1.3 Methodological framework](#13-methodological-framework)
-<<<<<<< HEAD
 - [2. Infrastructure and development environment](#2-infrastructure-and-development-environment)
 - [3. Data](#3-data)
   - [3.1 Primary data source](#31-primary-data-source)
@@ -59,23 +58,14 @@ We present a comprehensive methodological exploration of computational approache
 - [4. Methodological exploration](#4-methodological-exploration)
   - [4.1 Simple graph attention network VAE architecture](#41-simple-graph-attention-network-vae-architecture)
   - [4.3 Graph neural network exploration and validation framework](#43-graph-neural-network-exploration-and-validation-framework)
-=======
-- [System requirements](#system-requirements)
-- [Data](#data)
-  - [Webscrapring](#webscrapring)
-  - [Synthetic datasets](#synthetic-datasets)
-  - [Protein Structure Preprocessing](#protein-structure-preprocessing)
-- [Data quality](#data-quality)
-- [Protein structure prediction](#protein-structure-prediction)
+- [Protein Structure Prediction](#protein-structure-prediction)
   - [General architecture](#general-architecture)
   - [Optimization Pipeline](#optimization-pipeline)
     - [MDS pipeline](#mds-pipeline)
     - [Gradient-Based Optimization](#gradient-based-optimization)
   - [Empirical Parameter Optimization](#empirical-parameter-optimization)
-  - [Datasets](#datasets)
   - [Model](#model)
   - [Results](#results)
->>>>>>> e71b421a070526c1f677974fc14054cf52aeeadd
 - [References](#references)
 
 <div style="page-break-after: always;"></div>
@@ -353,7 +343,6 @@ Arian R. Jamasb, Pietro Lió, Tom L. Blundell
 bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 
 <a id="ref3"></a>
-<<<<<<< HEAD
 [3] Google Colab. (2017). Colaboratory: A Google research project. Google Research. https://colab.research.google.com/
 
 <a id="ref4"></a>
@@ -377,6 +366,4 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 <a id="ref10"></a>
 [10] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
 
-=======
 [3] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
->>>>>>> e71b421a070526c1f677974fc14054cf52aeeadd
