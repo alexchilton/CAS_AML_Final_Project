@@ -345,7 +345,7 @@ An alternative methodology demonstrating comparable performance was investigated
 
 Rather than using full-length amino acid sequences as input, each sequence is fragmented into fixed-length subsequences of length L, where L represents a fraction of the maximum protein length. Each amino acid is thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping is applied, resulting in a consistent probability distribution across all subsequences.
 
-The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length.
+The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter can vary a lot depending on the dataset and the distribution of protein lengths.
 
 <img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein lengths" style="width: 700px;">
 
