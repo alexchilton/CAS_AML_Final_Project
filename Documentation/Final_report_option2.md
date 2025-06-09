@@ -354,11 +354,11 @@ While idealistically well engineered, being able to handle different protein siz
 
 ### 7.2 Hybrid Learning Inversion Framework
 
-An alternative methodology demonstrating comparable performance was investigated, wherein the neural network operates as a component of a broader hybrid framework. This framework comprises five key stages: (i) data fragmentation, (ii) embedding, (iii) variational autoencoder, (iv) prototyping, and (v) data recovery through gradient-based optimization.
+An alternative methodology demonstrating comparable performance was investigated, wherein the neural network operates as a component of a broader hybrid framework. This framework comprises five key stages: (i) data fragmentation, (ii) embedding, (iii) variational autoencoder, (iv) aggregation, and (v) data recovery through gradient-based optimization.
 
 #### 7.2.1 Data Fragmentation
 
-Rather than using full-length amino acid sequences as input, each sequence is fragmented into fixed-length subsequences of length L, where L represents a fraction of the maximum protein length. Each amino acid is thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping is applied, resulting in a consistent probability distribution across all subsequences.
+Rather than using full-length amino acid sequences as input, each sequence is fragmented into fixed-length subsequences of length L, where L represents a fraction of the maximum protein length (bandwidth). Each amino acid is thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping is applied, resulting in a consistent probability distribution across all subsequences.
 
 The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
 
@@ -386,7 +386,9 @@ Given the modified architecture of the VAE, the output is not intended to recons
 
 Training was performed separately on two datasets, each comprising 20,000 samples derived from Nanobody and Fluoproteins structures, respectively. A 90/10 train–test split was employed, and models were trained over 80 epochs. At this stage, the loss curve for the test set reaches a plateau, while the training loss continues to decrease. This divergence suggests that, under the current training configuration, the model has reached its optimal convergence point, beyond which additional training yields diminishing generalization performance.
 
-#### 7.2.4 Prototyping
+#### 7.2.4 Aggregation
+
+Local predictions from individual subsequences are aggregated and averaged to yield comprehensive, protein-level contact maps predictions. The two evaluated datasets yield promising results, with the predicted structures exhibiting visually accurate correspondence to the reference conformations.
 
 <img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
 <img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" style="width: 1200px;">
