@@ -396,8 +396,8 @@ Figure to come -> Nanoproteins Learning curves
 
 
 <img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
-<img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Ground truth" style="width: 1200px;">
-<img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Ground truth" style="width: 1200px;">
+<img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" style="width: 1200px;">
+<img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" style="width: 1200px;">
 
 #### 7.2.5 Data Recovery through gradient-based optimization
 
