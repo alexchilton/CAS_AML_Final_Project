@@ -378,12 +378,12 @@ The original spatial data, represented as 3D atomic coordinates, is initially tr
 
 A modified Variational Autoencoder (VAE) is subsequently trained using the following configuration:
 
-Input: one-hot encoded amino acid sequences, comprising 20 categories for standard residues and an additional category for unidentified residues.
-Output: six-range binary contact maps derived from spatial embeddings.
-Latent code dimensionality: 256.
-Loss function: a weighted combination of Binary Cross-Entropy (BCE) and Kullback-Leibler (KL) divergence, with a tunable scaling factor σ applied to the KL term.
-Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
-Optimizer: RMS-Prop.
+- Input: one-hot encoded amino acid sequences, comprising 20 categories for standard residues and an additional category for unidentified residues.
+- Output: six-range binary contact maps derived from spatial embeddings.
+- Latent code dimensionality: 256.
+- Loss function: a weighted combination of Binary Cross-Entropy (BCE) and Kullback-Leibler (KL) divergence, with a tunable scaling factor σ applied to the KL term.
+- Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
+- Optimizer: RMS-Prop.
 
 Given the modified architecture of the VAE, the output is not intended to reconstruct the input sequence directly. Instead, it predicts a representation of the associated spatial structure — specifically, an embedded form of the structure encoded as a set of binary contact maps. This reflects a shift from traditional input reconstruction toward structured prediction, where the goal is to learn spatial constraints from sequence-based features.
 
