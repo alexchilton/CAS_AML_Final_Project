@@ -388,13 +388,15 @@ Training was performed separately on two datasets, each comprising 20,000 sample
 
 #### 7.2.4 Aggregation
 
-Local predictions from individual subsequences are aggregated and averaged to yield comprehensive, protein-level contact maps predictions. The two evaluated datasets yield promising results, with the predicted structures exhibiting visually accurate correspondence to the reference conformations.
+Local predictions from individual subsequences are aggregated and averaged to produce unified, protein-level contact map predictions. The two evaluated datasets show promising results, with the predicted structures exhibiting visually accurate correspondence to the reference conformations.
 
 <img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
 <img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" style="width: 1200px;">
 <img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" style="width: 1200px;">
 
 #### 7.2.5 Data Recovery through gradient-based optimization
+
+The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see Annex 1 for detailed procedure).
 
 <img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
