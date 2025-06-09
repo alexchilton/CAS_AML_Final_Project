@@ -58,6 +58,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
   - [6.3 Additional datasets for model validation and testing](#63-additional-datasets-for-model-validation-and-testing)
 - [7. Model flow](#7-model-flow)
   - [7.1 Graph Variational Autoencoder (GraphVAE)](#71-graph-variational-autoencoder-graphvae)
+  - [7.2 Simple Variational AutoEncoder within a Hybrid Learning–Inversion Framework (VAE)](#72-simple-variational-autoencoder-within-a-hybrid-learning-inversion-framework-vae)
 - [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
