@@ -370,7 +370,7 @@ The comparative study in Annex 1 established an empirical framework for the crit
 
 #### 7.2.2 Embedding
 
-Distance matrices are then derived from the subsequences spatial data (3D coordinates) and are embedded into range contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis : this configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures the homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
+The original spatial data, represented as 3D atomic coordinates, is initially transformed into distance matrices — representations that are invariant to rotation and translation, thereby facilitating broader pattern recognition. These distance matrices are subsequently embedded into range-based contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis : this configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures the homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
 
 <img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
 
@@ -385,22 +385,21 @@ Loss function: a weighted combination of Binary Cross-Entropy (BCE) and Kullback
 Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
 Optimizer: RMS-Prop.
 
-Training was conducted on 2 datasets of 20,000 samples each, using a 90/10 train–test split over 80 epochs. At this point, loss curve on the test set plateaus whereas the training set curve still improves, suggesting best convergence of the model under the current training configuration.
+Given the modified architecture of the VAE, the output is not intended to reconstruct the input sequence directly. Instead, it predicts a representation of the associated spatial structure — specifically, an embedded form of the structure encoded as a set of binary contact maps. This reflects a shift from traditional input reconstruction toward structured prediction, where the goal is to learn spatial constraints from sequence-based features.
 
-TC -> Learning curves
+Training was performed separately on two datasets, each comprising 20,000 samples derived from Nanobody and Fluoproteins structures, respectively. A 90/10 train–test split was employed, and models were trained over 80 epochs. At this stage, the loss curve for the test set reaches a plateau, while the training loss continues to decrease. This divergence suggests that, under the current training configuration, the model has reached its optimal convergence point, beyond which additional training yields diminishing generalization performance.
+
+Figure to come -> Nanoproteins Learning curves
 
 #### 7.2.4 Prototyping
 
-#### 7.2.5 Data Recovery through gradient-based optimization
 
-**Results**:
-
-<img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein lengths" style="width: 700px;">
-<img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
 
 <img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
 <img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Ground truth" style="width: 1200px;">
 <img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Ground truth" style="width: 1200px;">
+
+#### 7.2.5 Data Recovery through gradient-based optimization
 
 <img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
