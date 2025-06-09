@@ -59,6 +59,10 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [7. Model flow](#7-model-flow)
   - [7.1 Graph Variational Autoencoder (GraphVAE)](#71-graph-variational-autoencoder-graphvae)
   - [7.2 Hybrid Learning Inversion Framework](#72-hybrid-learning-inversion-framework)
+    - [7.2.1 Data Fragmentation and Embedding](#721-data-fragmentation-and-embedding)
+    - [7.2.2 Variational AutoEncoder (VAE)](#722-variational-autoencoder-vae)
+    - [7.2.3 Embedding Combination](#723-embedding-combination)
+    - [7.2.4 Data Recovery through gradient-based optimization](#724-data-recovery-through-gradient-based-optimization)
 - [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
@@ -297,9 +301,21 @@ We built a custom GraphVAE following the standard variational auto-encoder struc
 - 4 attention heads for multi-head attention mechanism
 - 1 dimensional edge attribute (distances)
 
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/figure_d.png" alt="First parsing" width="600">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 4:</strong> Schematic representation of the Protein GraphVAE with weigths and parameters 
+  </p>
+</div>
+
+
+
+
+
+
 The model was developed to handle variable-sized protein graphs without padding artifacts. The attention mechanism with 4 heads allowed the model to capture multiple types of relationships simultaneously within the protein structure.   
 
-We built the loss function as a composite element including reconstruction loss ($\mathcal{L}$ _recon), KL divergence loss ($\mathcal{L}$ _KL ) and rthogonal regularization ($\mathcal{L}$_ortho ). The reconstruction loss employed task-specific weighting to balance off different protein properties encoded in the graph structure. The KL parameter included a $\beta$-VAE with cyclical annealing to balance reconstruction quality and latent space organization with a warmup period t of 25 epochs: 
+We built the loss function as a composite element including reconstruction loss ($\mathcal{L}$ _recon), KL divergence loss ($\mathcal{L}$ _KL ) and orthogonal regularization ($\mathcal{L}$_ortho ). The reconstruction loss employed task-specific weighting to balance off different protein properties encoded in the graph structure. The KL parameter included a $\beta$-VAE with cyclical annealing to balance reconstruction quality and latent space organization with a warmup period t of 25 epochs: 
 
 $$
 \beta(t) = 
@@ -332,10 +348,13 @@ Where:
 
 The training involved a learning rate schedule with a reduction factor of 0.5 and 3-epochs patience. Gradient clipping was applied with max_norm=0.1 to prevent the exploding gradient issue. 
 
-For the generator part we used latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ with temperature scaling (NOTE FOR LARA: continue from here)
+For the generator part we used 16-dimensional latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ from a standard normal distribution N(0,1) with temperature scaling to control the conservativiness of the generations. The genartion was obtained as a step-wise process with a placeholder fopr the edge creation where each node connected to the next one in sequence in a ring connectivitz pattern, , through the decoder, the 16D vector was expanded into the full protein feature generating a matrix [1, nodes_per_graph, 8], where 8 were the initial input features, denormalized in the subsequent step. Lastly the coordinates were extracted, k-nearest neighbour edges costructed overwriting the initial edge scaffold and the graph object created. 
 
-**Main benefits**:  
-Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model  was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads.  
+**Benefits and drawbacks**:  
+Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads. 
+
+While idealistically well engineered, being able to handle different protein size, decode the protein features through the latent space and to use 3D spatial relationships to determine realistic bonding, the model had a substantial limitation connected to the randomness of the latent sampling and reconstruction fidelity was often low. Information decoding required some optimization, especially on the amino acid assignbment for the new nodes generated. Scalability was another issue, where memory usage became critical for large graphs or high batch sizes, edge reconstruction required further optimization.  
+
 
 ### 7.2 Hybrid Learning Inversion Framework
 
