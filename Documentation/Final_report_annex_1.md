@@ -39,17 +39,3 @@ Our systematic analysis revealed significant improvements over MDS prototypes us
 - **Partitioning Strategy Reversal**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
 
 ![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
-
-**Empirical Parameter Optimization**:
-
-Our comparative study established an empirical framework for critical process parameters:
-
-*Chunk Length Optimization:*
-- Optimal results achieved above 60% coverage
-- Consequently, subsequence length should be 30% at least of maximum studied length
-- Training dataset constraint: shortest chain length should correspond to 30% at least of longest chain
-
-*Contact Domain Configuration:*
-- 6-domain percentile partitioning identified as optimal
-- Balances reconstruction accuracy with computational efficiency
-- Provides consistent performance across different structure types
