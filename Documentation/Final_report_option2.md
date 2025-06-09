@@ -336,7 +336,7 @@ For the generator part we used latent sampling $\mathbf{z} \sim \mathcal{N}(0, \
 **Main benefits**:  
 Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model  was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads.  
 
-### 7.2 Mixed approach combining a simple VAE and an Optimization pipeline
+### 7.2 Simple Variational AutoEncoder within a Hybrid Learning–Inversion Framework (VAE)
 
 **General architecture**:
 
