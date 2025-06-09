@@ -366,7 +366,7 @@ Rather than using full-length amino acid sequences as input, each sequence is fr
 The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein length" width="700">
+  <img src="figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein length" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figure 5:</strong>  
   </p>
@@ -379,7 +379,7 @@ The original spatial data, represented as 3D atomic coordinates, is initially tr
 
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" width="700">
+  <img src="figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figure 6:</strong>  
   </p>
@@ -406,21 +406,21 @@ Training was performed separately on two datasets, each comprising 20,000 sample
 Local predictions from individual subsequences are aggregated and averaged to produce unified, protein-level contact map predictions. The two evaluated datasets show promising results, with the predicted structures exhibiting visually accurate correspondence to the reference conformations.
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" width="1200">
+  <img src="figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figure 7:</strong>  
   </p>
 </div>
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" width="1200">
+  <img src="figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figure 8:</strong>  
   </p>
 </div>
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" width="1200">
+  <img src="figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figure 9:</strong>  
   </p>
@@ -434,7 +434,7 @@ Across both datasets, the reconstructed structures are often closely aligned wit
 
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
+  <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figure 10:</strong>  
   </p>
