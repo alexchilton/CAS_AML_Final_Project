@@ -390,11 +390,7 @@ Given the modified architecture of the VAE, the output is not intended to recons
 
 Training was performed separately on two datasets, each comprising 20,000 samples derived from Nanobody and Fluoproteins structures, respectively. A 90/10 train–test split was employed, and models were trained over 80 epochs. At this stage, the loss curve for the test set reaches a plateau, while the training loss continues to decrease. This divergence suggests that, under the current training configuration, the model has reached its optimal convergence point, beyond which additional training yields diminishing generalization performance.
 
-Figure to come -> Nanoproteins Learning curves
-
 #### 7.2.4 Prototyping
-
-
 
 <img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
 <img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" style="width: 1200px;">
