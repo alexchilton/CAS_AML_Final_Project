@@ -59,10 +59,11 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [7. Model flow](#7-model-flow)
   - [7.1 Graph Variational Autoencoder (GraphVAE)](#71-graph-variational-autoencoder-graphvae)
   - [7.2 Hybrid Learning Inversion Framework](#72-hybrid-learning-inversion-framework)
-    - [7.2.1 Data Fragmentation and Embedding](#721-data-fragmentation-and-embedding)
-    - [7.2.2 Variational AutoEncoder (VAE)](#722-variational-autoencoder-vae)
-    - [7.2.3 Embedding Combination](#723-embedding-combination)
-    - [7.2.4 Data Recovery through gradient-based optimization](#724-data-recovery-through-gradient-based-optimization)
+    - [7.2.1 Data Fragmentation](#721-data-fragmentation)
+    - [7.2.2 Embedding](#722-embedding)
+    - [7.2.3 Variational AutoEncoder (VAE)](#723-variational-autoencoder-vae)
+    - [7.2.4 Prototyping](#724-prototyping)
+    - [7.2.5 Data Recovery through gradient-based optimization](#725-data-recovery-through-gradient-based-optimization)
 - [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
@@ -307,11 +308,6 @@ We built a custom GraphVAE following the standard variational auto-encoder struc
     <strong>Figure 4:</strong> Schematic representation of the Protein GraphVAE with weigths and parameters 
   </p>
 </div>
-
-
-
-
-
 
 The model was developed to handle variable-sized protein graphs without padding artifacts. The attention mechanism with 4 heads allowed the model to capture multiple types of relationships simultaneously within the protein structure.   
 
