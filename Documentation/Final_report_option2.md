@@ -360,35 +360,39 @@ An alternative methodology demonstrating comparable performance was investigated
 
 Rather than using full-length amino acid sequences as input, each sequence is fragmented into fixed-length subsequences of length L, where L represents a fraction of the maximum protein length. Each amino acid is thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping is applied, resulting in a consistent probability distribution across all subsequences.
 
-The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter can vary a lot depending on the dataset and the distribution of protein lengths.
+The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
 
 <img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein lengths" style="width: 700px;">
 
 #### 7.2.2 Embedding
 
+The original spatial data, represented as 3D atomic coordinates, is initially transformed into distance matrices — representations that are invariant to rotation and translation, thereby facilitating broader pattern recognition. These distance matrices are subsequently embedded into range-based contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis : this configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures the homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
+
 <img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
 
-Our comparative study :
+#### 7.2.3 Modified Variational AutoEncoder (VAE)
 
-*Contact Domain Configuration:*
-- 6-domain percentile partitioning identified as optimal
-- Balances reconstruction accuracy with computational efficiency
-- Provides consistent performance across different structure types
+A modified Variational Autoencoder (VAE) is subsequently trained using the following configuration:
 
-#### 7.2.3 Variational AutoEncoder (VAE)
+- Input: one-hot encoded amino acid sequences, comprising 20 categories for standard residues and an additional category for unidentified residues.
+- Output: six-range binary contact maps derived from spatial embeddings.
+- Latent code dimensionality: 256.
+- Activation: SoftMax(dim=-1). 
+- Loss function: a weighted combination of Binary Cross-Entropy (BCE) and Kullback-Leibler (KL) divergence, with a tunable scaling factor σ applied to the KL term.
+- Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
+- Optimizer: RMS-Prop.
+
+Given the modified architecture of the VAE, the output is not intended to reconstruct the input sequence directly. Instead, it predicts a representation of the associated spatial structure — specifically, an embedded form of the structure encoded as a set of binary contact maps. This reflects a shift from traditional input reconstruction toward structured prediction, where the goal is to learn spatial constraints from sequence-based features.
+
+Training was performed separately on two datasets, each comprising 20,000 samples derived from Nanobody and Fluoproteins structures, respectively. A 90/10 train–test split was employed, and models were trained over 80 epochs. At this stage, the loss curve for the test set reaches a plateau, while the training loss continues to decrease. This divergence suggests that, under the current training configuration, the model has reached its optimal convergence point, beyond which additional training yields diminishing generalization performance.
 
 #### 7.2.4 Prototyping
 
-#### 7.2.5 Data Recovery through gradient-based optimization
-
-**Results**:
-
-<img src="./figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein lengths" style="width: 700px;">
-<img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
-
 <img src="./figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" style="width: 1200px;">
-<img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Ground truth" style="width: 1200px;">
-<img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Ground truth" style="width: 1200px;">
+<img src="./figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" style="width: 1200px;">
+<img src="./figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" style="width: 1200px;">
+
+#### 7.2.5 Data Recovery through gradient-based optimization
 
 <img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
