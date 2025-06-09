@@ -370,11 +370,24 @@ The comparative study in Annex 1 established an empirical framework for the crit
 
 #### 7.2.2 Embedding
 
-Distance matrices are then derived from the subsequences spatial data (3D coordinates) and are embedded into range contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis. This configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures a homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
+Distance matrices are then derived from the subsequences spatial data (3D coordinates) and are embedded into range contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis : this configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures the homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
 
 <img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
 
-#### 7.2.3 Variational AutoEncoder (VAE)
+#### 7.2.3 Modified Variational AutoEncoder (VAE)
+
+A modified Variational Autoencoder (VAE) is subsequently trained using the following configuration:
+
+Input: one-hot encoded amino acid sequences, comprising 20 categories for standard residues and an additional category for unidentified residues.
+Output: six-range binary contact maps derived from spatial embeddings.
+Latent code dimensionality: 256.
+Loss function: a weighted combination of Binary Cross-Entropy (BCE) and Kullback-Leibler (KL) divergence, with a tunable scaling factor σ applied to the KL term.
+Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
+Optimizer: RMS-Prop.
+
+Training was conducted on 2 datasets of 20,000 samples each, using a 90/10 train–test split over 80 epochs. At this point, loss curve on the test set plateaus whereas the training set curve still improves, suggesting best convergence of the model under the current training configuration.
+
+TC -> Learning curves
 
 #### 7.2.4 Prototyping
 
