@@ -396,7 +396,7 @@ Local predictions from individual subsequences are aggregated and averaged to pr
 
 #### 7.2.5 Data Recovery through gradient-based optimization
 
-The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see Annex 1 for detailed procedure).
+The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see <a href="https://github.com/alexchilton/CAS_AML_Final_Project/edit/main/Documentation/" alt="Annex 1 - Gradient-Based Optimization" target="_self">Annex 1</a> for detailed procedure).
 
 <img src="./figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" style="width: 700px;">
 
