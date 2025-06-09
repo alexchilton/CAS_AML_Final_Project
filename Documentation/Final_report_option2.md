@@ -370,14 +370,9 @@ The comparative study in Annex 1 established an empirical framework for the crit
 
 #### 7.2.2 Embedding
 
+Distance matrices are then derived from the subsequences spatial data (3D coordinates) and are embedded into range contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis. This configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures a homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
+
 <img src="./figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" style="width: 700px;">
-
-Our comparative study :
-
-*Contact Domain Configuration:*
-- 6-domain percentile partitioning identified as optimal
-- Balances reconstruction accuracy with computational efficiency
-- Provides consistent performance across different structure types
 
 #### 7.2.3 Variational AutoEncoder (VAE)
 
