@@ -58,7 +58,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
   - [6.3 Additional datasets for model validation and testing](#63-additional-datasets-for-model-validation-and-testing)
 - [7. Model flow](#7-model-flow)
   - [7.1 Graph Variational Autoencoder (GraphVAE)](#71-graph-variational-autoencoder-graphvae)
-  - [7.2 Simple Variational AutoEncoder within a Hybrid Learning–Inversion Framework (VAE)](#72-simple-variational-autoEncoder-within-a-hybrid-learning–inversion-framework)
+  - [7.2 Hybrid Learning Inversion Framework](#72-hybrid-learning-inversion-framework)
 - [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
@@ -337,7 +337,7 @@ For the generator part we used latent sampling $\mathbf{z} \sim \mathcal{N}(0, \
 **Main benefits**:  
 Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model  was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads.  
 
-### 7.2 Simple Variational AutoEncoder within a Hybrid Learning–Inversion Framework
+### 7.2 Hybrid Learning Inversion Framework
 
 **General architecture**:
 
