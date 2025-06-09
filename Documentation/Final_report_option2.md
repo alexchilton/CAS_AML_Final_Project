@@ -339,7 +339,13 @@ Unlike traditional VAEs operating on fixed size inputs, our architecture handled
 
 ### 7.2 Hybrid Learning Inversion Framework
 
-**General architecture**:
+A radically different approach was also tested with comparable success, in which the neural network is integrated into a broader hybrid framework comprising several key stages :
+<ol type='i'>
+  <li>Data fragmentation and embedding</li>
+  <li>Variational Autoencoder (VAE)</li>
+  <li>Embeddings combination</li>
+  <li>Data recovery</li>
+</ol>
 
 **Optimization Pipeline**:
 
