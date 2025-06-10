@@ -64,6 +64,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - [7.2.3 Modified Variational AutoEncoder (VAE)](#723-modified-variational-autoencoder-vae)
     - [7.2.4 Aggregation](#724-aggregation)
     - [7.2.5 Data Recovery through gradient-based optimization](#725-data-recovery-through-gradient-based-optimization)
+    - [7.2.6 Benefits and Drawbacks](#726-benefits-and-drawbacks)
   - [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
   - [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
     - [7.4.1 Model architecture](#741-model-architecture)
@@ -426,7 +427,6 @@ The unified contact maps are subsequently processed through an optimization pipe
 
 Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and **TC** for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. Additionally, the current fragmentation strategy may yield subsequences that are too short to effectively capture essential folding patterns, suggesting the existence of a minimum fragment length required for accurate structural representation.
 
-
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
@@ -434,7 +434,7 @@ Across both datasets, the reconstructed structures are often closely aligned wit
   </p>
 </div>
 
-**Benefits and drawbacks**: 
+#### 7.2.6 Benefits and drawbacks
 
 The promising results achieved through this hybrid approach offer several valuable insights for future research directions:
 
