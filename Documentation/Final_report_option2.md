@@ -434,8 +434,14 @@ Across both datasets, the reconstructed structures are often closely aligned wit
   </p>
 </div>
 
-
 **Benefits and drawbacks**: 
+
+The promising results achieved through this hybrid approach offer several valuable insights for future research directions:
+
+- A strong, recurring relationship exists between amino acid sequences and the corresponding three-dimensional protein structures. This relationship can be effectively leveraged for predictive and generative modeling of protein structures.
+- Data fragmentation emerges as a viable alternative to conventional sequence length management strategies, such as padding or masking.
+- The proposed Hybrid Learning Inversion Framework demonstrates potential as a robust methodology for structural learning in protein modeling. 
+  
 
 ## 7.3 Additional diagnostic experiments 
 
