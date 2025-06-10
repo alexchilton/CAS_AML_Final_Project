@@ -425,7 +425,7 @@ Across both datasets, the reconstructed structures are often closely aligned wit
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 10:</strong> Comparison of original structure and recovered structure of fluoprotein 6MXW, chain E.
+    <strong>Figure 10:</strong> Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
   </p>
 </div>
 
