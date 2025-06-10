@@ -64,13 +64,14 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - [7.2.3 Modified Variational AutoEncoder (VAE)](#723-modified-variational-autoencoder-vae)
     - [7.2.4 Aggregation](#724-aggregation)
     - [7.2.5 Data Recovery through gradient-based optimization](#725-data-recovery-through-gradient-based-optimization)
-    - [7.2.6 Benefits and Drawbacks](#726-benefits-and-drawbacks)
-  - [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
-  - [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
-    - [7.4.1 Model architecture](#741-model-architecture)
-    - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
-    - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
-    - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
+    - [7.2.6 Benefits and drawbacks](#726-benefits-and-drawbacks)
+- [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
+- [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
+  - [7.4.1 Model architecture](#741-model-architecture)
+  - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
+  - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
+  - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
+- [8. Documentation](#8-documentation)
 - [Conclusions (first bit only now)](#conclusions-first-bit-only-now)
 - [References](#references)
 - [List of Figures](#list-of-figures)
@@ -320,7 +321,7 @@ We built a custom GraphVAE following the standard variational auto-encoder struc
 
 The model was developed to handle variable-sized protein graphs without padding artifacts. The attention mechanism with 4 heads allowed the model to capture multiple types of relationships simultaneously within the protein structure.   
 
-We built the loss function as a composite element including reconstruction loss ($\mathcal{L}$ _recon), KL divergence loss ($\mathcal{L}$ _KL ) and orthogonal regularization ($\mathcal{L}$_ortho ). The reconstruction loss employed task-specific weighting to balance off different protein properties encoded in the graph structure. The KL parameter included a $\beta$-VAE with cyclical annealing to balance reconstruction quality and latent space organization with a warmup period t of 25 epochs: 
+We built the loss function as a composite element including reconstruction loss ($\mathcal{L}$ _recon), KL divergence loss ($\mathcal{L}$ _KL ) and orthogonal regularization ($\mathcal{L}_{\text{ortho}}$). The reconstruction loss employed task-specific weighting to balance off different protein properties encoded in the graph structure. The KL parameter included a $\beta$-VAE with cyclical annealing to balance reconstruction quality and latent space organization with a warmup period t of 25 epochs: 
 
 $$
 \beta(t) = 
@@ -554,20 +555,19 @@ The 3D structure generated and converted in pdb file for reading through PyMOL  
 
 ### 7.4.4 Benefits and drawbacks
 
-One of the advantages this new approach, initially suggested by a generative model and further explored, had was the parallel generation of the sequence and the structure, enabling a consistency between primary and tertiary structure through a joint training. The multi component contact loss was a first attempt of a potentially further developable loss, including the physical-constraining parameters, the informations passed through the 38-dimensional nodes were very rich and the multi attention head enabled the model to focus selectively on different type of residue interactions. 
+One advantage of this new approach—originally inspired by a generative model and subsequently developed further—was its ability to generate the sequence and structure in parallel, enabling consistency between the primary and tertiary structures through joint training. The multi component contact loss was a first attempt of a potentially further developable loss, including the physical-constraining parameters, the informations passed through the 38-dimensional nodes were very rich and the multi attention head enabled the model to focus selectively on different type of residue interactions. 
 
+The model was though severely constrained by the maximum sequence lenght of 50 residues, limitation that would increase the computational of $O(N^2)$ graph attention operations on adjacency matrices with the increase of the sequence length. Additionally the model did not contains in this first implementation angles and torsions, computed in the preprocessing and essential in the structural biology for realistic side chain configurations. From thge described generation process the model gnerated proteins by building 50-residues subsequences and averagng them together, with the risk of introducing discontinuites in the final structure. For more complex datasets the complex multi component loss function may be difficult to balance.   
 
+## 8. Documentation
 
+We employed different level of documentation to ensure reproducibility and effective collaboration. Notebooks and python files were documented through the use of a version control system (GitHub) with README files and  refactorization as appropriate.   
+Experiments were tracked using Weight and Biases though szstematic experiments. Models were saved through checkpoints to enable training over several days without losing the progresses. 
 
 
 
 ## Conclusions (first bit only now)
 The early results indicated that the architecture may be potentially capable of capturing both sequence–structure relationships and the complex constraints governing protein folding, enabling the generation of plausible structures. Further validation will be necessary though to assess biological plausibility and to evaluate model performance on more diverse datasets in order to confirm the current findings (and metrics).
-
-
-
-
-
 
 
 ## References
@@ -673,16 +673,16 @@ $$
 
 Where:
 
-- $\( T \)$ is the sequence length,
-- $\( a_t^{\text{true}} \)$ is the true token at position $\( t \)$,
-- $\( a_{<t} \)$ denotes the sequence of tokens before time step $\( t \)$.
-- $\( L_{\text{contact}} \)$ is the loss enforcing contact map constraints,
-- $\( L_{\text{sequential}} \)$ penalizes non-sequential edges,
-- $\( L_{\text{symmetry}} \)$ enforces adjacency matrix symmetry,
-- $\( L_{\text{distance}} \)$ penalizes physically implausible edge distances.
-- $\( N \)$ is the number of residues,
-- $\( ss_i^{\text{true}} \)$ is the true secondary structure label at position $\( i \)$,
-- $\( h_i \)$ is the encoded representation of residue $\( i \)$.
+- $T$ is the sequence length  
+- $a_t^{\text{true}}$ is the true token at position $t$  
+- $a_{<t}$ denotes the sequence of tokens before time step $t$  
+- $L_{\text{contact}}$ is the loss enforcing contact map constraints  
+- $L_{\text{sequential}}$ penalizes non-sequential edges  
+- $L_{\text{symmetry}}$ enforces adjacency matrix symmetry  
+- $L_{\text{distance}}$ penalizes physically implausible edge distances  
+- $N$ is the number of residues  
+- $ss_i^{\text{true}}$ is the true secondary structure label at position $i$  
+- $h_i$ is the encoded representation of residue $i$
 
 The $\mathcal{L}_{\text{adj}}$ was itself combination of multiple factors described by the following equations: 
 
@@ -752,16 +752,17 @@ $$
 
 **Where:**
 
-- $\( T \)$: Length of the output sequence  
-- $\( a_t^{\text{true}} \)$: Ground truth token at step $\( t \)$  
-- $\( a_{<t} \)$: Sequence of preceding tokens  
-- $\( A_{\text{pred}} \)$, $\( A_{\text{true}} \)$: Predicted and true adjacency matrices  
-- $\( M \)$: Binary mask matrix  
-- $\( \odot \)$: Element-wise (Hadamard) product  
-- $\( \text{BCE} \)$: Binary cross-entropy loss  
-- $\( \text{MSE} \)$: Mean squared error  
-- $\( \text{diag}_k(A) \)$: $\( k \)$-th diagonal of matrix $\( A \)$  
-- $\( N \)$: Number of nodes in the graph  
-- $\( \mathcal{L}_{\text{local}} \)$, $\( \mathcal{L}_{\text{medium}} \)$, $\( \mathcal{L}_{\text{long}} \)$: Losses for different edge distance regimes  
-- $\( ss_i^{\text{true}} \)$: Ground truth secondary structure label for node $\( i \)$  
-- $\( \mathbf{h}_i \)$: Final node embedding of node $\( i \)$
+- $T$: Length of the output sequence  
+- $a_t^{\text{true}}$: Ground truth token at step $t$  
+- $a_{<t}$: Sequence of preceding tokens  
+- $A_{\text{pred}}, A_{\text{true}}$: Predicted and true adjacency matrices  
+- $M$: Binary mask matrix  
+- $\odot$: Element-wise (Hadamard) product  
+- $\text{BCE}$: Binary cross-entropy loss  
+- $\text{MSE}$: Mean squared error  
+- $\text{diag}_k(A)$: $k$-th diagonal of matrix $A$  
+- $N$: Number of nodes in the graph  
+- $\mathcal{L}_{\text{local}}, \mathcal{L}_{\text{medium}}, \mathcal{L}_{\text{long}}$: Losses for different edge distance regimes  
+- $ss_i^{\text{true}}$: Ground truth secondary structure label for node $i$  
+- $\mathbf{h}_i$: Final node embedding of node $i$
+
