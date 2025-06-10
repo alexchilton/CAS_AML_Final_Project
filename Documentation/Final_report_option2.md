@@ -71,6 +71,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
 - [Appendix](#appendix)
+  - [Appendix 1: GRAN loss function](#appendix-1-gran-loss-function)
 
 <div style="page-break-after: always;"></div>
 
@@ -481,43 +482,30 @@ Where:
 During training, teacher forcing was employed using ground truth sequences to reduce compounding errors [[19]](#ref19). For inference multinomial sampling was performed from the predicted distributions.  
 The dual output was represented by the amino acid sequence (via the sequence generation branch) and a 3D adjacency matrix (from the structure gneration branch), with an auxilliary prediction head to estimate secondary structure probability for each residue. This provided additional structure supervision and enabled structure aware sequence generation. 
 
-As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entyropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, simmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized and explicitated in the following equation: 
+As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entyropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, simmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized in the following equation and further explained in Appendix 1: 
 
 $$
 \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{seq}} + \mathcal{L}_{\text{adj}} + 0.5 \times \mathcal{L}_{\text{ss}}
 $$
 
+where: 
 
-$$
-\begin{aligned}
-\mathcal{L}_{\text{total}} =\ & 
--\frac{1}{T} \sum_{t=1}^{T} \log p(a_t^{\text{true}} \mid a_{<t}) \\
-& + \Big[1.0 \times \text{BCE}(A_{\text{pred}} \odot M,\ A_{\text{true}} \odot M) \\
-& \quad + 0.3 \times \frac{1}{2} \big(\text{MSE}(\text{diag}_1(A_{\text{pred}}),\ 0.9 \cdot \mathbf{1}) + \text{MSE}(\text{diag}_2(A_{\text{pred}}),\ 0.7 \cdot \mathbf{1})\big) \\
-& \quad + 0.3 \times \frac{1}{N^2} \sum_{i,j} \left|A_{\text{pred}}[i,j] - A_{\text{pred}}[j,i]\right| \\
-& \quad + 0.4 \times \big(0.3 \cdot \mathcal{L}_{\text{local}} + 0.3 \cdot \mathcal{L}_{\text{medium}} + 0.4 \cdot \mathcal{L}_{\text{long}}\big)\Big] \\
-& + 0.5 \times \left[-\frac{1}{N} \sum_{i=1}^{N} \log p(ss_i^{\text{true}} \mid \mathbf{h}_i)\right]
-\end{aligned}
-$$
-
-Where:
 - \( \mathcal{L}_{\text{seq}} \): Loss for sequence generation branch  
 - \( \mathcal{L}_{\text{adj}} \): Loss for structure generation branch 
 - \( \mathcal{L}_{\text{ss}} \): Loss for secondary structure prediction  
-- Coefficient \( 0.5 \): Weighting factor applied to balance the secondary structure loss
-- \( T \): Length of the output sequence  
-- \( a_t^{\text{true}} \): Ground truth token at step \( t \)  
-- \( a_{<t} \): Sequence of preceding tokens  
-- \( A_{\text{pred}} \), \( A_{\text{true}} \): Predicted and true adjacency matrices  
-- \( M \): Binary mask matrix  
-- \( \odot \): Element-wise (Hadamard) product  
-- \( \text{BCE} \): Binary cross-entropy loss  
-- \( \text{MSE} \): Mean squared error  
-- \( \text{diag}_k(A) \): \( k \)-th diagonal of matrix \( A \)  
-- \( N \): Number of nodes in the graph  
-- \( \mathcal{L}_{\text{local}} \), \( \mathcal{L}_{\text{medium}} \), \( \mathcal{L}_{\text{long}} \): Losses for different edge distance regimes  
-- \( ss_i^{\text{true}} \): Ground truth secondary structure label for node \( i \)  
-- \( \mathbf{h}_i \): Final node embedding of node \( i \)
+- Coefficient \( 0.5 \): Weighting factor 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## References
@@ -594,3 +582,118 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 
 
 ## Appendix
+
+### Appendix 1: GRAN loss function 
+
+The total loss was computed as combination of the three individual contribution from the sequence generation branch, the structure generation branch and the auxillary secondary structure branch:
+
+$$
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{seq}} + \mathcal{L}_{\text{adj}} + 0.5 \times \mathcal{L}_{\text{ss}}
+$$
+
+Each of the individual lossed described by the following formulations: 
+
+$$
+L_{seq} = -\frac{1}{T} \sum_{t=1}^{T} \log p(a_t^{\text{true}} \mid a_{<t})
+$$
+$$
+L_{\text{adj}} = 1.0 \times L_{\text{contact}} + 0.3 \times L_{\text{sequential}} + 0.3 \times L_{\text{symmetry}} + 0.4 \times L_{\text{distance}}
+$$
+$$
+L_{\text{ss}} = -\frac{1}{N} \sum_{i=1}^{N} \log p\left(ss_i^{\text{true}} \mid h_i\right)
+$$
+
+Where:
+
+- \( T \) is the sequence length,
+- \( a_t^{\text{true}} \) is the true token at position \( t \),
+- \( a_{<t} \) denotes the sequence of tokens before time step \( t \).
+- \( L_{\text{contact}} \) is the loss enforcing contact map constraints,
+- \( L_{\text{sequential}} \) penalizes non-sequential edges,
+- \( L_{\text{symmetry}} \) enforces adjacency matrix symmetry,
+- \( L_{\text{distance}} \) penalizes physically implausible edge distances.
+- \( N \) is the number of residues,
+- \( ss_i^{\text{true}} \) is the true secondary structure label at position \( i \),
+- \( h_i \) is the encoded representation of residue \( i \).
+
+The $\mathcal{L}_{\text{adj}}$ was itself combination of multiple factors described by the following equations: 
+
+$$
+L_{\text{contact}} = \mathrm{BCE}(A_{\text{pred}} \odot M,\ A_{\text{true}} \odot M)
+$$
+
+$$
+L_{\text{sequential}} = \frac{1}{2} \left[
+\mathrm{MSE}(\mathrm{diag}_1(A_{\text{pred}}),\ 0.9 \times \mathbf{1}) +
+\mathrm{MSE}(\mathrm{diag}_2(A_{\text{pred}}),\ 0.7 \times \mathbf{1})
+\right]
+$$
+
+$$
+L_{\text{symmetry}} = \frac{1}{N^2} \sum_{i,j} \left| A_{\text{pred}}[i,j] - A_{\text{pred}}[j,i] \right|
+$$
+
+$$
+L_{\text{distance}} = 0.3 \times L_{\text{local}} + 0.3 \times L_{\text{medium}} + 0.4 \times L_{\text{long}}
+$$
+
+$$
+L_{r} = \mathrm{BCE}(A_{\text{pred}} \odot M_r,\ A_{\text{true}} \odot M_r) \times \left( \sum M_r + \varepsilon \right)^{-1}
+$$
+
+**Mask definitions:**
+
+$$
+M_{\text{local}}[i,j] =
+\begin{cases}
+1 & \text{if } 1 \leq |i - j| \leq 5 \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+$$
+M_{\text{medium}}[i,j] =
+\begin{cases}
+1 & \text{if } 5 < |i - j| \leq 20 \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+$$
+M_{\text{long}}[i,j] =
+\begin{cases}
+1 & \text{if } |i - j| > 20 \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+
+Which combined all together gave the following final formulation for the total loss of the GRAN dual output architecture: 
+
+$$
+\begin{aligned}
+\mathcal{L}_{\text{total}} =\ & 
+-\frac{1}{T} \sum_{t=1}^{T} \log p(a_t^{\text{true}} \mid a_{<t}) \\
+& + \Big[1.0 \times \text{BCE}(A_{\text{pred}} \odot M,\ A_{\text{true}} \odot M) \\
+& \quad + 0.3 \times \frac{1}{2} \big(\text{MSE}(\text{diag}_1(A_{\text{pred}}),\ 0.9 \cdot \mathbf{1}) + \text{MSE}(\text{diag}_2(A_{\text{pred}}),\ 0.7 \cdot \mathbf{1})\big) \\
+& \quad + 0.3 \times \frac{1}{N^2} \sum_{i,j} \left|A_{\text{pred}}[i,j] - A_{\text{pred}}[j,i]\right| \\
+& \quad + 0.4 \times \big(0.3 \cdot \mathcal{L}_{\text{local}} + 0.3 \cdot \mathcal{L}_{\text{medium}} + 0.4 \cdot \mathcal{L}_{\text{long}}\big)\Big] \\
+& + 0.5 \times \left[-\frac{1}{N} \sum_{i=1}^{N} \log p(ss_i^{\text{true}} \mid \mathbf{h}_i)\right]
+\end{aligned}
+$$
+
+**Where:**
+
+- \( T \): Length of the output sequence  
+- \( a_t^{\text{true}} \): Ground truth token at step \( t \)  
+- \( a_{<t} \): Sequence of preceding tokens  
+- \( A_{\text{pred}} \), \( A_{\text{true}} \): Predicted and true adjacency matrices  
+- \( M \): Binary mask matrix  
+- \( \odot \): Element-wise (Hadamard) product  
+- \( \text{BCE} \): Binary cross-entropy loss  
+- \( \text{MSE} \): Mean squared error  
+- \( \text{diag}_k(A) \): \( k \)-th diagonal of matrix \( A \)  
+- \( N \): Number of nodes in the graph  
+- \( \mathcal{L}_{\text{local}} \), \( \mathcal{L}_{\text{medium}} \), \( \mathcal{L}_{\text{long}} \): Losses for different edge distance regimes  
+- \( ss_i^{\text{true}} \): Ground truth secondary structure label for node \( i \)  
+- \( \mathbf{h}_i \): Final node embedding of node \( i \)
