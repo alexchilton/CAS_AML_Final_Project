@@ -436,7 +436,7 @@ Across both datasets, the reconstructed structures are often closely aligned wit
 
 #### 7.2.6 Benefits and drawbacks
 
-Compared to the results obtained previously, the reconstructions acheived with this hybrid approach are very accurate and represent a significant improvement in protein structure prediction. The innovative learning inversion framework demontrates great potential as a methodology for structural learning; in this framework data fragmentation emerges equally as a viable alternative to convetional sequence length management through padding or masking. The inversion framework can leverage efficiently the strong bound between the amino-acid sequences and the three-dimensional structure of proteins. The encouraging outcomes obtained through this approach provide valuable insights and open new avenues for future research in protein modeling.
+Compared to the results obtained previously, the reconstructions acheived with this hybrid approach are very accurate and represent a significant improvement in protein structure prediction. The innovative learning inversion framework demontrates great potential as a methodology for structural learning; in this framework data fragmentation emerges equally as a viable alternative to convetional sequence length management through padding or masking. The encouraging outcomes obtained through this approach provide valuable insights, and open new avenues for future research in protein modeling.
 
 
 ## 7.3 Additional diagnostic experiments 
