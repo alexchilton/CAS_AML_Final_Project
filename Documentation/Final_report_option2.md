@@ -671,16 +671,16 @@ $$
 
 Where:
 
-- \( T \) is the sequence length,
-- \( a_t^{\text{true}} \) is the true token at position \( t \),
-- \( a_{<t} \) denotes the sequence of tokens before time step \( t \).
-- \( L_{\text{contact}} \) is the loss enforcing contact map constraints,
-- \( L_{\text{sequential}} \) penalizes non-sequential edges,
-- \( L_{\text{symmetry}} \) enforces adjacency matrix symmetry,
-- \( L_{\text{distance}} \) penalizes physically implausible edge distances.
-- \( N \) is the number of residues,
-- \( ss_i^{\text{true}} \) is the true secondary structure label at position \( i \),
-- \( h_i \) is the encoded representation of residue \( i \).
+- $\( T \)$ is the sequence length,
+- $\( a_t^{\text{true}} \)$ is the true token at position $\( t \)$,
+- $\( a_{<t} \)$ denotes the sequence of tokens before time step $\( t \)$.
+- $\( L_{\text{contact}} \)$ is the loss enforcing contact map constraints,
+- $\( L_{\text{sequential}} \)$ penalizes non-sequential edges,
+- $\( L_{\text{symmetry}} \)$ enforces adjacency matrix symmetry,
+- $\( L_{\text{distance}} \)$ penalizes physically implausible edge distances.
+- $\( N \)$ is the number of residues,
+- $\( ss_i^{\text{true}} \)$ is the true secondary structure label at position $\( i \)$,
+- $\( h_i \)$ is the encoded representation of residue $\( i \)$.
 
 The $\mathcal{L}_{\text{adj}}$ was itself combination of multiple factors described by the following equations: 
 
@@ -750,16 +750,16 @@ $$
 
 **Where:**
 
-- \( T \): Length of the output sequence  
-- \( a_t^{\text{true}} \): Ground truth token at step \( t \)  
-- \( a_{<t} \): Sequence of preceding tokens  
-- \( A_{\text{pred}} \), \( A_{\text{true}} \): Predicted and true adjacency matrices  
-- \( M \): Binary mask matrix  
-- \( \odot \): Element-wise (Hadamard) product  
-- \( \text{BCE} \): Binary cross-entropy loss  
-- \( \text{MSE} \): Mean squared error  
-- \( \text{diag}_k(A) \): \( k \)-th diagonal of matrix \( A \)  
-- \( N \): Number of nodes in the graph  
-- \( \mathcal{L}_{\text{local}} \), \( \mathcal{L}_{\text{medium}} \), \( \mathcal{L}_{\text{long}} \): Losses for different edge distance regimes  
-- \( ss_i^{\text{true}} \): Ground truth secondary structure label for node \( i \)  
-- \( \mathbf{h}_i \): Final node embedding of node \( i \)
+- $\( T \)$: Length of the output sequence  
+- $\( a_t^{\text{true}} \)$: Ground truth token at step $\( t \)$  
+- $\( a_{<t} \)$: Sequence of preceding tokens  
+- $\( A_{\text{pred}} \)$, $\( A_{\text{true}} \)$: Predicted and true adjacency matrices  
+- $\( M \)$: Binary mask matrix  
+- $\( \odot \)$: Element-wise (Hadamard) product  
+- $\( \text{BCE} \)$: Binary cross-entropy loss  
+- $\( \text{MSE} \)$: Mean squared error  
+- $\( \text{diag}_k(A) \)$: $\( k \)$-th diagonal of matrix $\( A \)$  
+- $\( N \)$: Number of nodes in the graph  
+- $\( \mathcal{L}_{\text{local}} \)$, $\( \mathcal{L}_{\text{medium}} \)$, $\( \mathcal{L}_{\text{long}} \)$: Losses for different edge distance regimes  
+- $\( ss_i^{\text{true}} \)$: Ground truth secondary structure label for node $\( i \)$  
+- $\( \mathbf{h}_i \)$: Final node embedding of node $\( i \)$
