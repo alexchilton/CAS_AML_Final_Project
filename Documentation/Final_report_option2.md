@@ -408,7 +408,7 @@ Local predictions from individual subsequences are aggregated and averaged to pr
   <img src="figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figures 7–9: </strong>Comparison for protein TC.
-<strong>Figure 7 </strong>presents the original contact maps derived from structural data.
+<strong>Figure 7 </strong>presents the original contact maps derived from structural data, masked according to the chosen subsequence length.
 <strong>Figure 8 </strong>shows the aggregated model predictions obtained by averaging local outputs from subsequences.
 <strong>Figure 9 </strong>displays the absolute difference between the predicted and original contact maps.
   </p>
