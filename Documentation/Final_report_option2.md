@@ -404,9 +404,9 @@ Training was performed separately on two datasets, each comprising 20,000 sample
 Local predictions from individual subsequences are aggregated and averaged to produce unified, protein-level contact map predictions. The two evaluated datasets show promising results, with the predicted structures exhibiting visually accurate correspondence to the reference conformations.
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" width="1200">
-  <img src="figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" width="1200">
-  <img src="figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" width="1200">
+  <img src="figures/FLUOPROTEINSOriginalcontactmaps(groundtruth).png" alt="Ground truth" width="1200">
+  <img src="figures/FLUOPROTEINSReconstructedcontactmaps.png" alt="Recovered maps" width="1200">
+  <img src="figures/FLUOPROTEINS_Errors.png" alt="Errors" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figures 7–9: </strong>Comparison for protein TC.
 <strong>Figure 7 </strong>presents the original contact maps derived from structural data, masked according to the chosen subsequence length.
