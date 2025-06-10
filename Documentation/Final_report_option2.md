@@ -368,8 +368,7 @@ The comparative study in Annex 1 established an empirical framework for the crit
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein length" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 5:</strong>  In the Fluoproteins dataset, protein chain lengths exhibit a peak around 225 residues, with 99% of sequences containing no more than 233 residues. Based on this observation, a conservative chunk length of 78 residues was selected—representing approximately 35% of the maximum observed length. This choice ensures a minimum coverage bandwidth of 70%, providing sufficient context within each fragment while maintaining consistency across samples.
-  </p>
+    <strong>Figure 5:</strong> In the Fluoproteins dataset, protein chain lengths exhibit a peak around 225 residues, with 99% of sequences containing no more than 233 residues. Based on this observation, a conservative chunk length of 78 residues was selected—representing approximately 35% of the maximum observed length. This choice ensures a minimum coverage bandwidth of 70%, providing sufficient context within each fragment while maintaining consistency across samples.</p>
 </div>
 
 
@@ -377,11 +376,10 @@ The comparative study in Annex 1 established an empirical framework for the crit
 
 The original spatial data, represented as 3D atomic coordinates, is initially transformed into distance matrices — representations that are invariant to rotation and translation, thereby facilitating broader pattern recognition. These distance matrices are subsequently embedded into range-based contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis : this configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures the homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
 
-
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 6:</strong></p>
+    <strong>Figure 6:</strong> Pairwise distance distribution across the Fluoproteins dataset. Red lines indicate the six-range percentile thresholds used to define the boundaries for contact map embeddings.</p>
 </div>
 
 #### 7.2.3 Modified Variational AutoEncoder (VAE)
