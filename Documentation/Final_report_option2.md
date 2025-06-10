@@ -67,6 +67,10 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
 - [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
   - [7.4.1 Model architecture](#741-model-architecture)
+  - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
+  - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
+  - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
+- [Conclusions (first bit only now)](#conclusions-first-bit-only-now)
 - [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
@@ -444,7 +448,14 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
 
 ### 7.4.1 Model architecture
 
-The model was built for protein graphs as described , each node was characterized by a 38-dimensional feature vector comprising 7 physiochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/figure_e_opt2.png" alt="GRAN model" width="700">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 11:</strong> Schematic representation of the GRAN model with weigths and parameters.
+  </p>
+</div>
+
+The model was built for protein graphs as described, each node was characterized by a 38-dimensional feature vector comprising 7 physiochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
 The graph encoder employed a a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention head with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
 
 Following processing, a global graph representation was obtained by mean pooling:  
@@ -496,11 +507,60 @@ where:
 - Coefficient \( 0.5 \): Weighting factor 
 
 
+### 7.4.2 Additional preprocessing and the generation process
+
+The early findings about the benefit on splitting the protein in 50-unites sequences described above, as well as the additional requirements to generate potentially biologically plausible structures required additional preprocessing in the data pipeline to calculate the missing parameters and chunking. Additionally, upon suggestion of a generative model [[20]](#ref20) and upon common practice in machine learning tasks [[21]](#ref21) we implemented some data augmentation by creating multiple overlapping windows for training. 
+
+Training was performed using the hyperparameters listed in Table 1, with each epoch requiring approximately 30 minutes on an NVIDIA GeForce RTX 3080 GPU. 
+
+| **Component**           | **Details**                                                                 |
+|-------------------------|------------------------------------------------------------------------------|
+| Optimization            | Adam optimizer with learning rate \(5 \times 10^{-4}\), weight decay \(1 \times 10^{-5}\) |
+| Learning Rate Scheduling| ReduceLROnPlateau, factor 0.5, patience 3 epochs                            |
+| Regularization          | Gradient clipping (max norm 1.0), Dropout rate 0.1, Early stopping (patience 10, min 30 epochs) |
+| Batch Processing        | Fixed batch size of 16 using 50-residue protein subsequences                |
+
+**Table 1**: GRAN-inspired dual output model hyperparameters.
+
+The new generation was obtained by sampling from the latent space, autoregressive generation of the amino acid sequence, prediction of the adjacency matrix and the corresponding 3D contact pattern and finally reconstruction of the full 3D structure through optimization. 
+
+### 7.4.3 Training performance and model convergence 
+
+The model showed good convergence charatectistics across all loss components during training with stable performance reached approximately after epoch 50. 
+
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/figure_f.png" alt="GRAN model" width="700">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 12:</strong> Training logs from the GRAN model.
+  </p>
+</div>
+
+
+Once trained, the contact map prediction achieved an accuracy of 99.51% 
+
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/figure_g.png" alt="GRAN model" width="700">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 13:</strong> Contact map prediction accuracy analysis with binary comparison and difference analysis.
+  </p>
+</div>
+
+The 3D structure generated and converted in pdb file for reading through PyMOL  exibited realistic aminoacid composition distribution, plausible contact map and realistic fold topology and backbone connectivity. 
+
+(picture)  -> Pymol 
+(picture) --> Pymol 
+
+### 7.4.4 Benefits and drawbacks
+
+One of the advantages this new approach, initially suggested by a generative model and further explored, had was the parallel generation of the sequence and the structure, enabling a consistency between primary and tertiary structure through a joint training. The multi component contact loss was a first attempt of a potentially further developable loss, including the physical-constraining parameters, the informations passed through the 38-dimensional nodes were very rich and the multi attention head enabled the model to focus selectively on different type of residue interactions. 
 
 
 
 
 
+
+## Conclusions (first bit only now)
+The early results indicated that the architecture may be potentially capable of capturing both sequence–structure relationships and the complex constraints governing protein folding, enabling the generation of plausible structures. Further validation will be necessary though to assess biological plausibility and to evaluate model performance on more diverse datasets in order to confirm the current findings (and metrics).
 
 
 
@@ -568,6 +628,12 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 
 <a id="ref19"></a>
 [19] Lamb, Alex & Goyal, Anirudh & Zhang, Ying & Zhang, Saizheng & Courville, Aaron & Bengio, Y.. (2016). Professor Forcing: A New Algorithm for Training Recurrent Networks. 10.48550/arXiv.1610.09038. 
+
+<a id="ref20"></a>
+[20] (Claude)
+
+<a id="ref21"></a>
+[21] Hernandez-Garcia, Alex & König, Peter. (2019). Further advantages of data augmentation on convolutional neural networks. 10.48550/arXiv.1906.11052. 
 
 <div style="page-break-after: always;"></div>
 
