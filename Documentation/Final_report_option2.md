@@ -379,7 +379,7 @@ The original spatial data, represented as 3D atomic coordinates, is initially tr
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 6:</strong> Pairwise distance distribution across the Fluoproteins dataset. Red lines indicate the six-range percentile thresholds used to define the boundaries for contact map embeddings.</p>
+    <strong>Figure 6:</strong> Pairwise distance distribution across the Fluoproteins dataset. The strong initial peak corresponds to the typical 3.8 Å distance between consecutive alpha-carbon atoms in the protein backbone. Red lines indicate the six-range percentile thresholds used to define the boundaries for contact map embeddings.</p>
 </div>
 
 #### 7.2.3 Modified Variational AutoEncoder (VAE)
@@ -404,22 +404,13 @@ Local predictions from individual subsequences are aggregated and averaged to pr
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS%20-%20Original%20contact%20maps%20(ground%20truth).png" alt="Ground truth" width="1200">
-  <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 7:</strong>  
-  </p>
-</div>
-
-<div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS%20-%20Reconstructed%20contact%20maps.png" alt="Recovered maps" width="1200">
-  <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 8:</strong>  
-  </p>
-</div>
-
-<div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS%20-%20Errors.png" alt="Errors" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 9:</strong>  
+    <strong>Figures 7–9: </strong>Comparison for protein TC.
+<strong>Figure 7 </strong>presents the original contact maps derived from structural data.
+<strong>Figure 8 </strong>shows the aggregated model predictions obtained by averaging local outputs from subsequences.
+<strong>Figure 9 </strong>displays the absolute difference between the predicted and original contact maps.
   </p>
 </div>
 
