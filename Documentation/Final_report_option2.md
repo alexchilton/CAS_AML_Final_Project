@@ -64,12 +64,13 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - [7.2.3 Modified Variational AutoEncoder (VAE)](#723-modified-variational-autoencoder-vae)
     - [7.2.4 Aggregation](#724-aggregation)
     - [7.2.5 Data Recovery through gradient-based optimization](#725-data-recovery-through-gradient-based-optimization)
-- [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
-- [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
-  - [7.4.1 Model architecture](#741-model-architecture)
-  - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
-  - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
-  - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
+    - [7.2.6 Benefits and Drawbacks](#726-benefits-and-drawbacks)
+  - [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
+  - [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
+    - [7.4.1 Model architecture](#741-model-architecture)
+    - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
+    - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
+    - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
 - [Conclusions (first bit only now)](#conclusions-first-bit-only-now)
 - [References](#references)
 - [List of Figures](#list-of-figures)
@@ -424,8 +425,7 @@ Local predictions from individual subsequences are aggregated and averaged to pr
 
 The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see <a href="https://github.com/alexchilton/CAS_AML_Final_Project/edit/main/Documentation/Final_report_annex_1.md" alt="Annex 1 - Gradient-Based Optimization" target="_self">Annex 1 - Gradient-Based Optimization</a> for detailed procedure).
 
-Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and **TC** for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. Additionally, the current fragmentation strategy may yield subsequences that are too short to effectively capture essential folding patterns, suggesting the existence of a minimum fragment length required for accurate structural representation.
-
+Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and **TC** for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. Additionally, the current fragmentation policy may yield subsequences that are too short to effectively capture essential folding patterns, suggesting the existence of a minimum fragment length required for accurate structural representation.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
@@ -434,8 +434,10 @@ Across both datasets, the reconstructed structures are often closely aligned wit
   </p>
 </div>
 
+#### 7.2.6 Benefits and drawbacks
 
-**Benefits and drawbacks**: 
+Compared to the results obtained previously, the reconstructions acheived with this hybrid approach are very accurate and represent a significant improvement in protein structure prediction. The innovative learning inversion framework demontrates great potential as a methodology for structural learning; in this framework data fragmentation emerges equally as a viable alternative to convetional sequence length management through padding or masking. The encouraging outcomes obtained through this approach provide valuable insights, and open new avenues for future research in protein modeling.
+
 
 ## 7.3 Additional diagnostic experiments 
 
