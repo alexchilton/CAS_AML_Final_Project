@@ -389,7 +389,7 @@ A modified Variational Autoencoder (VAE) is subsequently trained using the follo
 - Input: one-hot encoded amino acid sequences, comprising 20 categories for standard residues and an additional category for unidentified residues.
 - Output: six-range binary contact maps derived from spatial embeddings.
 - Latent code dimensionality: 256.
-- Weights Initialization: Xavier, normal.
+- Weights Initialization: Glorot, normal.
 - Activation: SoftMax(dim=-1). 
 - Loss function: a weighted combination of Binary Cross-Entropy (BCE) and Kullback-Leibler (KL) divergence, with a tunable scaling factor σ applied to the KL term.
 - Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
