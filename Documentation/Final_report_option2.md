@@ -425,7 +425,7 @@ Local predictions from individual subsequences are aggregated and averaged to pr
 
 The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see <a href="https://github.com/alexchilton/CAS_AML_Final_Project/edit/main/Documentation/Final_report_annex_1.md" alt="Annex 1 - Gradient-Based Optimization" target="_self">Annex 1 - Gradient-Based Optimization</a> for detailed procedure).
 
-Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and **TC** for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. Additionally, the current fragmentation strategy may yield subsequences that are too short to effectively capture essential folding patterns, suggesting the existence of a minimum fragment length required for accurate structural representation.
+Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and **TC** for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. Additionally, the current fragmentation policy may yield subsequences that are too short to effectively capture essential folding patterns, suggesting the existence of a minimum fragment length required for accurate structural representation.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
@@ -436,12 +436,8 @@ Across both datasets, the reconstructed structures are often closely aligned wit
 
 #### 7.2.6 Benefits and drawbacks
 
-The promising results achieved through this hybrid approach offer several valuable insights for future research directions:
+Compared to the results obtained previously, the reconstructions acheived with this hybrid approach are very accurate and represent a significant improvement in protein structure prediction. The innovative learning inversion framework demontrates great potential as a methodology for structural learning; in this framework data fragmentation emerges equally as a viable alternative to convetional sequence length management through padding or masking. The inversion framework can leverage efficiently the strong bound between the amino-acid sequences and the three-dimensional structure of proteins. The encouraging outcomes obtained through this approach provide valuable insights and open new avenues for future research in protein modeling.
 
-- A strong, recurring relationship exists between amino acid sequences and the corresponding three-dimensional protein structures. This relationship can be effectively leveraged for predictive and generative modeling of protein structures.
-- Data fragmentation emerges as a viable alternative to conventional sequence length management strategies, such as padding or masking.
-- The proposed Hybrid Learning Inversion Framework demonstrates potential as a robust methodology for structural learning in protein modeling. 
-  
 
 ## 7.3 Additional diagnostic experiments 
 
