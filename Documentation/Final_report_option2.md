@@ -429,8 +429,6 @@ The unified contact maps are subsequently processed through an optimization pipe
 
 Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and around 2.30 for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. The selected latent space dimensionality of 256 may be insufficient to effectively capture the complex and high-dimensional patterns, potentially limiting the representational capacity of the model.
 
-A second evaluation on the Nanobodies dataset, conducted with the same chunk length (43 residues), but using a larger training set (30,000 samples) and an expanded latent code size (320), resulted in a lower mean absolute error centered around **TC**, confirming the initial intuition regarding the benefits of increased representational capacity and data volume.
-
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
