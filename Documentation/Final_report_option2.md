@@ -72,8 +72,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
   - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
   - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
 - [8. Documentation](#8-documentation)
-- [Conclusions (first bit only now)](#conclusions-first-bit-only-now)
-- [References](#references)
+- [9. Risks](#9-risks)
+- [10. Conclusions (first bit only now)](#10-conclusions-first-bit-only-now)
+- [11. References](#11-references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
 - [Appendix](#appendix)
@@ -552,10 +553,24 @@ Once trained, the contact map prediction achieved an accuracy of 99.51%
   </p>
 </div>
 
-The 3D structure generated and converted in pdb file for reading through PyMOL  exibited realistic aminoacid composition distribution, plausible contact map and realistic fold topology and backbone connectivity. 
+The 3D structure generated and converted in pdb file for reading through PyMOL.  
 
-(picture)  -> Pymol 
-(picture) --> Pymol 
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/visualization.png" alt="GRAN model" width="600">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 14:</strong> cartoon visualization of the genarted protein through PyMOL.
+  </p>
+</div>
+
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/surface.png" alt="GRAN model" width="600">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 15:</strong> surface visualization of the generated protein through PyMOL. Ble and red areas represent charged residues, green and yellow area represent hydrophobic regions. 
+  </p>
+</div>
+
+
+Despite plausible contact map and realistic fold topology and backbone connectivity, the amino acid distribution and and the disposition of the charged and hydrophobic residues do not follow yet the pattern of a folded protein indicating further optimization needed.  
 
 ### 7.4.4 Benefits and drawbacks
 
@@ -568,13 +583,18 @@ The model was though severely constrained by the maximum sequence lenght of 50 r
 We employed different level of documentation to ensure reproducibility and effective collaboration. Notebooks and python files were documented through the use of a version control system (GitHub) with README files and  refactorization as appropriate.   
 Experiments were tracked using Weight and Biases though szstematic experiments. Models were saved through checkpoints to enable training over several days without losing the progresses. 
 
+## 9. Risks
+
+Protein structures are extremely complex systems to be interpreted and studied. This intrinsic complexity is reflected in the genartive task where not only a plausible amino acid sequence have to be generated, but a secondary and tertiary structures have to be predicted either depending on the sequenc generated and on many biological constrains. This high complexity was aknowledges by the authors upon the numerous attempt to evaluate different strategies without success.  
+with this awareness the risk of generating unplasible structures is high, especially without strong physico-biological constrains. The current stage of the project focused mainly on studying the different generation strategies and its limitation in order to develop the more suitable strategy, the aforedescribed risk is not therefore of concern on this stage but will be considered in the development of the PINN GNN.  
+Another risk connected with the use of complex networks with relatively small amount of data (approximately 3000 structures) is the overfitting, and in our case as explained in the data section the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus wa son the study of the genartive task for biological systems. 
 
 
-## Conclusions (first bit only now)
+## 10. Conclusions (first bit only now)
 The early results indicated that the architecture may be potentially capable of capturing both sequence–structure relationships and the complex constraints governing protein folding, enabling the generation of plausible structures. Further validation will be necessary though to assess biological plausibility and to evaluate model performance on more diverse datasets in order to confirm the current findings (and metrics).
 
 
-## References
+## 11. References
 
 <a id="ref1"></a>
 [1] Nelson, David L., and Michael M. Cox. Lehninger Principles of Biochemistry. 6th ed. W. H. Freeman, 2012.
