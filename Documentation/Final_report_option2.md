@@ -426,9 +426,9 @@ Local predictions from individual subsequences are aggregated and averaged to pr
 
 The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see <a href="https://github.com/alexchilton/CAS_AML_Final_Project/edit/main/Documentation/Final_report_annex_1.md" alt="Annex 1 - Gradient-Based Optimization" target="_new">Annex 1 - Gradient-Based Optimization</a> for detailed procedure).
 
-Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and around 2.30 for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. Additionally, the Nanobodies dataset fragmentation policy may yield subsequences that are too short to effectively capture essential folding patterns, suggesting the existence of a minimum fragment length required for accurate structural representation.
+Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and around 2.30 for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. The selected latent space dimensionality of 256 may be insufficient to effectively capture the complex and high-dimensional patterns, potentially limiting the representational capacity of the model.
 
-A second evaluation using a larger chunk length (50 residues instead of 43) on the Nanobodies dataset supports this intuition, yielding a mean absolute error centered around **TC**. 
+A second evaluation using a larger chunk length (50 residues instead of 43) yields a slightly higher mean absolute error centered around 2.37, suggesting that chunk length does not make a difference regarding the error.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
@@ -441,9 +441,7 @@ A second evaluation using a larger chunk length (50 residues instead of 43) on t
 
 Compared to the results obtained previously, the reconstructions acheived with this hybrid approach are very accurate and represent a significant improvement in protein structure prediction. The innovative learning inversion framework demontrates great potential as a methodology for structural learning; in this framework data fragmentation emerges equally as a viable alternative to convetional sequence length management through padding or masking. 
 
-On the other hand, there is a risk of overfitting to local patterns and obliterate the larger context, largely dependent on the chosen size of the subsequences and the diversity of the dataset. Additionally, the overall complexity of the framework may complicate model interpretability and scalability.
-
-**something to add here ?**
+However, this approach is not without limitations. One notable concern is the risk of overfitting to local patterns at the expense of capturing broader structural context. This issue is strongly influenced by the chosen subsequence length and the diversity of the training dataset. The overall complexity of the framework may also hinder model interpretability and limit its scalability. In particular, when applied to larger proteins comprising thousands of residues, increasing the minimum chunk length can lead to a substantial expansion of the training dataset — growing quadratically with sequence length due to the rise in pairwise distance computations.
 
 
 ## 7.3 Additional diagnostic experiments 
