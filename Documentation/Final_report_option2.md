@@ -327,8 +327,8 @@ We built a custom GraphVAE following the standard variational auto-encoder struc
 - 1 dimensional edge attribute (distances)
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="figures/model_schema_GVAE.jpg" alt="Schematic representation of the Protein GraphVAE with weights and parameters" width="700">
-  <p style="margin: 10px 40px; font-style: italic;">
+  <img src="figures/model_schema_GVAE.jpg" alt="Schematic representation of the Protein GraphVAE with weights and parameters" width="800">
+  <p style="margin: 10px 40px 10px; font-style: italic;">
     <strong>Figure 4:</strong> Schematic representation of the Protein GraphVAE with weights and parameters 
   </p>
 </div>
@@ -417,8 +417,8 @@ A modified Variational Autoencoder (VAE) was subsequently trained using the foll
 - Optimizer: RMS-Prop.
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="figures/model_schema_VAE.jpg" alt="Schematic representation of the modified VAE with weights and parameters" width="700">
-  <p style="margin: 10px 40px; font-style: italic;">
+  <img src="figures/model_schema_VAE.jpg" alt="Schematic representation of the modified VAE with weights and parameters" width="800">
+  <p style="margin: 10px 40px 10px; font-style: italic;">
     <strong>Figure 7:</strong> Schematic representation of the modified VAE with weights and parameters 
   </p>
 </div>
@@ -484,7 +484,7 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
 #### 7.4.1 Model architecture
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="figures/model_schema_GRAN.JPG" alt="GRAN model" width="700">
+  <img src="figures/model_schema_GRAN.jpg" alt="GRAN model" width="800">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figure 12:</strong> Schematic representation of the GRAN model with weights and parameters.
   </p>
