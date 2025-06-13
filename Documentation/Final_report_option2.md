@@ -584,7 +584,8 @@ Experiments were tracked using Weight and Biases through systematic experiments.
 ## 9. Risks
 
 Protein structures are extremely complex systems to be interpreted and studied. This intrinsic complexity is reflected in the generative task where not only a plausible amino acid sequence have to be generated, but a secondary and tertiary structures have to be predicted either depending on the sequenc generated and on many biological constrains. This high complexity was acknowledged by the authors upon the numerous attempt to evaluate different strategies without success.  
-With this awareness the risk of generating implausible structures is high, especially without strong physico-biological constraints. The current stage of the project focused mainly on studying the different generation strategies and its limitations in order to develop the most suitable strategy, the aforementioned risk is not therefore of concern at this stage but will be considered in the development of the PINN GNN.  
+With this awareness the risk of generating implausible structures is high, especially without strong physico-biological constraints. The current stage of the project focused mainly on studying the different generation strategies and its limitations in order to develop the most suitable strategy, the aforementioned risk is not therefore of concern at this stage but will be considered in the development of the PINN GNN. 
+
 Another risk connected with the use of complex networks with relatively small amount of data (approximately 3000 structures) is the overfitting, and in our case as explained in the data section the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus wa son the study of the generative task for biological systems. 
 
 
