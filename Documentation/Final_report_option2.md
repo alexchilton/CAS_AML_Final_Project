@@ -1,5 +1,5 @@
 **Alex Chilton**  
-<span style="color: gray; font-size: 0.8em;">Rathausgasse 14</br>CH &dash 3014 Bern</span>   
+<span style="color: gray; font-size: 0.8em;">Rathausgasse 14</br>CH &mdash; 3014 Bern</span>   
 <span style="font-size: 0.8em;">alex_chilton@gmx.co.uk</span>   
 
 **Lauro Foletti**  
