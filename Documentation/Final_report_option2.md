@@ -65,8 +65,8 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - [7.2.4 Aggregation](#724-aggregation)
     - [7.2.5 Data Recovery through gradient-based optimization](#725-data-recovery-through-gradient-based-optimization)
     - [7.2.6 Benefits and drawbacks](#726-benefits-and-drawbacks)
-- [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
-- [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
+  - [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
+  - [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
   - [7.4.1 Model architecture](#741-model-architecture)
   - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
   - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
@@ -79,7 +79,11 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [List of Tables](#list-of-tables)
 - [Appendix](#appendix)
   - [Appendix 1: Three-dimensional Structure Recovery through Gradient-Based Optimization](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization)
-  - [Appendix 2: GRAN loss function](#appendix-1-gran-loss-function)
+    - [Data](#data)
+    - [Embedding process](#embedding-process)
+    - [Reverse embedding process](#reverse-embedding-process)
+    - [Systematic experiments](#systematic-experiments)
+  - [Appendix 2: GRAN loss function](#appendix-2-gran-loss-function)
 
 <div style="page-break-after: always;"></div>
 
@@ -426,7 +430,7 @@ Local predictions from individual subsequences are aggregated and averaged to pr
 
 #### 7.2.5 Data Recovery through gradient-based optimization
 
-The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see <a href="https://github.com/alexchilton/CAS_AML_Final_Project/edit/main/Documentation/Final_report_annex_1.md" alt="Annex 1 - Gradient-Based Optimization" target="_new">Annex 1 - Gradient-Based Optimization</a> for detailed procedure).
+The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see [Appendix 1: Three-dimensional Structure Recovery through Gradient-Based Optimization](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization) for detailed procedure).
 
 Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and around 2.30 for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. The selected latent space dimensionality of 256 may be insufficient to effectively capture the complex and high-dimensional patterns, potentially limiting the representational capacity of the model.
 
@@ -444,7 +448,7 @@ Compared to the results obtained previously, the reconstructions achieved with t
 However, this approach is not without limitations. One concern is the risk of overfitting to local patterns at the expense of capturing broader structural context. This issue is strongly influenced by the chosen subsequence length and the diversity of the training dataset. The overall complexity of the framework may also hinder model interpretability and limit its scalability. In particular, when applied to larger proteins comprising thousands of residues, increasing the minimum chunk length can lead to a substantial expansion of the training dataset — growing quadratically with sequence length due to the rise in pairwise distance computations.
 
 
-## 7.3 Additional diagnostic experiments 
+### 7.3 Additional diagnostic experiments 
 
 Following the drawbacks of the first VAE implementation and the positive results from the optimization pipeline, we conducted diagnostic experiments using the GAT-VAE architecture on both the SCOP dataset and the Synthetic Graph Validation Dataset. These experiments employed different approaches to better understand the model's fundamental capabilities and validate our architectural choices.
 
@@ -458,7 +462,7 @@ However, the SCOP classification results indicated limitations in our approach f
 
 These diagnostic experiments, while not meeting our expectations for SCOP classification, provided crucial insights that informed our subsequent decision to pursue the GRAN-inspired dual output architecture. The limitations observed reinforced the necessity of moving beyond simple classification tasks toward more sophisticated generative approaches that could better capture the complexity of protein structure relationships.
 
-## 7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture
+### 7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture
 
 Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on graph generation [[18]](#ref18) and the conceptual similarity of modeling proteins as sequential chains of amino acids, together with complete structural graphs. The original GRAN model used only a structural model and we wanted to keep the sequential nature too.
 
@@ -748,8 +752,13 @@ However, when using contact matrices with information loss, MDS relied on protot
 - Partitioning into sectors of identical width gave optimal results
 - Percentile partitioning followed closely in performance  
 - Structural partitioning yielded least accurate results
-  
-![MDS reconstruction accuracy](figures/mds_accuracy_grid.png)
+
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/mds_accuracy_grid.png" alt="MDS reconstruction systematic study" width="700">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 16:</strong> MDS reconstruction systematic study.
+  </p>
+</div>
 
 **2. Gradient-Based Optimization Pipeline**
 
@@ -759,7 +768,12 @@ Our systematic analysis revealed significant improvements over MDS prototypes us
 - **Domain Number Impact**: More contact matrix domains consistently improved reconstruction quality
 - **Partitioning Strategy**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
 
-![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/gbo_accuracy_grid.png" alt="Optimized reconstruction systematic study" width="700">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 17:</strong> Optimized reconstructions systematic study.
+  </p>
+</div>
 
 
 ### Appendix 2: GRAN loss function 
