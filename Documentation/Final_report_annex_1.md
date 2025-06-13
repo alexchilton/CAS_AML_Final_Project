@@ -7,7 +7,7 @@ The study shows that the inversion process — despite the inherent loss of info
 ## Data
 
 Three sets of coordinates, each representing a distinct structural configuration, are analyzed to explore contrastive spatial distributions:
-<ol type="1"><li><strong>Single Large Point Cloud</strong> – A synthetically generated, uniformly distributed set of points forming one uncentered cluster.
+<ol type="1"><li><strong>Single Large Point Cloud</strong> – A synthetically generated, uniformly distributed set of points forming one cluster.
 </li>
 <li><strong>Multiple Small Point Clouds</strong> – A synthetic configuration composed of several smaller, spatially disparate clusters sampled from a Gaussian distribution. 
 </li>
@@ -40,13 +40,15 @@ The embedding process results in 2 objects:
 
 The reverse embedding process consists of 2 stages departing from the embeddings and the list obtained earlier :
 <ol type="1"><li>
-  <b>MDS pipeline</b>. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these values constitute a first approximation of the 3D coordinates and are used to initialize a table of logits;<br></li>
-  <li><b>Optimization pipeline</b>. Logits are fed into an optimization loop, which translates them into relative distances and compares them with contact information. This optimization process relies entirely on a double sigmoid which “validates” the proposed values when they fall within the expected range, and penalizes them when they fall outside it, all in a continuous and differentiable manner (soft ranges). Proposed values are compared with target values by BCE. The process returns a set of three-dimensional coordinates whose relative distances correspond as closely as possible to the contact maps.</li>
+  <b>MDS pipeline</b>. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these values constitute a first approximation of the 3D coordinates and are used as initialization values for a table of logits;<br></li>
+  <li><b>Optimization pipeline</b>. Logits are fed into an optimization loop, which translates them into relative distances and compares them with contact information. This optimization process relies entirely on a double sigmoid which “validates” the proposed values when they fall within the expected range, and penalizes them when they fall outside it, all in a continuous and differentiable manner (soft ranges). Proposed values are compared with target values by BCE. </li>
 </ol>
 
-## Experimental results
+The process returns a set of three-dimensional coordinates whose relative distances correspond as closely as possible to the contact maps.
 
-Experiments were conducted to map the interactions between the datasets and the three key parameters, and to identify optimal settings.
+## Systematic experiments
+
+Systematic experiments were conducted to map the interactions between the datasets and the three key parameters, and to identify optimal settings. The recovered structures were then compared to the original ones using absolute mean error and cosine similarity scores.
 
 ### 1. MDS pipeline
 
@@ -65,6 +67,8 @@ Our systematic analysis revealed significant improvements over MDS prototypes us
 - **Error Reduction**: Mean absolute error greatly reduced with significant improvement between 0-20% coverage
 - **Coverage Optimization**: For protein structures, performance plateaued around 60% coverage
 - **Domain Number Impact**: More contact matrix domains consistently improved reconstruction quality
-- **Partitioning Strategy Reversal**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
+- **Partitioning Strategy**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
 
 ![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
+
+
