@@ -601,25 +601,31 @@ One advantage of this new approach—originally inspired by a generative model a
 The model was, however, severely constrained by the maximum sequence length of 50 residues, limitation that would increase the computational complexity of $O(N^2)$ graph attention operations on adjacency matrices with the increase of the sequence length. Additionally, the model did not contain in this first implementation angles and torsions, computed in the preprocessing and essential in the structural biology for realistic side chain configurations. From the described generation process the model generated proteins by building 50-residues subsequences and averaging them together, with the risk of introducing discontinuities in the final structure. For more complex datasets the complex multi-component loss function may be difficult to balance.   
 
 ## 8. Documentation
+<div style="text-align: justify;">
 
 We employed different level of documentation to ensure reproducibility and effective collaboration. Notebooks and python files were documented through the use of a version control system (GitHub) with README files and  refactorization as appropriate.   
 Experiments were tracked using Weight and Biases through systematic experiments. Models were saved through checkpoints to enable training over several days without losing the progresses. 
+</div>
 
 ## 9. Risks
+<div style="text-align: justify;">
 
 Protein structures are extremely complex systems to be interpreted and studied. This intrinsic complexity was reflected in the generative task where not only a plausible amino acid sequence had to be generated, but secondary and tertiary structures had to be predicted depending both on the sequence generated and on many biological constraints. This high complexity was acknowledged by the authors through the numerous attempts to evaluate different strategies without success.
 
 With this awareness, the risk of generating implausible structures was high, especially without strong physico-biological constraints. The current stage of the project focused mainly on studying the different generation strategies and their limitations in order to develop the most suitable strategy. The aforementioned risk was therefore not of concern at this stage but will be considered in the development of the PINN.
 
 Another risk connected with the use of complex networks with relatively small amounts of data (approximately 3000 structures) was overfitting, and in our case, as explained in the data section, the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus was rather on the study of the generative task for biological systems.
+</div>
 
 
 ## 10. Conclusions 
+<div style="text-align: justify;">
 The early results indicated that the studied architectures, with the required optimizations, may be potentially capable of capturing both sequence–structure relationships and the complex constraints governing protein folding, enabling the generation of plausible structures.  
 
 The first ProteinGraphVAE had the ability to learn both node-level properties and structural features, while handling gracefully different protein sizes but with low fidelity in the reconstruction, which could be potentially improved by a strongly physically constrained loss (absent in this model). The hybrid learning inversion framework proved to be very promising in the handling of long protein chains and variable length, while improving the fidelity of the reconstruction, though the fixed chunk length represented a limitation on the reconstruction of bigger proteins which could be plausibly overcome by sequence overlapping techniques or by using more powerful frameworks for training with longer sequence chunks. Ultimately the GRAN model showed great potential through the dual output mechanism and the auxiliary secondary structure validation strategy, but still required optimization in the generation to ensure plausibility of the generated new proteins.   
 
 Further validation will be required to assess the performance of these models in more diverse datasets, like the pH dataset newly developed. Furthermore, the generative capabilities of our PINN GNN will not be dedicated to new proteins but to the same input protein, simplifying the generation task by removing the biological plausibility constraint, as the output would be strongly constrained on the input with regard to the sequence order. With this in mind, our thorough investigation provided us sufficient data and encouraging results to proceed with the development of the physically constrained system originally planned.
+</div>
 
 
 ## References
@@ -697,6 +703,36 @@ Renjie Liao, Yujia Li, Yang Song, Shenlong Wang, Charlie Nash, William L. Hamilt
 <div style="page-break-after: always;"></div>
 
 ## List of Figures
+
+<div style="text-align: justify;">
+
+Figure 1: Comparison between molecular and graph-based representations of the same protein structure. 
+
+Figure 2: Comparison of protein representation formats.
+
+Figure 3: 3D visualization of a protein structure showing amino acid residues as colored spheres according to type.
+
+Figure 4: Schematic representation of the Protein GraphVAE with weights and parameters 
+
+Figure 5: In the Fluoproteins dataset, protein chain lengths exhibit a peak around 225 residues, with 99% of sequences containing no more than 233 residues. Based on this observation, a conservative chunk length of 78 residues was selected—representing approximately 35% of the maximum observed length. This choice ensures a minimum coverage bandwidth of 70%, providing sufficient context within each fragment while maintaining consistency across samples.
+
+Figure 6: Pairwise distance distribution across the Fluoproteins dataset. 
+
+Figures 7–9: Comparison for protein TC.
+
+Figure 10: Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
+
+Figure 11:Schematic representation of the GRAN model with weights and parameters.
+
+Figure 12: Training logs from the GRAN model.
+
+Figure 13: Contact map prediction accuracy analysis with binary comparison and difference analysis.
+
+Figure 14: Cartoon visualization of the generated protein through PyMOL.
+
+Figure 15: surface visualization of the generated protein through PyMOL. 
+
+</div>
 
 <div style="page-break-after: always;"></div>
 
