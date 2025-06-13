@@ -74,7 +74,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [8. Documentation](#8-documentation)
 - [9. Risks](#9-risks)
 - [10. Conclusions](#10-conclusions)
-- [11. References](#11-references)
+- [References](#references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
 - [Appendix](#appendix)
@@ -450,7 +450,7 @@ However, this approach is not without limitations. One concern is the risk of ov
 
 ### 7.3 Additional diagnostic experiments 
 
-Following the drawbacks of the first VAE implementation and the positive results from the optimization pipeline, we conducted diagnostic experiments using the GAT-VAE architecture on both the SCOP dataset and the Synthetic Graph Validation Dataset. These experiments employed different approaches to better understand the model's fundamental capabilities and validate our architectural choices.
+Following the drawbacks of the first VAE implementation and the positive results from the optimization pipeline, we conducted diagnostic experiments using the GAT-VAE architecture on both the SCOP dataset and the Synthetic Graph Validation Dataset [[18]](#ref18). These experiments employed different approaches to better understand the model's fundamental capabilities and validate our architectural choices.
 
 The motivation for this simplified approach came from examining classification methodologies that could provide clearer performance metrics and faster validation cycles, while also testing generative capabilities on controlled synthetic data.
 
@@ -464,7 +464,7 @@ These diagnostic experiments, while not meeting our expectations for SCOP classi
 
 ### 7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture
 
-Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on graph generation [[18]](#ref18) and the conceptual similarity of modeling proteins as sequential chains of amino acids, together with complete structural graphs. The original GRAN model used only a structural model and we wanted to keep the sequential nature too.
+Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on graph generation [[19]](#ref19) and the conceptual similarity of modeling proteins as sequential chains of amino acids, together with complete structural graphs. The original GRAN model used only a structural model and we wanted to keep the sequential nature too.
 
 ### 7.4.1 Model architecture
 
@@ -512,7 +512,7 @@ Where:
 - \( W_{\text{seq}} \), \( \mathbf{b}_{\text{seq}} \): Trainable weight matrix and bias vector  
 - \( \mathrm{softmax} \): Normalized exponential function for computing class probabilities 
 
-During training, teacher forcing was employed using ground truth sequences to reduce compounding errors [[19]](#ref19). For inference multinomial sampling was performed from the predicted distributions.  
+During training, teacher forcing was employed using ground truth sequences to reduce compounding errors [[20]](#ref20). For inference multinomial sampling was performed from the predicted distributions.  
 The dual output was represented by the amino acid sequence (via the sequence generation branch) and a 3D adjacency matrix (from the structure generation branch), with an auxiliary prediction head to estimate secondary structure probability for each residue. This provided additional structure supervision and enabled structure aware sequence generation. 
 
 As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, symmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized in the following equation and further explained in Appendix 1: 
@@ -531,7 +531,7 @@ where:
 
 ### 7.4.2 Additional preprocessing and the generation process
 
-The early findings about the benefit on splitting the protein in 50-unites sequences described above, as well as the additional requirements to generate potentially biologically plausible structures required additional preprocessing in the data pipeline to calculate the missing parameters and chunking. Additionally, upon suggestion of a generative model [[20]](#ref20) and upon common practice in machine learning tasks [[21]](#ref21) we implemented some data augmentation by creating multiple overlapping windows for training. 
+The early findings about the benefit on splitting the protein in 50-unites sequences described above, as well as the additional requirements to generate potentially biologically plausible structures required additional preprocessing in the data pipeline to calculate the missing parameters and chunking. Additionally, upon suggestion of a generative model [[21]](#ref21) and upon common practice in machine learning tasks [[22]](#ref22) we implemented some data augmentation by creating multiple overlapping windows for training. 
 
 Training was performed using the hyperparameters listed in Table 1, with each epoch requiring approximately 30 minutes on an NVIDIA GeForce RTX 3080 GPU. 
 
@@ -613,7 +613,7 @@ The first ProteinGraphVAE had the ability to learn both node-level properties an
 Further validation will be required to assess the performance of these models in more diverse datasets, like the pH dataset newly developed. Furthermore, the generative capabilities of our PINN GNN will not be dedicated to new proteins but to the same input protein, simplifying the generation task by removing the biological plausibility constraint, as the output would be strongly constrained on the input with regard to the sequence order. With this in mind, our thorough investigation provided us sufficient data and encouraging results to proceed with the development of the physically constrained system originally planned.
 
 
-## 11. References
+## References
 
 <a id="ref1"></a>
 [1] Nelson, David L., and Michael M. Cox. Lehninger Principles of Biochemistry. 6th ed. W. H. Freeman, 2012.
@@ -669,18 +669,21 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 [17] Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
 
 <a id="ref18"></a>
-[18] Efficient Graph Generation with Graph Recurrent Attention Networks
+[18] Korman, A. (2023). Prediction of protein movement upon ligand binding using equivariant graph neural networks. Stanford CS224W: Machine Learning with Graphs. Medium. https://medium.com/stanford-cs224w/prediction-of-protein-movement-upon-ligand-binding-using-equivariant-graph-neural-networks-a1f4b2c8b8a0
+
+<a id="ref19"></a>
+[19] Efficient Graph Generation with Graph Recurrent Attention Networks
 Renjie Liao, Yujia Li, Yang Song, Shenlong Wang, Charlie Nash, William L. Hamilton, David Duvenaud, Raquel Urtasun, Richard S. Zemel
  
 
-<a id="ref19"></a>
-[19] Lamb, Alex & Goyal, Anirudh & Zhang, Ying & Zhang, Saizheng & Courville, Aaron & Bengio, Y.. (2016). Professor Forcing: A New Algorithm for Training Recurrent Networks. 10.48550/arXiv.1610.09038. 
-
 <a id="ref20"></a>
-[20] (Claude)
+[20] Lamb, Alex & Goyal, Anirudh & Zhang, Ying & Zhang, Saizheng & Courville, Aaron & Bengio, Y.. (2016). Professor Forcing: A New Algorithm for Training Recurrent Networks. 10.48550/arXiv.1610.09038. 
 
 <a id="ref21"></a>
-[21] Hernandez-Garcia, Alex & König, Peter. (2019). Further advantages of data augmentation on convolutional neural networks. 10.48550/arXiv.1906.11052. 
+[21] Claude (Anthropic). (2025). Claude Sonnet 4 [Large language model]. June 2025, from https://claude.ai
+
+<a id="ref22"></a>
+[22] Hernandez-Garcia, Alex & König, Peter. (2019). Further advantages of data augmentation on convolutional neural networks. 10.48550/arXiv.1906.11052. 
 
 <div style="page-break-after: always;"></div>
 
