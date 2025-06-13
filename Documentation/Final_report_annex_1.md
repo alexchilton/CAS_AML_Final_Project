@@ -28,11 +28,9 @@ The resulting distance matrices are then converted into range-based contact maps
 A set of basic constraints is imposed: given the continuous nature of pairwise distance distributions in each dataset, the range domains are defined to cover the entire extent of the distance domain. Additionally, to prevent ambiguous contact information and ensure the resulting contact maps remain compatible with probabilistic operations, the domains are contiguous and non-overlapping.
 
 The specific distribution of each structure leads us to consider several approaches to domain partitioning : 
-<ol type="a">
-  <li><u>Percentiles</u>. A quantitative boundary ensures the homogeneous distribution of contacts between domains;</li>
-  <li><u>Sectors</u>. Qualitative demarcation, distributing distances between sectors of equal width;</li>
-  <li><u>Structural</u>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.</li>
-</ol>
+- <b>Percentiles</b>. A quantitative boundary ensures the homogeneous distribution of contacts between domains;
+- <b>Sectors</b>. Qualitative demarcation, distributing distances between sectors of equal width;
+- <b>Structural</b>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.
 
 **Process**
 
