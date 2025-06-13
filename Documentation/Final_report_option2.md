@@ -461,6 +461,8 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
   </p>
 </div>
 
+Unlike variational autoencoders, this model does not use a probabilistic latent space with sampling. Instead, it directly maps input graph features to dual outputs (sequence and structure) through deterministic neural network transformations with attention mechanisms.
+
 The model was built for protein graphs as described, each node was characterized by a 38-dimensional feature vector comprising 7 physiochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
 The graph encoder employed a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention heads with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
 
@@ -528,7 +530,7 @@ Training was performed using the hyperparameters listed in Table 1, with each ep
 
 **Table 1**: GRAN-inspired dual output model hyperparameters.
 
-The new generation was obtained by sampling from the latent space, autoregressive generation of the amino acid sequence, prediction of the adjacency matrix and the corresponding 3D contact pattern and finally reconstruction of the full 3D structure through optimization. 
+The generation process works as follows: (1) input protein graph features are processed through graph attention layers to create node embeddings, (2) global graph representation is obtained through mean pooling of node embeddings, (3) this global representation initializes a GRU-based autoregressive sequence decoder that generates amino acid sequences step-by-step, (4) simultaneously, an edge predictor network uses pairwise node embeddings to predict the adjacency matrix, and (5) finally, 3D structure reconstruction is performed through gradient-based optimization using the predicted contact patterns.
 
 ### 7.4.3 Training performance and model convergence 
 
