@@ -94,7 +94,7 @@ Protein structure is conventionally described at four hierarchical levels. The p
 
 ### 1.2 Project objectives and evolution
 
-We initially conceptualized this project to develop a physically informed neural network (PINN) able to predict protein tertiary structure changes upon environmental perturbation. The development of this ultimate goal imposed though preliminary studies necessary to understand the complex structure of proteins and the challenges intertwined with the translation, modification and generation of these elaborated biological structures.   
+We initially conceptualized this project to develop a physically informed neural network (PINN) able to predict protein tertiary structure changes upon environmental perturbation. The development of this ultimate goal imposed preliminary studies necessary to understand the complex structure of proteins and the challenges intertwined with the translation, modification and generation of these elaborated biological structures.   
 More specifically the preliminary studies involved:   
 - **Parsing of crystallographic / X-ray experimental data (PDB files)**: to extract meaningful information for the subsequent phases of the project;
 - **Preprocessing and pre-calculation**: of all the properties potentially required to describe the 3D structure of the protein and could play a role in the interaction with the environment;
@@ -121,7 +121,7 @@ The trained best model and associated metadata will be made publicly available v
 
 <div style="text-align: justify;">
 
-Data were obtained from the RCSB Protein Data Bank (PDB) [[11]](#ref11) using the official API with carefully defined selection criteria. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. The search included multiple criteria to catch as many nanobodies as possible, including, among others, the family (Camelidae), mentions (VHH) or labels. The script was designed to retrieve all matching strucures, handling pagination and downloading each PDB file (containing 3D protein structure data) individually.   
+Data were obtained from the RCSB Protein Data Bank (PDB) [[11]](#ref11) using the official API with carefully defined selection criteria. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. The search included multiple criteria to catch as many nanobodies as possible, including, among others, the family (Camelidae), mentions (VHH) or specific labels. The script was designed to retrieve all matching structures, handling pagination and downloading each PDB file (containing 3D protein structure data) individually.   
 In a secondary phase, we extended the pipeline to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[12]](#ref12) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features, envisioning subsequent phases of the project and the requirements of a PINN within a supervised learning framework. 
 
 </div>
@@ -159,7 +159,7 @@ PDB files were parsed using BioPython [[13]](#ref13). We evaluated several parsi
   </p>
 </div>
 
-Upon the first visualization we could observe among the issues the existence of several chains, not belonging to the same proteins but being clusters instead, which were treated by the preprocessing as one molecule. We therefore preprocessed the pdb files to have independent chains (each representing one unique nanobody) and converted in to heterogeneous graphs.   
+Upon the first visualization we could observe among the issues the existence of several chains, not belonging to the same proteins but being clusters instead, which were treated by the preprocessing as one molecule. We therefore preprocessed the pdb files to have independent chains (each representing one unique nanobody) and converted into heterogeneous graphs.   
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_b.png" alt="Second parsing" width="600">
@@ -304,7 +304,7 @@ Building upon our systematic preprocessing foundation, we explored multiple comp
 
 ### 7.1 Graph Variational Autoencoder (GraphVAE)
 
-VAEs have shown success in molecular generation tasks [[16]](#ref16) [[17]](#ref17), and the graph structure seemed well-suited to capture protein spatial relationships. 
+VAEs have demonstrated success in molecular generation tasks [[16]](#ref16) [[17]](#ref17), and the graph structure seemed well-suited to capture protein spatial relationships. 
 
 We built a custom GraphVAE following the standard variational auto-encoder structure with the following parameters: 
 - input: 8-dimensional node features representing physicochemical properties
@@ -463,7 +463,7 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
 
 Unlike variational autoencoders, this model does not use a probabilistic latent space with sampling. Instead, it directly maps input graph features to dual outputs (sequence and structure) through deterministic neural network transformations with attention mechanisms.
 
-The model was built for protein graphs as described, each node was characterized by a 38-dimensional feature vector comprising 7 physiochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
+The model was built for protein graphs as described, each node was characterized by a 38-dimensional feature vector comprising 7 physicochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
 The graph encoder employed a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention heads with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
 
 Following processing, a global graph representation was obtained by mean pooling:  
@@ -530,7 +530,7 @@ Training was performed using the hyperparameters listed in Table 1, with each ep
 
 **Table 1**: GRAN-inspired dual output model hyperparameters.
 
-The generation process works as follows: (1) input protein graph features are processed through graph attention layers to create node embeddings, (2) global graph representation is obtained through mean pooling of node embeddings, (3) this global representation initializes a GRU-based autoregressive sequence decoder that generates amino acid sequences step-by-step, (4) simultaneously, an edge predictor network uses pairwise node embeddings to predict the adjacency matrix, and (5) finally, 3D structure reconstruction is performed through gradient-based optimization using the predicted contact patterns.
+The generation process employs a novel multi-subsequence aggregation strategy to create full-length proteins from a model trained on 50-residue subsequences. The process works as follows: (1) The full target protein length is divided into overlapping 50-residue windows with 50% overlap (step size of 25 residues), (2) for each window, input graph features are processed through graph attention layers to create node embeddings, (3) a global graph representation is obtained through mean pooling, which initializes a GRU-based autoregressive decoder that generates the subsequence, (4) simultaneously, an edge predictor network processes pairwise node embeddings to predict the corresponding adjacency matrix segment, (5) overlapping regions between subsequences are averaged - for sequence positions, the most frequently predicted amino acid is selected using a voting mechanism, while for adjacency matrices, overlapping values are arithmetically averaged, (6) the final full-length protein is assembled by concatenating all subsequences and averaging their overlapping regions, and (7) 3D structure reconstruction is performed through gradient-based optimization using the final aggregated contact map with a binary threshold of 0.065.
 
 ### 7.4.3 Training performance and model convergence 
 
