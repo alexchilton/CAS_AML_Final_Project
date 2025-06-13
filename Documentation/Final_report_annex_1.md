@@ -1,6 +1,8 @@
 # Annex 1
 # Three-dimensional Structure Recovery through Gradient-Based Optimization
 
+This short study proposes an empirical framework for tuning the parameters of an optimization pipeline designed to reconstruct the three-dimensional expression of a structure from partial contact maps. These contact maps, derived from local fragment predictions based on sequence subsequences, represent incomplete spatial interaction data. To recover the full 3D structure, a process comparable to a "reverse embedding" is employed, which maps the partial contact information back into spatial coordinates.
+
 The encoding of distance matrices into contact matrices obviously involves a significant loss of information. Continuous values are eliminated in favor of indicative binary values, reducing them to very rough approximations. Under certain conditions, however, these approximations can be combined in such a way as to recover close original values, making the encoding process partially - and surprisingly, reversible. The binary and categorical aspect of contact matrices can be directly assimilated to probability mass distributions, enabling the use of sigmoids for optimization.
 
 Interesting results were obtained with combining two operations: 
