@@ -445,12 +445,21 @@ However, this approach is not without limitations. One concern is the risk of ov
 
 ## 7.3 Additional diagnostic experiments 
 
-Following the drawbacks of the first VAE implementation and the positive results upon the optimization pipeline we conducted a brief investigation of the GAT-VAE using the SCOP dataset and the Synthetic Graph Validation Dataset using a classification instead of a more complex generation task.  
-For this goal we used a 28-dimensional input head, 3-layer SAGEConv with residual connections and batch normalization as encoder and a 7 class output (corresponding to the 7 classes of the SCOP dataset). the dataset were further preprocessed with the newly experimented 50-residue blocks and step size 1. **(LARA STILL TO FINISH)**
+Following the drawbacks of the first VAE implementation and the positive results from the optimization pipeline, we conducted diagnostic experiments using the GAT-VAE architecture on both the SCOP dataset and the Synthetic Graph Validation Dataset. These experiments employed different approaches to better understand the model's fundamental capabilities and validate our architectural choices.
+
+The motivation for this simplified approach came from examining classification methodologies that could provide clearer performance metrics and faster validation cycles, while also testing generative capabilities on controlled synthetic data.
+
+For the SCOP classification experiments, we implemented a Graph Attention Network (GATNetwork) with multiple attention heads, using 3-layer GATConv modules with batch normalization and residual connections. The model architecture included a 64-dimensional hidden layer with 4 attention heads, followed by batch normalization and dropout (0.3) for regularization. The classification head consisted of two linear layers mapping to 7 classes corresponding to the SCOP structural categories. The SCOP dataset was preprocessed by filtering proteins to include only those with fewer than 300 residues to ensure computational feasibility, reducing the dataset from 3,420 to 2,717 proteins while maintaining balanced class representation across the 7 SCOP structural categories.
+
+In parallel, we conducted generative experiments using synthetic graphs with controlled topological properties, allowing us to test the VAE generation mechanisms on simpler, well-understood structures before applying them to complex biological data. The synthetic graph experiments used an Enhanced Graph Variational Autoencoder with GAT layers, incorporating color embeddings, coordinate normalization, and feature normalization to handle the 13-dimensional input features effectively for graph generation tasks.
+
+However, the SCOP classification results indicated limitations in our approach for capturing the complex structural relationships inherent in protein data. The classification task, while providing valuable insights into the attention mechanism's basic functionality, proved insufficient for demonstrating the model's capacity to handle the nuanced structural patterns required for protein generation. This highlighted the need for more sophisticated architectural approaches that could better leverage the sequential and spatial nature of protein structures.
+
+These diagnostic experiments, while not meeting our expectations for SCOP classification, provided crucial insights that informed our subsequent decision to pursue the GRAN-inspired dual output architecture. The limitations observed reinforced the necessity of moving beyond simple classification tasks toward more sophisticated generative approaches that could better capture the complexity of protein structure relationships.
 
 ## 7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture
 
-Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on time series data [[18]](#ref18) and the conceptual similarity of modeling proteins as sequential chains of amino acids, rather than as complete structural graphs.
+Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on graph generation [[18]](#ref18) and the conceptual similarity of modeling proteins as sequential chains of amino acids, rather than as complete structural graphs.
 
 ### 7.4.1 Model architecture
 
@@ -651,7 +660,9 @@ bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
 [17] Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
 
 <a id="ref18"></a>
-[18] Cirstea, Razvan Gabriel & Guo, Chenjuan & Yang, Bin. (2021). Graph Attention Recurrent Neural Networks for Correlated Time Series Forecasting. 10.48550/arXiv.2103.10760. 
+[18] Efficient Graph Generation with Graph Recurrent Attention Networks
+Renjie Liao, Yujia Li, Yang Song, Shenlong Wang, Charlie Nash, William L. Hamilton, David Duvenaud, Raquel Urtasun, Richard S. Zemel
+ 
 
 <a id="ref19"></a>
 [19] Lamb, Alex & Goyal, Anirudh & Zhang, Ying & Zhang, Saizheng & Courville, Aaron & Bengio, Y.. (2016). Professor Forcing: A New Algorithm for Training Recurrent Networks. 10.48550/arXiv.1610.09038. 
