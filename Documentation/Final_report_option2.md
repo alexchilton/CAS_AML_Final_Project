@@ -327,8 +327,8 @@ We built a custom GraphVAE following the standard variational auto-encoder struc
 - 1 dimensional edge attribute (distances)
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="figures/figure_d.png" alt="First parsing" width="600">
-  <p style="margin: 10px 40px; font-style: italic;">
+  <img src="figures/model_schema_GVAE.jpg" alt="Schematic representation of the Protein GraphVAE with weights and parameters" width="800">
+  <p style="margin: 10px 40px 10px; font-style: italic;">
     <strong>Figure 4:</strong> Schematic representation of the Protein GraphVAE with weights and parameters 
   </p>
 </div>
@@ -416,6 +416,13 @@ A modified Variational Autoencoder (VAE) was subsequently trained using the foll
 - Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
 - Optimizer: RMS-Prop.
 
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/model_schema_VAE.jpg" alt="Schematic representation of the modified VAE with weights and parameters" width="800">
+  <p style="margin: 10px 40px 10px; font-style: italic;">
+    <strong>Figure 7:</strong> Schematic representation of the modified VAE with weights and parameters 
+  </p>
+</div>
+
 Given the modified architecture of the VAE, the output was not intended to reconstruct the input sequence directly. Instead, it predicted a representation of the associated spatial structure — specifically, an embedded form of the structure encoded as a set of binary contact maps. This reflects a shift from traditional input reconstruction toward structured prediction, where the goal was to learn spatial constraints from sequence-based features.
 
 Training was performed separately on two datasets, each comprising 20,000 samples derived from Nanobody and Fluoproteins structures, respectively. A 90/10 train–test split was employed, and models were trained over 80 epochs. At this stage, the loss curve for the test set reached a plateau, while the training loss continued to decrease. This divergence suggested that, under the current training configuration, the model had reached its optimal convergence point, beyond which additional training yields diminishing generalization performance.
@@ -429,10 +436,10 @@ Local predictions from individual subsequences were aggregated and averaged to p
   <img src="figures/FLUOPROTEINSReconstructedcontactmaps.png" alt="Recovered maps" width="1200">
   <img src="figures/FLUOPROTEINS_Errors.png" alt="Errors" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figures 7–9: </strong>Comparison for protein TC.
-<strong>Figure 7 </strong>(top) presents the original contact maps derived from structural data, masked according to the chosen subsequence length.
-<strong>Figure 8 </strong> (middle) shows the aggregated model predictions obtained by averaging local outputs from subsequences.
-<strong>Figure 9 </strong> (bottom) displays the absolute difference between the predicted and original contact maps.
+    <strong>Figures 8–10: </strong>Comparison for protein TC.
+<strong>Figure 8 </strong>(top) presents the original contact maps derived from structural data, masked according to the chosen subsequence length.
+<strong>Figure 9 </strong> (middle) shows the aggregated model predictions obtained by averaging local outputs from subsequences.
+<strong>Figure 10 </strong> (bottom) displays the absolute difference between the predicted and original contact maps.
   </p>
 </div>
 
@@ -445,7 +452,7 @@ Across both datasets, the reconstructed structures were often closely aligned wi
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 10:</strong> Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
+    <strong>Figure 11:</strong> Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
   </p>
 </div>
 
@@ -477,9 +484,9 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
 #### 7.4.1 Model architecture
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="figures/figure_e_opt2.png" alt="GRAN model" width="700">
+  <img src="figures/model_schema_GRAN.jpg" alt="GRAN model" width="800">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 11:</strong> Schematic representation of the GRAN model with weights and parameters.
+    <strong>Figure 12:</strong> Schematic representation of the GRAN model with weights and parameters.
   </p>
 </div>
 
@@ -561,7 +568,7 @@ The model showed good convergence characteristics across all loss components dur
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_f.png" alt="GRAN model" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 12:</strong> Training logs from the GRAN model.
+    <strong>Figure 13:</strong> Training logs from the GRAN model.
   </p>
 </div>
 
@@ -571,7 +578,7 @@ Once trained, the contact map prediction achieved an accuracy of 99.51%
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_g.png" alt="GRAN model" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 13:</strong> Contact map prediction accuracy analysis with binary comparison and difference analysis.
+    <strong>Figure 14:</strong> Contact map prediction accuracy analysis with binary comparison and difference analysis.
   </p>
 </div>
 
@@ -580,14 +587,14 @@ The 3D structure was generated and converted in pdb file for reading through PyM
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/visualization.png" alt="GRAN model" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 14:</strong> cartoon visualization of the generated protein through PyMOL.
+    <strong>Figure 15:</strong> cartoon visualization of the generated protein through PyMOL.
   </p>
 </div>
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/surface_atoms.png" alt="GRAN model" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 15:</strong> surface visualization of the generated protein through PyMOL. Blue and red areas represent charged residues, green and yellow area represent hydrophobic regions. 
+    <strong>Figure 16:</strong> surface visualization of the generated protein through PyMOL. Blue and red areas represent charged residues, green and yellow area represent hydrophobic regions. 
   </p>
 </div>
 
@@ -808,7 +815,7 @@ However, when using contact matrices with information loss, MDS relied on protot
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/mds_accuracy_grid.png" alt="MDS reconstruction systematic study" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 16:</strong> MDS reconstruction systematic study.
+    <strong>Figure 17:</strong> MDS reconstruction systematic study.
   </p>
 </div>
 
@@ -823,7 +830,7 @@ Our systematic analysis revealed significant improvements over MDS prototypes us
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/gbo_accuracy_grid.png" alt="Optimized reconstruction systematic study" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 17:</strong> Optimized reconstructions systematic study.
+    <strong>Figure 18:</strong> Optimized reconstructions systematic study.
   </p>
 </div>
 
