@@ -8,11 +8,11 @@ The study shows that the inversion process — despite the inherent loss of info
 **Data**
 
 Three sets of coordinates, each representing a distinct structural configuration, are analyzed to explore contrastive spatial distributions:
-<ol type="(1)"><li>Single Large Point Cloud – A synthetically generated, uniformly distributed set of points forming one uncentered cluster.
+<ol type="1"><li>**Single Large Point Cloud** – A synthetically generated, uniformly distributed set of points forming one uncentered cluster.
 </li>
-<li>Multiple Small Point Clouds – A synthetic configuration composed of several smaller, spatially disparate clusters sampled from a Gaussian distribution. 
+<li>**Multiple Small Point Clouds** – A synthetic configuration composed of several smaller, spatially disparate clusters sampled from a Gaussian distribution. 
 </li>
-<li>Real-World Nanoprotein Data – Empirical atomic coordinates of the alpha-carbon atoms of protein residues, exhibiting a naturally "organic" spatial distribution.
+<li>**Real-World Nanoprotein Data** – Empirical atomic coordinates of the alpha-carbon atoms of protein residues, exhibiting a naturally "organic" spatial distribution.
 </li></ol>
 
 For the sake of comparison, all three sets contain an identical number of points (120), and are normalized to comparable spatial scales, with the maximum inter-point distance approximately 35 units in each case.
