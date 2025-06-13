@@ -1,12 +1,10 @@
-# Title TC
+# Three-dimensional Structure Recovery through Gradient-Based Optimization
 
-**Optimization Pipeline**:
-
-The preliminary encoding of distance matrices into contact matrices involves a significant loss of information. Continuous values are eliminated in favor of indicative binary values, reducing them to very rough approximations. Under certain conditions, however, these approximations can be combined in such a way as to recover close original values, making the encoding process partially - and surprisingly, reversible. The binary and categorical aspect of contact matrices can be directly assimilated to probability mass distributions, enabling the use of sigmoids for optimization.
+The encoding of distance matrices into contact matrices obviously involves a significant loss of information. Continuous values are eliminated in favor of indicative binary values, reducing them to very rough approximations. Under certain conditions, however, these approximations can be combined in such a way as to recover close original values, making the encoding process partially - and surprisingly, reversible. The binary and categorical aspect of contact matrices can be directly assimilated to probability mass distributions, enabling the use of sigmoids for optimization.
 
 Interesting results were obtained with combining two operations: 
 
-1.	Logit initialization. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these three values constitute a first approximation of the 3D coordinates and are used to initialize a table of logits;
+1.	Logit initialization. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these values constitute a first approximation of the 3D coordinates and are used to initialize a table of logits;
 
 2.	Optimization. Logits are fed into an optimization loop, which translates them into relative distances and compares them with contact information. This optimization process relies entirely on a double sigmoid which “validates” the proposed values when they fall within the expected range, and penalizes them when they fall outside it, all in a continuous and differentiable manner (soft ranges). Proposed values are compared with target values by BCE.
 
