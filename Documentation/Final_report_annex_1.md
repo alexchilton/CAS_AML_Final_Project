@@ -32,6 +32,8 @@ The specific distribution of each structure leads us to consider several approac
 - <b>Sectors</b>. Qualitative demarcation, distributing distances between sectors of equal width;
 - <b>Structural</b>. An “organic” demarcation based on the “ripples” visible on certain distribution curves, sensitive to the intrinsic structure of the data.
 
+The embedding process results in a tensor of shape (𝑁,𝑁,𝐶), where 𝑁 is the number of points in the dataset, and 𝐶 is the number of contact maps (i.e., distance ranges).
+
 **Process**
 
 1.	Logit initialization. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these values constitute a first approximation of the 3D coordinates and are used to initialize a table of logits;
