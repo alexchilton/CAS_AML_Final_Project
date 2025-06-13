@@ -688,7 +688,7 @@ Renjie Liao, Yujia Li, Yang Song, Shenlong Wang, Charlie Nash, William L. Hamilt
 
 ## Appendix
 
-### Appendix 1 : Three-dimensional Structure Recovery through Gradient-Based Optimization
+### Appendix 1: Three-dimensional Structure Recovery through Gradient-Based Optimization
 
 This short study proposes an empirical framework for tuning the parameters of an optimization pipeline designed to reconstruct the three-dimensional expression of a structure from partial contact maps. These contact maps, derived from local fragment predictions based on sequence subsequences, represent incomplete spatial interaction data. To recover the full 3D structure, a process comparable to a "reverse embedding" is employed, which maps the partial contact information back into spatial coordinates.
 
