@@ -1,3 +1,4 @@
+# Annex 1
 # Three-dimensional Structure Recovery through Gradient-Based Optimization
 
 The encoding of distance matrices into contact matrices obviously involves a significant loss of information. Continuous values are eliminated in favor of indicative binary values, reducing them to very rough approximations. Under certain conditions, however, these approximations can be combined in such a way as to recover close original values, making the encoding process partially - and surprisingly, reversible. The binary and categorical aspect of contact matrices can be directly assimilated to probability mass distributions, enabling the use of sigmoids for optimization.
