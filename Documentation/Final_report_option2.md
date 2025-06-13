@@ -1,5 +1,5 @@
 **Alex Chilton**  
-<span style="color: gray; font-size: 0.8em;">Rathausgasse 14</br>CH &dash 3014 Bern</span>   
+<span style="color: gray; font-size: 0.8em;">Rathausgasse 14</br>CH &mdash; 3014 Bern</span>   
 <span style="font-size: 0.8em;">alex_chilton@gmx.co.uk</span>   
 
 **Lauro Foletti**  
@@ -99,7 +99,7 @@ More specifically the preliminary studies involved:
 - **Parsing of crystallographic / X-ray experimental data (PDB files)**: to extract meaningful information for the subsequent phases of the project;
 - **Preprocessing and pre-calculation**: of all the properties potentially required to describe the 3D structure of the protein and could play a role in the interaction with the environment;
 - **Models exploration**: with state of the art generative models commonly used in the chemical field or in the image processing environment. 
-- **Development of a loss function**: to constrain physically the neural network and drive the generation through biologically plausible structures
+- **Development of a loss function**: to incorporate physical constraints into the neural network and direct the generation process toward biologically plausible structures
 
 The present report will focus on the pre-studies leaving the ultimate goal for future development on the project. 
 
@@ -113,7 +113,7 @@ We used PyTorch [[2]](#ref2) as the primary deep learning framework, with PyTorc
 
 We used Weights & Biases [[9]](#ref9) for integration for experiment logging and visualization, tracking training metrics, loss components, and model performance across different architectural approaches. 
 
-The trained best model wand associated metadata will be made publicly available via Hugging Face [[10]](#ref10) to ensure reproducibility and facilitate further research.
+The trained best model and associated metadata will be made publicly available via Hugging Face [[10]](#ref10) to ensure reproducibility and facilitate further research.
 
 </div>
 
@@ -121,7 +121,7 @@ The trained best model wand associated metadata will be made publicly available 
 
 <div style="text-align: justify;">
 
-Data were obtained from the RCSB Protein Data Bank (PDB) [[11]](#ref11) using the official API with carefully defined selection criteria. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. Search included multiple criteria to catch as many nanobodies as possible including among others the family (Camelidae), mentions (VHH) or labels. The script was designed to retrieve all matching strucures, handling pagination and downloading each PDB file (containing 3D protein structure data) individually.   
+Data were obtained from the RCSB Protein Data Bank (PDB) [[11]](#ref11) using the official API with carefully defined selection criteria. The initial working dataset was restricted to nanobodies, selected for their relatively uniform length (typically 100–150 amino acids) and substantial structural diversity. The search included multiple criteria to catch as many nanobodies as possible, including, among others, the family (Camelidae), mentions (VHH) or labels. The script was designed to retrieve all matching strucures, handling pagination and downloading each PDB file (containing 3D protein structure data) individually.   
 In a secondary phase, we extended the pipeline to a second dataset comprising diverse protein types and subsequently cross-referenced with the BRENDA enzyme database [[12]](#ref12) to retrieve available experimental pH annotations for future analyses involving pH-dependent structural features, envisioning subsequent phases of the project and the requirements of a PINN within a supervised learning framework. 
 
 </div>
@@ -130,7 +130,7 @@ In a secondary phase, we extended the pipeline to a second dataset comprising di
 
 <div style="text-align: justify;">
 
-The preliminary studies were handled in indipendent notebook or python files stored in the respective GitHub folder. Datasets were stored in a Drive shared folder due to dimension cotriction upon GitHub upload. The final preprocessed dataset with the respective metadata of the best model will be stored in the Hugging Face repositry as explained in section 2. 
+The preliminary studies were handled in independent notebooks or python files stored in the respective GitHub folder. Datasets were stored in a Drive shared folder due to size restrictions at GitHub. The final preprocessed dataset with the respective metadata of the best model will be stored in the Hugging Face repository as explained in section 2. 
 
 
 </div>
@@ -140,7 +140,7 @@ The preliminary studies were handled in indipendent notebook or python files sto
 <div style="text-align: justify;">
 
 Our nanobody-focused approach provided several methodological advantages including size consistency (~15kDa, 120-130 residues), high-resolution structural data from X-ray/cryo-EM sources, and consistent immunoglobulin fold architecture while maintaining functional diversity. However, the shared scaffold architecture and potential engineering bias toward stable conformations may limit generalization to diverse protein families.
-To support our methodological development, we employed additional datasets for different purposes: synthetic graphs with controlled topological properties to test our algorithms on simpler, known structures before tackling complex biological data, SCOP dataset entries for diagnostic classification experiments, and fluorescent proteins (fluobodies) as an alternative biological dataset. These limitations were considered acceptable for our preliminary phase focused on investigating generation techniques, suitable preprocessing and a meaningful loss function. .
+To support our methodological development, we employed additional datasets for different purposes: synthetic graphs with controlled topological properties to test our algorithms on simpler, known structures before tackling complex biological data, SCOP dataset entries for diagnostic classification experiments, and fluorescent proteins (fluobodies) as an alternative biological dataset. These limitations were considered acceptable for our preliminary phase focused on investigating generation techniques, a suitable preprocessing and a meaningful loss function. .
 
 </div>
 
@@ -159,7 +159,7 @@ PDB files were parsed using BioPython [[13]](#ref13). We evaluated several parsi
   </p>
 </div>
 
-Upon the first visualization we could observe among the issues the existance of several chains, not belonging to the same proteins but being clusters instead, which were treated by the preprocessing as one molecule. We therefore preprocessed the pdb files to have independent chains (each representing one unique nanobody) and converted in heterogeneous graphs.   
+Upon the first visualization we could observe among the issues the existence of several chains, not belonging to the same proteins but being clusters instead, which were treated by the preprocessing as one molecule. We therefore preprocessed the pdb files to have independent chains (each representing one unique nanobody) and converted in to heterogeneous graphs.   
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_b.png" alt="Second parsing" width="600">
@@ -169,7 +169,7 @@ Upon the first visualization we could observe among the issues the existance of 
 </div>
 
 
-Ultimately the proteins were preprocessed in different steps, identifying the alpha carbon first, mapping the amino-acid types and the respective coordinates and computing the non-covalent intereactions. The reconstruction can be visualized in the following 3D representation:
+Ultimately the proteins were preprocessed in different steps, identifying the alpha carbon first, mapping the amino-acid types and the respective coordinates and computing the non-covalent interactions. The reconstruction can be visualized in the following 3D representation:
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_c.png" alt="3D protein structure" width="600">
@@ -203,7 +203,7 @@ $$
 
 where $s_i$ denoted the DSSP-assigned secondary structure class.
 
-Subsequently, residue-level protein graphs $G = (V, E)$ were built where $V$ represented nodes features and $E$ represented edge features (either peptide bonds or spatial proximity). We defined Edges $(i, j) \in \mathbb{E}$ by the following:
+Subsequently, residue-level protein graphs $G = (V, E)$ were built where $V$ represented node features and $E$ represented edge features (either peptide bonds or spatial proximity). We defined Edges $(i, j) \in \mathbb{E}$ by the following:
 
 $$
 \|\vec{x}_i^{CA} - \vec{x}_j^{CA}\|_2 < \delta \quad \text{with} \quad \delta = 7.0\,\text{\AA}
@@ -355,12 +355,12 @@ Where:
 
 The training involved a learning rate schedule with a reduction factor of 0.5 and 3-epochs patience. Gradient clipping was applied with max_norm=0.1 to prevent the exploding gradient issue. 
 
-For the generator part we used 16-dimensional latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ from a standard normal distribution N(0,1) with temperature scaling to control the conservativiness of the generations. The genartion was obtained as a step-wise process with a placeholder fopr the edge creation where each node connected to the next one in sequence in a ring connectivity pattern, through the decoder, the 16D vector was expanded into the full protein feature generating a matrix [1, nodes_per_graph, 8], where 8 were the initial input features, denormalized in the subsequent step. Lastly the coordinates were extracted, k-nearest neighbour edges costructed overwriting the initial edge scaffold and the graph object created. 
+For the generator part we used 16-dimensional latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ from a standard normal distribution N(0,1) with temperature scaling to control the conservativiness of the generations. The generation was obtained as a step-wise process with a placeholder fopr the edge creation where each node connected to the next one in sequence in a ring connectivity pattern, through the decoder, the 16D vector was expanded into the full protein feature generating a matrix [1, nodes_per_graph, 8], where 8 were the initial input features, denormalized in the subsequent step. Lastly the coordinates were extracted, k-nearest neighbour edges constructed overwriting the initial edge scaffold and the graph object created. 
 
 **Benefits and drawbacks**:  
 Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads. 
 
-While idealistically well engineered, being able to handle different protein size, decode the protein features through the latent space and to use 3D spatial relationships to determine realistic bonding, the model had a substantial limitation connected to the randomness of the latent sampling and reconstruction fidelity was often low. Information decoding required some optimization, especially on the amino acid assignbment for the new nodes generated. Scalability was another issue, where memory usage became critical for large graphs or high batch sizes, edge reconstruction required further optimization.  
+While idealistically well engineered, being able to handle different protein size, decode the protein features through the latent space and to use 3D spatial relationships to determine realistic bonding, the model had a substantial limitation connected to the randomness of the latent sampling and reconstruction fidelity was often low. Information decoding required some optimization, especially on the amino acid assignment for the new nodes generated. Scalability was another issue, where memory usage became critical for large graphs or high batch sizes, edge reconstruction required further optimization.  
 
 
 ### 7.2 Hybrid Learning Inversion Framework
@@ -445,8 +445,8 @@ However, this approach is not without limitations. One concern is the risk of ov
 
 ## 7.3 Additional diagnostic experiments 
 
-Following the drawbacks of the first VAE implementation and the positive results upon the optimization pipeline we conducted a short investigation of the GAT-VAE using the SCOP dataset and the Synthetic Graph Validation Dataset using a classification instead of a more complex generation task.  
-For this goal we used a 28-dimensional input head, 3-layer SAGEConv with residual connections and batch normalization as encoder and a 7 class output (corresponding ot the 7 classes of the SCOP dataset). the dataset were further preprocessed with the newly experimented 50-residue blocks and step size 1. **(LARA STILL TO FINISH)**
+Following the drawbacks of the first VAE implementation and the positive results upon the optimization pipeline we conducted a brief investigation of the GAT-VAE using the SCOP dataset and the Synthetic Graph Validation Dataset using a classification instead of a more complex generation task.  
+For this goal we used a 28-dimensional input head, 3-layer SAGEConv with residual connections and batch normalization as encoder and a 7 class output (corresponding to the 7 classes of the SCOP dataset). the dataset were further preprocessed with the newly experimented 50-residue blocks and step size 1. **(LARA STILL TO FINISH)**
 
 ## 7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture
 
@@ -462,7 +462,7 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
 </div>
 
 The model was built for protein graphs as described, each node was characterized by a 38-dimensional feature vector comprising 7 physiochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
-The graph encoder employed a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention head with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
+The graph encoder employed a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention heads with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
 
 Following processing, a global graph representation was obtained by mean pooling:  
 
@@ -574,18 +574,18 @@ Despite plausible contact map and realistic fold topology and backbone connectiv
 
 One advantage of this new approach—originally inspired by a generative model and subsequently developed further—was its ability to generate the sequence and structure in parallel, enabling consistency between the primary and tertiary structures through joint training. The multi component contact loss was a first attempt of a potentially further developable loss, including the physical-constraining parameters, the information passed through the 38-dimensional nodes were very rich and the multi attention head enabled the model to focus selectively on different type of residue interactions. 
 
-The model was though severely constrained by the maximum sequence length of 50 residues, limitation that would increase the computational complexity of $O(N^2)$ graph attention operations on adjacency matrices with the increase of the sequence length. Additionally, the model did not contain in this first implementation angles and torsions, computed in the preprocessing and essential in the structural biology for realistic side chain configurations. From the described generation process the model generated proteins by building 50-residues subsequences and averaging them together, with the risk of introducing discontinuites in the final structure. For more complex datasets the complex multi component loss function may be difficult to balance.   
+The model was, however, severely constrained by the maximum sequence length of 50 residues, limitation that would increase the computational complexity of $O(N^2)$ graph attention operations on adjacency matrices with the increase of the sequence length. Additionally, the model did not contain in this first implementation angles and torsions, computed in the preprocessing and essential in the structural biology for realistic side chain configurations. From the described generation process the model generated proteins by building 50-residues subsequences and averaging them together, with the risk of introducing discontinuities in the final structure. For more complex datasets the complex multi-component loss function may be difficult to balance.   
 
 ## 8. Documentation
 
 We employed different level of documentation to ensure reproducibility and effective collaboration. Notebooks and python files were documented through the use of a version control system (GitHub) with README files and  refactorization as appropriate.   
-Experiments were tracked using Weight and Biases though szstematic experiments. Models were saved through checkpoints to enable training over several days without losing the progresses. 
+Experiments were tracked using Weight and Biases through systematic experiments. Models were saved through checkpoints to enable training over several days without losing the progresses. 
 
 ## 9. Risks
 
-Protein structures are extremely complex systems to be interpreted and studied. This intrinsic complexity is reflected in the genartive task where not only a plausible amino acid sequence have to be generated, but a secondary and tertiary structures have to be predicted either depending on the sequenc generated and on many biological constrains. This high complexity was aknowledges by the authors upon the numerous attempt to evaluate different strategies without success.  
-with this awareness the risk of generating unplasible structures is high, especially without strong physico-biological constrains. The current stage of the project focused mainly on studying the different generation strategies and its limitation in order to develop the more suitable strategy, the aforedescribed risk is not therefore of concern on this stage but will be considered in the development of the PINN GNN.  
-Another risk connected with the use of complex networks with relatively small amount of data (approximately 3000 structures) is the overfitting, and in our case as explained in the data section the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus wa son the study of the genartive task for biological systems. 
+Protein structures are extremely complex systems to be interpreted and studied. This intrinsic complexity is reflected in the generative task where not only a plausible amino acid sequence have to be generated, but a secondary and tertiary structures have to be predicted either depending on the sequenc generated and on many biological constrains. This high complexity was acknowledged by the authors upon the numerous attempt to evaluate different strategies without success.  
+With this awareness the risk of generating implausible structures is high, especially without strong physico-biological constraints. The current stage of the project focused mainly on studying the different generation strategies and its limitations in order to develop the most suitable strategy, the aforementioned risk is not therefore of concern at this stage but will be considered in the development of the PINN GNN.  
+Another risk connected with the use of complex networks with relatively small amount of data (approximately 3000 structures) is the overfitting, and in our case as explained in the data section the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus wa son the study of the generative task for biological systems. 
 
 
 ## 10. Conclusions (first bit only now)
