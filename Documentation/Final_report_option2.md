@@ -7,7 +7,7 @@
 <span style="font-size: 0.8em;">lauro.foletti@gmail.com</span> 
 
 **Lara Nonis**  
-<span style="color: gray; font-size: 0.8em;">(address)</span>   
+<span style="color: gray; font-size: 0.8em;">Maispracherstrasse 2a</br>CH &mdash; 4312 Magden</span>   
 <span style="font-size: 0.8em;">lara.nonis01@gmail.com</span>  
 
 
@@ -353,14 +353,14 @@ $$
 
 Where:
 
-- \( \lambda_{\text{ortho}} = 0.1 \): Orthogonality strength parameter  
-- \( C \): Correlation matrix of normalized latent means  
-- \( I \): Identity matrix  
-- \( \left\| \cdot \right\|_F \): Frobenius norm 
+- $\lambda_{\text{ortho}} = 0.1$ is the orthogonality strength parameter  
+- $C$ is the correlation matrix of normalized latent means  
+- $I$ is the identity matrix  
+- $\left\| \cdot \right\|_F$ is the Frobenius norm
 
 The training involved a learning rate schedule with a reduction factor of 0.5 and 3-epochs patience. Gradient clipping was applied with max_norm=0.1 to prevent the exploding gradient issue. 
 
-For the generator part we used 16-dimensional latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ from a standard normal distribution N(0,1) with temperature scaling to control the conservativiness of the generations. The generation was obtained as a step-wise process with a placeholder fopr the edge creation where each node connected to the next one in sequence in a ring connectivity pattern, through the decoder, the 16D vector was expanded into the full protein feature generating a matrix [1, nodes_per_graph, 8], where 8 were the initial input features, denormalized in the subsequent step. Lastly the coordinates were extracted, k-nearest neighbour edges constructed overwriting the initial edge scaffold and the graph object created. 
+For the generator part we used 16-dimensional latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ from a standard normal distribution N(0,1) with temperature scaling to control the conservativiness of the generations. The generation was obtained as a step-wise process with a placeholder for the edge creation where each node connected to the next one in sequence in a ring connectivity pattern, through the decoder, the 16D vector was expanded into the full protein feature generating a matrix [1, nodes_per_graph, 8], where 8 were the initial input features, denormalized in the subsequent step. Lastly the coordinates were extracted, k-nearest neighbour edges constructed overwriting the initial edge scaffold and the graph object created. 
 
 **Benefits and drawbacks**:  
 Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads. 
@@ -370,11 +370,11 @@ While idealistically well engineered, being able to handle different protein siz
 
 ### 7.2 Hybrid Learning Inversion Framework
 
-An alternative methodology demonstrating comparable performance was investigated, wherein the neural network operates as a component of a broader hybrid framework. This framework comprises five key stages: (i) data fragmentation, (ii) embedding, (iii) variational autoencoder, (iv) aggregation, and (v) data recovery through gradient-based optimization.
+An alternative methodology demonstrating comparable performance was investigated, wherein the neural network operates as a component of a broader hybrid framework. This framework comprised five key stages: (i) data fragmentation, (ii) embedding, (iii) variational autoencoder, (iv) aggregation, and (v) data recovery through gradient-based optimization.
 
 #### 7.2.1 Data Fragmentation
 
-Rather than using full-length amino acid sequences as input, each sequence is fragmented into fixed-length subsequences of length L, where L represents a fraction of the maximum protein length (bandwidth). Each amino acid is thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping is applied, resulting in a consistent probability distribution across all subsequences.
+Rather than using full-length amino acid sequences as input, each sequence was fragmented into fixed-length subsequences of length L, where L represented a fraction of the maximum protein length (bandwidth). Each amino acid was thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping was applied, resulting in a consistent probability distribution across all subsequences.
 
 The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
 
@@ -387,7 +387,7 @@ The comparative study in Annex 1 established an empirical framework for the crit
 
 #### 7.2.2 Embedding
 
-The original spatial data, represented as 3D atomic coordinates, is initially transformed into distance matrices — representations that are invariant to rotation and translation, thereby facilitating broader pattern recognition. These distance matrices are subsequently embedded into range-based contact maps. While this embedding entails a significant loss of information, it offers the key advantage of converting continuous data into a binary representation. The contact maps are defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis : this configuration balances reconstruction accuracy with computational efficiency, and demonstrates consistent performance across diverse structures. Moreover, it ensures the homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
+The original spatial data, represented as 3D atomic coordinates, were initially transformed into distance matrices — representations that are invariant to rotation and translation, thereby facilitating broader pattern recognition. These distance matrices were subsequently embedded into range-based contact maps. While this embedding entailed a significant loss of information, it offered the key advantage of converting continuous data into a binary representation. The contact maps were defined using a six-range percentile-based partitioning scheme, identified as optimal through the comparative analysis : this configuration balanced reconstruction accuracy with computational efficiency, and demonstrated consistent performance across diverse structures. Moreover, it ensured the homogeneous distribution of contacts across the maps, a property that appears particularly advantageous for neural network training.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS_distances.png" alt="Fluoprotein distances" width="700">
@@ -397,7 +397,7 @@ The original spatial data, represented as 3D atomic coordinates, is initially tr
 
 #### 7.2.3 Modified Variational AutoEncoder (VAE)
 
-A modified Variational Autoencoder (VAE) is subsequently trained using the following configuration:
+A modified Variational Autoencoder (VAE) was subsequently trained using the following configuration:
 
 - Input: one-hot encoded amino acid sequences, comprising 20 categories for standard residues and an additional category for unidentified residues.
 - Output: six-range binary contact maps derived from spatial embeddings.
@@ -408,13 +408,13 @@ A modified Variational Autoencoder (VAE) is subsequently trained using the follo
 - Learning rate: A value of 2 × 10⁻⁵ was found to offer robust convergence and consistent performance.
 - Optimizer: RMS-Prop.
 
-Given the modified architecture of the VAE, the output is not intended to reconstruct the input sequence directly. Instead, it predicts a representation of the associated spatial structure — specifically, an embedded form of the structure encoded as a set of binary contact maps. This reflects a shift from traditional input reconstruction toward structured prediction, where the goal is to learn spatial constraints from sequence-based features.
+Given the modified architecture of the VAE, the output was not intended to reconstruct the input sequence directly. Instead, it predicted a representation of the associated spatial structure — specifically, an embedded form of the structure encoded as a set of binary contact maps. This reflects a shift from traditional input reconstruction toward structured prediction, where the goal was to learn spatial constraints from sequence-based features.
 
-Training was performed separately on two datasets, each comprising 20,000 samples derived from Nanobody and Fluoproteins structures, respectively. A 90/10 train–test split was employed, and models were trained over 80 epochs. At this stage, the loss curve for the test set reaches a plateau, while the training loss continues to decrease. This divergence suggests that, under the current training configuration, the model has reached its optimal convergence point, beyond which additional training yields diminishing generalization performance.
+Training was performed separately on two datasets, each comprising 20,000 samples derived from Nanobody and Fluoproteins structures, respectively. A 90/10 train–test split was employed, and models were trained over 80 epochs. At this stage, the loss curve for the test set reached a plateau, while the training loss continued to decrease. This divergence suggested that, under the current training configuration, the model had reached its optimal convergence point, beyond which additional training yields diminishing generalization performance.
 
 #### 7.2.4 Aggregation
 
-Local predictions from individual subsequences are aggregated and averaged to produce unified, protein-level contact map predictions. The two evaluated datasets show promising results, with the predicted structures exhibiting visually accurate correspondence to the reference conformations.
+Local predictions from individual subsequences were aggregated and averaged to produce unified, protein-level contact map predictions. The two evaluated datasets showed promising results, with the predicted structures exhibiting visually accurate correspondence to the reference conformations.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINSOriginalcontactmaps(groundtruth).png" alt="Ground truth" width="1200">
@@ -422,17 +422,17 @@ Local predictions from individual subsequences are aggregated and averaged to pr
   <img src="figures/FLUOPROTEINS_Errors.png" alt="Errors" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
     <strong>Figures 7–9: </strong>Comparison for protein TC.
-<strong>Figure 7 </strong>presents the original contact maps derived from structural data, masked according to the chosen subsequence length.
-<strong>Figure 8 </strong>shows the aggregated model predictions obtained by averaging local outputs from subsequences.
-<strong>Figure 9 </strong>displays the absolute difference between the predicted and original contact maps.
+<strong>Figure 7 </strong>(top) presents the original contact maps derived from structural data, masked according to the chosen subsequence length.
+<strong>Figure 8 </strong> (middle) shows the aggregated model predictions obtained by averaging local outputs from subsequences.
+<strong>Figure 9 </strong> (bottom) displays the absolute difference between the predicted and original contact maps.
   </p>
 </div>
 
 #### 7.2.5 Data Recovery through gradient-based optimization
 
-The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see [Appendix 1: Three-dimensional Structure Recovery through Gradient-Based Optimization](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization) for detailed procedure).
+The unified contact maps were subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction began by generating an initial distance matrix through random sampling within each defined contact range. This matrix was then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure was further refined through a gradient-based optimization procedure, which minimized violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see [Appendix 1: Three-dimensional Structure Recovery through Gradient-Based Optimization](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization) for detailed procedure).
 
-Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and around 2.30 for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. The selected latent space dimensionality of 256 may be insufficient to effectively capture the complex and high-dimensional patterns, potentially limiting the representational capacity of the model.
+Across both datasets, the reconstructed structures were often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and around 2.30 for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may have stemmed from several factors: the broader structural diversity within this dataset likely increaseing the complexity of pattern extraction, potentially necessitating a larger training set. The selected latent space dimensionality of 256 may have been insufficient to effectively capture the complex and high-dimensional patterns, potentially limiting the representational capacity of the model.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEIN_result.png" alt="Fluoprotein reconstruction" width="700">
@@ -443,9 +443,9 @@ Across both datasets, the reconstructed structures are often closely aligned wit
 
 #### 7.2.6 Benefits and drawbacks
 
-Compared to the results obtained previously, the reconstructions achieved with this hybrid approach are more accurate and represent a significant improvement in protein structure prediction. The inversion framework demonstrates potential as a methodology for structural learning; in this framework data fragmentation emerges as a viable alternative to initial sequence length management through padding or masking, providing a straightforward technique for data augmentation. The binary embedding of spatial data is likely to facilitate the network learning.
+Compared to the results obtained previously, the reconstructions achieved with this hybrid approach were more accurate and represented a significant improvement in protein structure prediction. The inversion framework demonstrated potential as a methodology for structural learning; in this framework data fragmentation emerged as a viable alternative to initial sequence length management through padding or masking, providing a straightforward technique for data augmentation. The binary embedding of spatial data was likely to facilitate the network learning.
 
-However, this approach is not without limitations. One concern is the risk of overfitting to local patterns at the expense of capturing broader structural context. This issue is strongly influenced by the chosen subsequence length and the diversity of the training dataset. The overall complexity of the framework may also hinder model interpretability and limit its scalability. In particular, when applied to larger proteins comprising thousands of residues, increasing the minimum chunk length can lead to a substantial expansion of the training dataset — growing quadratically with sequence length due to the rise in pairwise distance computations.
+However, this approach was not without limitations. One concern was the risk of overfitting to local patterns at the expense of capturing broader structural context. This issue was strongly influenced by the chosen subsequence length and the diversity of the training dataset. The overall complexity of the framework may also have hindered model interpretability and limit its scalability. In particular, when applied to larger proteins comprising thousands of residues, increasing the minimum chunk length could lead to a substantial expansion of the training dataset — growing quadratically with sequence length due to the rise in pairwise distance computations.
 
 
 ### 7.3 Additional diagnostic experiments 
@@ -475,7 +475,7 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
   </p>
 </div>
 
-Unlike variational autoencoders, this model does not use a probabilistic latent space with sampling. Instead, it directly maps input graph features to dual outputs (sequence and structure) through deterministic neural network transformations with attention mechanisms.
+Unlike variational autoencoders, this model did not use a probabilistic latent space with sampling. Instead, it directly mapped input graph features to dual outputs (sequence and structure) through deterministic neural network transformations with attention mechanisms.
 
 The model was built for protein graphs as described, each node was characterized by a 38-dimensional feature vector comprising 7 physicochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
 The graph encoder employed a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention heads with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
@@ -537,14 +537,14 @@ Training was performed using the hyperparameters listed in Table 1, with each ep
 
 | **Component**           | **Details**                                                                 |
 |-------------------------|------------------------------------------------------------------------------|
-| Optimization            | Adam optimizer with learning rate \(5 \times 10^{-4}\), weight decay \(1 \times 10^{-5}\) |
+| Optimization            | Adam optimizer with learning rate $5 \times 10^{-4}$, weight decay $1 \times 10^{-5}$ |
 | Learning Rate Scheduling| ReduceLROnPlateau, factor 0.5, patience 3 epochs                            |
 | Regularization          | Gradient clipping (max norm 1.0), Dropout rate 0.1, Early stopping (patience 10, min 30 epochs) |
 | Batch Processing        | Fixed batch size of 16 using 50-residue protein subsequences                |
 
 **Table 1**: GRAN-inspired dual output model hyperparameters.
 
-The generation process employs a novel multi-subsequence aggregation strategy to create full-length proteins from a model trained on 50-residue subsequences. The process works as follows: (1) The full target protein length is divided into overlapping 50-residue windows with 50% overlap (step size of 25 residues), (2) for each window, input graph features are processed through graph attention layers to create node embeddings, (3) a global graph representation is obtained through mean pooling, which initializes a GRU-based autoregressive decoder that generates the subsequence, (4) simultaneously, an edge predictor network processes pairwise node embeddings to predict the corresponding adjacency matrix segment, (5) overlapping regions between subsequences are averaged - for sequence positions, the most frequently predicted amino acid is selected using a voting mechanism, while for adjacency matrices, overlapping values are arithmetically averaged, (6) the final full-length protein is assembled by concatenating all subsequences and averaging their overlapping regions, and (7) 3D structure reconstruction is performed through gradient-based optimization using the final aggregated contact map with a binary threshold of 0.065.
+The generation process employed a novel multi-subsequence aggregation strategy to create full-length proteins from a model trained on 50-residue subsequences. The process worked as follows: (1) The full target protein length was divided into overlapping 50-residue windows with 50% overlap (step size of 25 residues), (2) for each window, input graph features were processed through graph attention layers to create node embeddings, (3) a global graph representation was obtained through mean pooling, which initialized a GRU-based autoregressive decoder that generated the subsequence, (4) simultaneously, an edge predictor network processed pairwise node embeddings to predict the corresponding adjacency matrix segment, (5) overlapping regions between subsequences were averaged - for sequence positions, the most frequently predicted amino acid was selected using a voting mechanism, while for adjacency matrices, overlapping values were arithmetically averaged, (6) the final full-length protein was assembled by concatenating all subsequences and averaging their overlapping regions, and (7) 3D structure reconstruction was performed through gradient-based optimization using the final aggregated contact map with a binary threshold of 0.065.
 
 ### 7.4.3 Training performance and model convergence 
 
@@ -567,7 +567,7 @@ Once trained, the contact map prediction achieved an accuracy of 99.51%
   </p>
 </div>
 
-The 3D structure generated and converted in pdb file for reading through PyMOL.  
+The 3D structure was generated and converted in pdb file for reading through PyMOL.  
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/visualization.png" alt="GRAN model" width="600">
@@ -577,9 +577,9 @@ The 3D structure generated and converted in pdb file for reading through PyMOL.
 </div>
 
 <div style="text-align: center; margin: 20px 0;">
-  <img src="figures/surface.png" alt="GRAN model" width="600">
+  <img src="figures/surface_atoms.png" alt="GRAN model" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 15:</strong> surface visualization of the generated protein through PyMOL. Ble and red areas represent charged residues, green and yellow area represent hydrophobic regions. 
+    <strong>Figure 15:</strong> surface visualization of the generated protein through PyMOL. Blue and red areas represent charged residues, green and yellow area represent hydrophobic regions. 
   </p>
 </div>
 
@@ -599,10 +599,11 @@ Experiments were tracked using Weight and Biases through systematic experiments.
 
 ## 9. Risks
 
-Protein structures are extremely complex systems to be interpreted and studied. This intrinsic complexity is reflected in the generative task where not only a plausible amino acid sequence have to be generated, but a secondary and tertiary structures have to be predicted either depending on the sequenc generated and on many biological constrains. This high complexity was acknowledged by the authors upon the numerous attempt to evaluate different strategies without success.  
-With this awareness the risk of generating implausible structures is high, especially without strong physico-biological constraints. The current stage of the project focused mainly on studying the different generation strategies and its limitations in order to develop the most suitable strategy, the aforementioned risk is not therefore of concern at this stage but will be considered in the development of the PINN GNN. 
+Protein structures are extremely complex systems to be interpreted and studied. This intrinsic complexity was reflected in the generative task where not only a plausible amino acid sequence had to be generated, but secondary and tertiary structures had to be predicted depending both on the sequence generated and on many biological constraints. This high complexity was acknowledged by the authors through the numerous attempts to evaluate different strategies without success.
 
-Another risk connected with the use of complex networks with relatively small amount of data (approximately 3000 structures) is the overfitting, and in our case as explained in the data section the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus wa son the study of the generative task for biological systems. 
+With this awareness, the risk of generating implausible structures was high, especially without strong physico-biological constraints. The current stage of the project focused mainly on studying the different generation strategies and their limitations in order to develop the most suitable strategy. The aforementioned risk was therefore not of concern at this stage but will be considered in the development of the PINN.
+
+Another risk connected with the use of complex networks with relatively small amounts of data (approximately 3000 structures) was overfitting, and in our case, as explained in the data section, the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus was rather on the study of the generative task for biological systems.
 
 
 ## 10. Conclusions 
