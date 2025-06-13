@@ -32,7 +32,15 @@
 ## Abstract
 <div style="text-align: justify;">
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+
+This project assessed the complexities and challenges of protein structure generation from PDB-derived crystallographic representations. Understanding how to computationally generate protein tertiary structures is crucial for advancing protein engineering and drug discovery applications. 
+
+The methodology involved developing and evaluating multiple neural network architectures, including graph variational autoencoders, hybrid learning frameworks, and graph recurrent networks. The datasets comprised different protein structures from the Protein Data Bank, which were processed through a comprehensive preprocessing pipeline to convert 3D crystallographic data into graph representations with physicochemical properties and spatial relationships.  
+
+Challenges in protein complexity and variable sequence lengths were addressed through different architectural approaches and feature engineering strategies. Each method demonstrated distinct capabilities for capturing sequence-structure relationships, with evaluation focusing on reconstruction accuracy and contact map prediction.
+
+Results indicated promising directions for graph-based protein generation, with structural reconstruction achieving 0.77 Å accuracy and contact map prediction reaching 99.51% accuracy. While further optimization is required, these findings provided methodological foundations for future protein engineering applications.
+ 
 
 </div>
 
@@ -67,10 +75,10 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
     - [7.2.6 Benefits and drawbacks](#726-benefits-and-drawbacks)
   - [7.3 Additional diagnostic experiments](#73-additional-diagnostic-experiments)
   - [7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture](#74-graph-recurrent-attention-network-gran-inspired-dual-output-architecture)
-  - [7.4.1 Model architecture](#741-model-architecture)
-  - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
-  - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
-  - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
+    - [7.4.1 Model architecture](#741-model-architecture)
+    - [7.4.2 Additional preprocessing and the generation process](#742-additional-preprocessing-and-the-generation-process)
+    - [7.4.3 Training performance and model convergence](#743-training-performance-and-model-convergence)
+    - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
 - [8. Documentation](#8-documentation)
 - [9. Risks](#9-risks)
 - [10. Conclusions](#10-conclusions)
@@ -160,7 +168,7 @@ PDB files were parsed using BioPython [[13]](#ref13). We evaluated several parsi
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_a.png" alt="First parsing" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 1:</strong> Comparison between molecular and graph-based representations of the same protein structure. Left: PyMOL  molecular visualization showing secondary structure elements. Right: NetworkX graph representation displaying nodes (residues) connected by spatial proximity edges. The graph representation captures overall protein connectivity but does not clearly preserve the distinct secondary structure organization visible in the molecular model, illustrating the information loss during graph conversion..
+    <strong>Figure 1:</strong> Comparison between molecular and graph-based representations of the same protein structure. Left: PyMOL  molecular visualization showing secondary structure elements. Right: NetworkX graph representation displaying nodes (residues) connected by spatial proximity edges. The graph representation captures overall protein connectivity but does not clearly preserve the distinct secondary structure organization visible in the molecular model, illustrating the information loss during graph conversion.
   </p>
 </div>
 
@@ -169,7 +177,7 @@ Upon the first visualization we could observe among the issues the existence of 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_b.png" alt="Second parsing" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 2:</strong> Comparison of protein representation formats: NetworkX graph visualization (left) and PyMOL molecular structure (right) of the same nanobody. The graph format preserves connectivity and secondary structure patterns while simplifying atomic detail..
+    <strong>Figure 2:</strong> Comparison of protein representation formats: NetworkX graph visualization (left) and PyMOL molecular structure (right) of the same nanobody. The graph format preserves connectivity and secondary structure patterns while simplifying atomic detail.
   </p>
 </div>
 
@@ -466,7 +474,7 @@ These diagnostic experiments, while not meeting our expectations for SCOP classi
 
 Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on graph generation [[19]](#ref19) and the conceptual similarity of modeling proteins as sequential chains of amino acids, together with complete structural graphs. The original GRAN model used only a structural model and we wanted to keep the sequential nature too.
 
-### 7.4.1 Model architecture
+#### 7.4.1 Model architecture
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_e_opt2.png" alt="GRAN model" width="700">
@@ -515,7 +523,7 @@ Where:
 During training, teacher forcing was employed using ground truth sequences to reduce compounding errors [[20]](#ref20). For inference multinomial sampling was performed from the predicted distributions.  
 The dual output was represented by the amino acid sequence (via the sequence generation branch) and a 3D adjacency matrix (from the structure generation branch), with an auxiliary prediction head to estimate secondary structure probability for each residue. This provided additional structure supervision and enabled structure aware sequence generation. 
 
-As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, symmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized in the following equation and further explained in Appendix 1: 
+As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, symmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized in the following equation and further explained in Appendix 2: 
 
 $$
 \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{seq}} + \mathcal{L}_{\text{adj}} + 0.5 \times \mathcal{L}_{\text{ss}}
@@ -529,7 +537,7 @@ where:
 - Coefficient \( 0.5 \): Weighting factor 
 
 
-### 7.4.2 Additional preprocessing and the generation process
+#### 7.4.2 Additional preprocessing and the generation process
 
 The early findings about the benefit on splitting the protein in 50-unites sequences described above, as well as the additional requirements to generate potentially biologically plausible structures required additional preprocessing in the data pipeline to calculate the missing parameters and chunking. Additionally, upon suggestion of a generative model [[21]](#ref21) and upon common practice in machine learning tasks [[22]](#ref22) we implemented some data augmentation by creating multiple overlapping windows for training. 
 
@@ -546,7 +554,7 @@ Training was performed using the hyperparameters listed in Table 1, with each ep
 
 The generation process employed a novel multi-subsequence aggregation strategy to create full-length proteins from a model trained on 50-residue subsequences. The process worked as follows: (1) The full target protein length was divided into overlapping 50-residue windows with 50% overlap (step size of 25 residues), (2) for each window, input graph features were processed through graph attention layers to create node embeddings, (3) a global graph representation was obtained through mean pooling, which initialized a GRU-based autoregressive decoder that generated the subsequence, (4) simultaneously, an edge predictor network processed pairwise node embeddings to predict the corresponding adjacency matrix segment, (5) overlapping regions between subsequences were averaged - for sequence positions, the most frequently predicted amino acid was selected using a voting mechanism, while for adjacency matrices, overlapping values were arithmetically averaged, (6) the final full-length protein was assembled by concatenating all subsequences and averaging their overlapping regions, and (7) 3D structure reconstruction was performed through gradient-based optimization using the final aggregated contact map with a binary threshold of 0.065.
 
-### 7.4.3 Training performance and model convergence 
+#### 7.4.3 Training performance and model convergence 
 
 The model showed good convergence characteristics across all loss components during training with stable performance reached approximately after epoch 50. 
 
@@ -586,7 +594,7 @@ The 3D structure was generated and converted in pdb file for reading through PyM
 
 Despite plausible contact map and realistic fold topology and backbone connectivity, the amino acid distribution and the disposition of the charged and hydrophobic residues do not follow yet the pattern of a folded protein indicating further optimization needed.  
 
-### 7.4.4 Benefits and drawbacks
+#### 7.4.4 Benefits and drawbacks
 
 One advantage of this new approach—originally inspired by a generative model and subsequently developed further—was its ability to generate the sequence and structure in parallel, enabling consistency between the primary and tertiary structures through joint training. The multi component contact loss was a first attempt of a potentially further developable loss, including the physical-constraining parameters, the information passed through the 38-dimensional nodes were very rich and the multi attention head enabled the model to focus selectively on different type of residue interactions. 
 
