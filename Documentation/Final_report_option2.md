@@ -73,7 +73,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
   - [7.4.4 Benefits and drawbacks](#744-benefits-and-drawbacks)
 - [8. Documentation](#8-documentation)
 - [9. Risks](#9-risks)
-- [10. Conclusions (first bit only now)](#10-conclusions-first-bit-only-now)
+- [10. Conclusions](#10-conclusions)
 - [11. References](#11-references)
 - [List of Figures](#list-of-figures)
 - [List of Tables](#list-of-tables)
@@ -605,8 +605,12 @@ With this awareness the risk of generating implausible structures is high, espec
 Another risk connected with the use of complex networks with relatively small amount of data (approximately 3000 structures) is the overfitting, and in our case as explained in the data section the limited robustness. Only similar structures or synthetic data were selected on purpose in this specific case, as the focus wa son the study of the generative task for biological systems. 
 
 
-## 10. Conclusions (first bit only now)
-The early results indicated that the architecture may be potentially capable of capturing both sequence–structure relationships and the complex constraints governing protein folding, enabling the generation of plausible structures. Further validation will be necessary though to assess biological plausibility and to evaluate model performance on more diverse datasets in order to confirm the current findings (and metrics).
+## 10. Conclusions 
+The early results indicated that the studied architectures, with the required optimizations, may be potentially capable of capturing both sequence–structure relationships and the complex constraints governing protein folding, enabling the generation of plausible structures.  
+
+The first ProteinGraphVAE had the ability to learn both node-level properties and structural features, while handling gracefully different protein sizes but with low fidelity in the reconstruction, which could be potentially improved by a strongly physically constrained loss (absent in this model). The hybrid learning inversion framework proved to be very promising in the handling of long protein chains and variable length, while improving the fidelity of the reconstruction, though the fixed chunk length represented a limitation on the reconstruction of bigger proteins which could be plausibly overcome by sequence overlapping techniques or by using more powerful frameworks for training with longer sequence chunks. Ultimately the GRAN model showed great potential through the dual output mechanism and the auxiliary secondary structure validation strategy, but still required optimization in the generation to ensure plausibility of the generated new proteins.   
+
+Further validation will be required to assess the performance of these models in more diverse datasets, like the pH dataset newly developed. Furthermore, the generative capabilities of our PINN GNN will not be dedicated to new proteins but to the same input protein, simplifying the generation task by removing the biological plausibility constraint, as the output would be strongly constrained on the input with regard to the sequence order. With this in mind, our thorough investigation provided us sufficient data and encouraging results to proceed with the development of the physically constrained system originally planned.
 
 
 ## 11. References
