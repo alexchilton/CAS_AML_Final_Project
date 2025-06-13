@@ -12,7 +12,7 @@ Three sets of coordinates, each representing a distinct structural configuration
 </li>
 <li><strong>Multiple Small Point Clouds</strong> – A synthetic configuration composed of several smaller, spatially disparate clusters sampled from a Gaussian distribution. 
 </li>
-<li><strong>Real-World Nanoprotein Data</strong> – Empirical atomic coordinates of the alpha-carbon atoms of protein residues, exhibiting a naturally "organic" spatial distribution.
+<li><strong>Real-World Nanoprotein Data</strong> – Empirical atomic coordinates of the alpha-carbon atoms of protein 4POY, chain A residues, exhibiting a naturally "organic" spatial distribution.
 </li></ol>
 
 For the sake of comparison, all three sets contain an identical number of points (120), and are normalized to comparable spatial scales, with the maximum inter-point distance approximately 35 units in each case.
