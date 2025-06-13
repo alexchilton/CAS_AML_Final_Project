@@ -459,7 +459,7 @@ These diagnostic experiments, while not meeting our expectations for SCOP classi
 
 ## 7.4 Graph recurrent attention network (GRAN)-inspired dual output architecture
 
-Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on graph generation [[18]](#ref18) and the conceptual similarity of modeling proteins as sequential chains of amino acids, rather than as complete structural graphs.
+Following the mixed results from the synthetic graph experiments and the SCOP classification task, and considering the encouraging outcomes from the VAE and the optimization pipeline, we proposed a different approach based on a Graph Recurrent Attention Network (GRAN). This decision was motivated by the strong performance of such networks on graph generation [[18]](#ref18) and the conceptual similarity of modeling proteins as sequential chains of amino acids, together with complete structural graphs. The original GRAN model used only a structural model and we wanted to keep the sequential nature too.
 
 ### 7.4.1 Model architecture
 
