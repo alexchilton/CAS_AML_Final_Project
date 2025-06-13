@@ -426,7 +426,7 @@ Local predictions from individual subsequences are aggregated and averaged to pr
 
 #### 7.2.5 Data Recovery through gradient-based optimization
 
-The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see <a href="https://github.com/alexchilton/CAS_AML_Final_Project/edit/main/Documentation/Final_report_annex_1.md" alt="Annex 1 - Gradient-Based Optimization" target="_new">Annex 1 - Gradient-Based Optimization</a> for detailed procedure).
+The unified contact maps are subsequently processed through an optimization pipeline designed to approximating and recovering the corresponding three-dimensional structure. The reconstruction begins by generating an initial distance matrix through random sampling within each defined contact range. This matrix is then used to produce a preliminary 3D structure via Multi-Dimensional Scaling (MDS). The resulting structure is further refined through a gradient-based optimization procedure, which minimizes violations of the contact constraints by penalizing out-of-range distances using sigmoid-based functions (see [Appendix 1: Three-dimensional Structure Recovery through Gradient-Based Optimization](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization) for detailed procedure).
 
 Across both datasets, the reconstructed structures are often closely aligned with the originals, with mean absolute error (MAE) distributions centered around 0.77 for the Fluoproteins and around 2.30 for the Nanobodies (averaged over 30 evaluations). The relatively higher error observed in the Nanobodies reconstructions may stem from several factors: the broader structural diversity within this dataset likely increases the complexity of pattern extraction, potentially necessitating a larger training set. The selected latent space dimensionality of 256 may be insufficient to effectively capture the complex and high-dimensional patterns, potentially limiting the representational capacity of the model.
 
@@ -748,8 +748,13 @@ However, when using contact matrices with information loss, MDS relied on protot
 - Partitioning into sectors of identical width gave optimal results
 - Percentile partitioning followed closely in performance  
 - Structural partitioning yielded least accurate results
-  
-![MDS reconstruction accuracy](figures/mds_accuracy_grid.png)
+
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/mds_accuracy_grid.png" alt="MDS reconstruction systematic study" width="700">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 16:</strong> MDS reconstruction systematic study.
+  </p>
+</div>
 
 **2. Gradient-Based Optimization Pipeline**
 
@@ -759,7 +764,12 @@ Our systematic analysis revealed significant improvements over MDS prototypes us
 - **Domain Number Impact**: More contact matrix domains consistently improved reconstruction quality
 - **Partitioning Strategy**: Percentile partitioning proved most efficient for optimization, while structural partitioning was least effective
 
-![Optimized reconstruction accuracy](figures/gbo_accuracy_grid.png)
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/gbo_accuracy_grid.png" alt="Optimized reconstruction systematic study" width="700">
+  <p style="margin: 10px 40px; font-style: italic;">
+    <strong>Figure 17:</strong> Optimized reconstructions systematic study.
+  </p>
+</div>
 
 
 ### Appendix 2: GRAN loss function 
