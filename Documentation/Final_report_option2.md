@@ -1,5 +1,5 @@
 **Alex Chilton**  
-<span style="color: gray; font-size: 0.8em;">(addresse)</span>   
+<span style="color: gray; font-size: 0.8em;">Rathausgasse 14</br>CH &dash 3014 Bern</span>   
 <span style="font-size: 0.8em;">alex_chilton@gmx.co.uk</span>   
 
 **Lauro Foletti**  
@@ -7,7 +7,7 @@
 <span style="font-size: 0.8em;">lauro.foletti@gmail.com</span> 
 
 **Lara Nonis**  
-<span style="color: gray; font-size: 0.8em;">(addresse)</span>   
+<span style="color: gray; font-size: 0.8em;">(address)</span>   
 <span style="font-size: 0.8em;">lara.nonis01@gmail.com</span>  
 
 
@@ -94,9 +94,9 @@ Protein structure is conventionally described at four hierarchical levels. The p
 
 ### 1.2 Project objectives and evolution
 
-We initally conceptualized this project to develop a phisically informed neural network (PINN) able to predict protein tertiary structure changes upon environmental perturbation. The development of this ultimate goal imposed though preliminary studies necessary to understand the complex structure of proteins and the challenges intertwined with the translation, modification and generation of these elaborated biological structures.   
+We initially conceptualized this project to develop a physically informed neural network (PINN) able to predict protein tertiary structure changes upon environmental perturbation. The development of this ultimate goal imposed though preliminary studies necessary to understand the complex structure of proteins and the challenges intertwined with the translation, modification and generation of these elaborated biological structures.   
 More specifically the preliminary studies involved:   
-- **Parsing of cristallographic / X-ray experimental data (PDB files)**: to extract meaningful information for the subsequent phases of the project;
+- **Parsing of crystallographic / X-ray experimental data (PDB files)**: to extract meaningful information for the subsequent phases of the project;
 - **Preprocessing and pre-calculation**: of all the properties potentially required to describe the 3D structure of the protein and could play a role in the interaction with the environment;
 - **Models exploration**: with state of the art generative models commonly used in the chemical field or in the image processing environment. 
 - **Development of a loss function**: to constrain physically the neural network and drive the generation through biologically plausible structures
@@ -159,7 +159,7 @@ PDB files were parsed using BioPython [[13]](#ref13). We evaluated several parsi
   </p>
 </div>
 
-Upon the first visualization we could observe among the issues the existance of several chains, not belonging to the same proteins but being clusers instead, which were treated by the preprocessing as one molecule. We therefore preprocessed the pdb files to have indipendent chains (each representing one unique nanobody) and converted in heterogeneous graphs.   
+Upon the first visualization we could observe among the issues the existance of several chains, not belonging to the same proteins but being clusters instead, which were treated by the preprocessing as one molecule. We therefore preprocessed the pdb files to have independent chains (each representing one unique nanobody) and converted in heterogeneous graphs.   
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_b.png" alt="Second parsing" width="600">
@@ -316,7 +316,7 @@ We built a custom GraphVAE following the standard variational auto-encoder struc
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_d.png" alt="First parsing" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 4:</strong> Schematic representation of the Protein GraphVAE with weigths and parameters 
+    <strong>Figure 4:</strong> Schematic representation of the Protein GraphVAE with weights and parameters 
   </p>
 </div>
 
@@ -355,7 +355,7 @@ Where:
 
 The training involved a learning rate schedule with a reduction factor of 0.5 and 3-epochs patience. Gradient clipping was applied with max_norm=0.1 to prevent the exploding gradient issue. 
 
-For the generator part we used 16-dimensional latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ from a standard normal distribution N(0,1) with temperature scaling to control the conservativiness of the generations. The genartion was obtained as a step-wise process with a placeholder fopr the edge creation where each node connected to the next one in sequence in a ring connectivitz pattern, , through the decoder, the 16D vector was expanded into the full protein feature generating a matrix [1, nodes_per_graph, 8], where 8 were the initial input features, denormalized in the subsequent step. Lastly the coordinates were extracted, k-nearest neighbour edges costructed overwriting the initial edge scaffold and the graph object created. 
+For the generator part we used 16-dimensional latent sampling $\mathbf{z} \sim \mathcal{N}(0, \sigma^2 I)$ from a standard normal distribution N(0,1) with temperature scaling to control the conservativiness of the generations. The genartion was obtained as a step-wise process with a placeholder fopr the edge creation where each node connected to the next one in sequence in a ring connectivity pattern, through the decoder, the 16D vector was expanded into the full protein feature generating a matrix [1, nodes_per_graph, 8], where 8 were the initial input features, denormalized in the subsequent step. Lastly the coordinates were extracted, k-nearest neighbour edges costructed overwriting the initial edge scaffold and the graph object created. 
 
 **Benefits and drawbacks**:  
 Unlike traditional VAEs operating on fixed size inputs, our architecture handled variable-sized graphs through attention based pooling for size invariant encoding, dynamic batching with graph-level indices and flexible decoding supporting arbitrary output sizes. The model was able to simultaneously learn node-level chemical properties and structural features with graph-level batch indices through the multi-attention heads. 
@@ -438,7 +438,7 @@ Across both datasets, the reconstructed structures are often closely aligned wit
 
 #### 7.2.6 Benefits and drawbacks
 
-Compared to the results obtained previously, the reconstructions acheived with this hybrid approach are more accurate and represent a significant improvement in protein structure prediction. The inversion framework demontrates potential as a methodology for structural learning; in this framework data fragmentation emerges as a viable alternative to initial sequence length management through padding or masking, providing a sraighforward technique for data augmentation. The binary embedding of spatial data is likely to facilitate the network learning.
+Compared to the results obtained previously, the reconstructions achieved with this hybrid approach are more accurate and represent a significant improvement in protein structure prediction. The inversion framework demonstrates potential as a methodology for structural learning; in this framework data fragmentation emerges as a viable alternative to initial sequence length management through padding or masking, providing a straightforward technique for data augmentation. The binary embedding of spatial data is likely to facilitate the network learning.
 
 However, this approach is not without limitations. One concern is the risk of overfitting to local patterns at the expense of capturing broader structural context. This issue is strongly influenced by the chosen subsequence length and the diversity of the training dataset. The overall complexity of the framework may also hinder model interpretability and limit its scalability. In particular, when applied to larger proteins comprising thousands of residues, increasing the minimum chunk length can lead to a substantial expansion of the training dataset — growing quadratically with sequence length due to the rise in pairwise distance computations.
 
@@ -457,12 +457,12 @@ Following the mixed results from the synthetic graph experiments and the SCOP cl
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_e_opt2.png" alt="GRAN model" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 11:</strong> Schematic representation of the GRAN model with weigths and parameters.
+    <strong>Figure 11:</strong> Schematic representation of the GRAN model with weights and parameters.
   </p>
 </div>
 
 The model was built for protein graphs as described, each node was characterized by a 38-dimensional feature vector comprising 7 physiochemical properties (size, flexibility, aromaticity, hydrogen bonding capacity, polarity, and electronic properties ), amino acid identity (22 dimensions, one-hot encoded) and secondary structure (9 dimensions, one-hot encoded). Each edge was characterized by the distance.  
-The graph encoder employed a a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention head with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
+The graph encoder employed a multi-layer Graph Attention Network (GAT) with residual connections, each of the 4 attention head with 32 features for a total of 128 dimensions. Layer normalization was applied after each attention layer for training stability, while a 0.1 dropout rate was set to prevent overfitting. 
 
 Following processing, a global graph representation was obtained by mean pooling:  
 
@@ -497,9 +497,9 @@ Where:
 - \( \mathrm{softmax} \): Normalized exponential function for computing class probabilities 
 
 During training, teacher forcing was employed using ground truth sequences to reduce compounding errors [[19]](#ref19). For inference multinomial sampling was performed from the predicted distributions.  
-The dual output was represented by the amino acid sequence (via the sequence generation branch) and a 3D adjacency matrix (from the structure gneration branch), with an auxilliary prediction head to estimate secondary structure probability for each residue. This provided additional structure supervision and enabled structure aware sequence generation. 
+The dual output was represented by the amino acid sequence (via the sequence generation branch) and a 3D adjacency matrix (from the structure generation branch), with an auxiliary prediction head to estimate secondary structure probability for each residue. This provided additional structure supervision and enabled structure aware sequence generation. 
 
-As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entyropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, simmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized in the following equation and further explained in Appendix 1: 
+As previously developed for the first VAE, and envisioning future applications in physically constrained models, the loss was a composite function with weighted terms. A standard cross entropy loss for the amino acid prediction (first output branch) and multi component contact loss for the structure generation branch including basic contact loss as binary cross entropy between true and predicted, sequential distance constrains penalizing deviations from the expected CA-CA distance, symmetry regularization to minimize asymmetry in the contact maps and a final term to rank the interactions. The full loss function is summarized in the following equation and further explained in Appendix 1: 
 
 $$
 \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{seq}} + \mathcal{L}_{\text{adj}} + 0.5 \times \mathcal{L}_{\text{ss}}
@@ -532,7 +532,7 @@ The new generation was obtained by sampling from the latent space, autoregressiv
 
 ### 7.4.3 Training performance and model convergence 
 
-The model showed good convergence charatectistics across all loss components during training with stable performance reached approximately after epoch 50. 
+The model showed good convergence characteristics across all loss components during training with stable performance reached approximately after epoch 50. 
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/figure_f.png" alt="GRAN model" width="700">
@@ -556,7 +556,7 @@ The 3D structure generated and converted in pdb file for reading through PyMOL.
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/visualization.png" alt="GRAN model" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 14:</strong> cartoon visualization of the genarted protein through PyMOL.
+    <strong>Figure 14:</strong> cartoon visualization of the generated protein through PyMOL.
   </p>
 </div>
 
@@ -568,13 +568,13 @@ The 3D structure generated and converted in pdb file for reading through PyMOL.
 </div>
 
 
-Despite plausible contact map and realistic fold topology and backbone connectivity, the amino acid distribution and and the disposition of the charged and hydrophobic residues do not follow yet the pattern of a folded protein indicating further optimization needed.  
+Despite plausible contact map and realistic fold topology and backbone connectivity, the amino acid distribution and the disposition of the charged and hydrophobic residues do not follow yet the pattern of a folded protein indicating further optimization needed.  
 
 ### 7.4.4 Benefits and drawbacks
 
-One advantage of this new approach—originally inspired by a generative model and subsequently developed further—was its ability to generate the sequence and structure in parallel, enabling consistency between the primary and tertiary structures through joint training. The multi component contact loss was a first attempt of a potentially further developable loss, including the physical-constraining parameters, the informations passed through the 38-dimensional nodes were very rich and the multi attention head enabled the model to focus selectively on different type of residue interactions. 
+One advantage of this new approach—originally inspired by a generative model and subsequently developed further—was its ability to generate the sequence and structure in parallel, enabling consistency between the primary and tertiary structures through joint training. The multi component contact loss was a first attempt of a potentially further developable loss, including the physical-constraining parameters, the information passed through the 38-dimensional nodes were very rich and the multi attention head enabled the model to focus selectively on different type of residue interactions. 
 
-The model was though severely constrained by the maximum sequence lenght of 50 residues, limitation that would increase the computational of $O(N^2)$ graph attention operations on adjacency matrices with the increase of the sequence length. Additionally the model did not contains in this first implementation angles and torsions, computed in the preprocessing and essential in the structural biology for realistic side chain configurations. From thge described generation process the model gnerated proteins by building 50-residues subsequences and averagng them together, with the risk of introducing discontinuites in the final structure. For more complex datasets the complex multi component loss function may be difficult to balance.   
+The model was though severely constrained by the maximum sequence length of 50 residues, limitation that would increase the computational complexity of $O(N^2)$ graph attention operations on adjacency matrices with the increase of the sequence length. Additionally, the model did not contain in this first implementation angles and torsions, computed in the preprocessing and essential in the structural biology for realistic side chain configurations. From the described generation process the model generated proteins by building 50-residues subsequences and averaging them together, with the risk of introducing discontinuites in the final structure. For more complex datasets the complex multi component loss function may be difficult to balance.   
 
 ## 8. Documentation
 
@@ -681,7 +681,7 @@ $$
 \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{seq}} + \mathcal{L}_{\text{adj}} + 0.5 \times \mathcal{L}_{\text{ss}}
 $$
 
-Each of the individual lossed described by the following formulations: 
+Each of the individual losses described by the following formulations: 
 
 $$
 L_{seq} = -\frac{1}{T} \sum_{t=1}^{T} \log p(a_t^{\text{true}} \mid a_{<t})
