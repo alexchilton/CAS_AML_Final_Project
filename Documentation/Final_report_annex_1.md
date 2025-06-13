@@ -1,5 +1,4 @@
-# Annex 1
-# Three-dimensional Structure Recovery through Gradient-Based Optimization
+# Appendix 1 : Three-dimensional Structure Recovery through Gradient-Based Optimization
 
 This short study proposes an empirical framework for tuning the parameters of an optimization pipeline designed to reconstruct the three-dimensional expression of a structure from partial contact maps. These contact maps, derived from local fragment predictions based on sequence subsequences, represent incomplete spatial interaction data. To recover the full 3D structure, a process comparable to a "reverse embedding" is employed, which maps the partial contact information back into spatial coordinates.
 
@@ -17,11 +16,12 @@ Three sets of coordinates, each representing a distinct structural configuration
 
 For the sake of comparison, all three sets contain an identical number of points (120), and are normalized to comparable spatial scales, with the maximum inter-point distance approximately 35 units in each case.
 
-## Embedding
+## Embedding process
 
-The original 3D coordinates are converted into pairwise distance matrices using standard Euclidean norm. Each point is then represented as a 120-dimensional vector, capturing its distances to all other points in the structure. The distance matrices are symmetric, with zeros along the main diagonal.
+The original 3D coordinates are converted into pairwise distance matrices using standard Euclidean norm. Each point is then represented as a 120-dimensional vector, capturing its distances to all other points in the structure. The distance matrices are symmetric, with zeros along the main diagonal. To constrain local context, a subsequence length is defined, determining the bandwidth of the distance matrices. A corresponding mask is applied such that all distance values outside this window are zeroed out;
 
-The resulting distance matrices are then converted into range-based contact maps, based on two key parameters: 
+The resulting distance matrices are then converted into range-based contact maps, based on three key parameters: 
+- the <b>bandwidth coverage</b>;
 - the <b>number of discrete ranges</b> used for data partitioning;
 - the <b>numerical boundaries</b> that define these ranges.
 
@@ -36,19 +36,23 @@ The embedding process results in 2 objects:
 - a tensor of shape (𝑁,𝑁,𝐶), where 𝑁 is the number of points in the dataset, and 𝐶 is the number of contact maps (i.e., distance ranges).
 - a list of numercial values describing the boundaries of each distance range.
 
-## Reverse embedding
+## Reverse embedding process
 
 The reverse embedding process consists of 2 stages departing from the embeddings and the list obtained earlier :
 <ol type="1"><li>
   <b>MDS pipeline</b>. A first matrix of distances is produced by taking a uniform random value within the boundaries of the respective domains expressed by the contacts; the matrix is then reduced to three dimensions via a classical MDS (Multidimensional Scaling); these values constitute a first approximation of the 3D coordinates and are used to initialize a table of logits;<br></li>
-  <li><b>Optimization pipeline</b>. Logits are fed into an optimization loop, which translates them into relative distances and compares them with contact information. This optimization process relies entirely on a double sigmoid which “validates” the proposed values when they fall within the expected range, and penalizes them when they fall outside it, all in a continuous and differentiable manner (soft ranges). Proposed values are compared with target values by BCE.</li>
+  <li><b>Optimization pipeline</b>. Logits are fed into an optimization loop, which translates them into relative distances and compares them with contact information. This optimization process relies entirely on a double sigmoid which “validates” the proposed values when they fall within the expected range, and penalizes them when they fall outside it, all in a continuous and differentiable manner (soft ranges). Proposed values are compared with target values by BCE. The process returns a set of three-dimensional coordinates whose relative distances correspond as closely as possible to the contact maps.</li>
 </ol>
 
-The process returns a set of three-dimensional coordinates whose relative distances correspond as closely as possible to the contact maps.
+## Experimental results
+
+Experiments were conducted to map the interactions between the datasets and the three key parameters, and to identify optimal settings.
 
 ### 1. MDS pipeline
 
-Our analysis revealed that coordinate recovery was straightforward when complete distance matrices were available, with Multidimensional Scaling achieving extremely low error (MAE = 0.0000 for uniform structures) in very short process time. However, when using contact matrices with information loss, MDS relied on prototype distance matrices based on random sampling from contact domains. We found that:
+Our analysis revealed that coordinate recovery was straightforward when complete distance matrices were available, with Multidimensional Scaling achieving extremely low error (MAE = 0.0000 for uniform structures) in very short process time. 
+
+However, when using contact matrices with information loss, MDS relied on prototype distance matrices based on random sampling from contact domains. We found that:
 - Partitioning into sectors of identical width gave optimal results
 - Percentile partitioning followed closely in performance  
 - Structural partitioning yielded least accurate results
