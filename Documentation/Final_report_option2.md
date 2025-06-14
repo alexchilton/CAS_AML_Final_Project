@@ -1,3 +1,25 @@
+<style>
+
+@page {
+  margin-bottom: 2cm;
+  @bottom-right {
+    content: counter(page);
+  }
+}
+
+@page:first {
+  @bottom-right {
+    content: "";
+  }
+}
+
+@page:nth(2) {
+  @bottom-right {
+    content: "";
+  }
+}
+</style>
+
 **Alex Chilton**  
 <span style="color: gray; font-size: 0.8em;">Rathausgasse 14</br>CH &mdash; 3014 Bern</span>   
 <span style="font-size: 0.8em;">alex_chilton@gmx.co.uk</span>   
@@ -8,7 +30,7 @@
 
 **Lara Nonis**  
 <span style="color: gray; font-size: 0.8em;">Maispracherstrasse 2a</br>CH &mdash; 4312 Magden</span>   
-<span style="font-size: 0.8em;">lara.nonis01@gmail.com</span>  
+<span style="font-size: 0.8em;">lara.nonis01@gmail.com</span> 
 
 
 
@@ -25,6 +47,7 @@ Methodological Exploration of Protein Structure Generation from PDB Representati
 <p style="color: #666; font-size: 16px; ">15 June 2025</p>
 
 </div>
+
 
 
 <div style="page-break-after: always;"></div>
@@ -46,7 +69,9 @@ Results indicated promising directions for graph-based protein generation, with 
 
 <div style="page-break-after: always;"></div>
 
-## Table of contents  
+
+## Table of contents 
+
 
 - [Abstract](#abstract)
 - [Table of contents](#table-of-contents)
@@ -82,9 +107,6 @@ Results indicated promising directions for graph-based protein generation, with 
 - [8. Documentation](#8-documentation)
 - [9. Risks](#9-risks)
 - [10. Conclusions](#10-conclusions)
-- [References](#references)
-- [List of Figures](#list-of-figures)
-- [List of Tables](#list-of-tables)
 - [Appendix](#appendix)
   - [Appendix 1: Three-dimensional Structure Recovery through Gradient-Based Optimization](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization)
     - [Data](#data)
@@ -92,6 +114,10 @@ Results indicated promising directions for graph-based protein generation, with 
     - [Reverse embedding process](#reverse-embedding-process)
     - [Systematic experiments](#systematic-experiments)
   - [Appendix 2: GRAN loss function](#appendix-2-gran-loss-function)
+- [List of Figures](#list-of-figures)
+- [List of Tables](#list-of-tables)
+- [References](#references)
+- [Statement](#statement)
 
 <div style="page-break-after: always;"></div>
 
@@ -503,9 +529,9 @@ $$
 
 Where:
 
-- \( \mathbf{h}_G \): Global graph embedding  
-- \( |V| \): Number of nodes in the graph  
-- \( \mathbf{h}_i^{(\text{final})} \): Final hidden representation of node \( i \) 
+- $\mathbf{h}_G$: Global graph embedding  
+- $|V|$: Number of nodes in the graph  
+- $\mathbf{h}_i^{(\text{final})}$: Final hidden representation of node $i$
 
 that initialized a gated recurrent unit (GRU)-based autoregressive sequence decoder:
 
@@ -519,13 +545,13 @@ $$
 
 Where:
 
-- \( \mathbf{h}_t \): Hidden state at time step \( t \)  
-- \( \mathbf{x}_{t-1} \): Input at time step \( t-1 \) (embedding of the previously generated amino acid)  
-- \( \mathbf{h}_{t-1} \): Hidden state at time step \( t-1 \)  
-- \( a_t \): Action (or output) at time step \( t \)  
-- \( a_{<t} \): Sequence of actions preceding time \( t \)  
-- \( W_{\text{seq}} \), \( \mathbf{b}_{\text{seq}} \): Trainable weight matrix and bias vector  
-- \( \mathrm{softmax} \): Normalized exponential function for computing class probabilities 
+- $\mathbf{h}_t$: Hidden state at time step $t$  
+- $\mathbf{x}_{t-1}$: Input at time step $t-1$ (embedding of the previously generated amino acid)  
+- $\mathbf{h}_{t-1}$: Hidden state at time step $t-1$  
+- $a_t$: Action (or output) at time step $t$  
+- $a_{<t}$: Sequence of actions preceding time $t$  
+- $W_{\text{seq}}$, $\mathbf{b}_{\text{seq}}$: Trainable weight matrix and bias vector  
+- $\mathrm{softmax}$: Normalized exponential function for computing class probabilities
 
 During training, teacher forcing was employed using ground truth sequences to reduce compounding errors [[20]](#ref20). For inference multinomial sampling was performed from the predicted distributions.  
 The dual output was represented by the amino acid sequence (via the sequence generation branch) and a 3D adjacency matrix (from the structure generation branch), with an auxiliary prediction head to estimate secondary structure probability for each residue. This provided additional structure supervision and enabled structure aware sequence generation. 
@@ -538,10 +564,10 @@ $$
 
 where: 
 
-- \( \mathcal{L}_{\text{seq}} \): Loss for sequence generation branch  
-- \( \mathcal{L}_{\text{adj}} \): Loss for structure generation branch 
-- \( \mathcal{L}_{\text{ss}} \): Loss for secondary structure prediction  
-- Coefficient \( 0.5 \): Weighting factor 
+- $\mathcal{L}_{\text{seq}}$: Loss for sequence generation branch  
+- $\mathcal{L}_{\text{adj}}$: Loss for structure generation branch  
+- $\mathcal{L}_{\text{ss}}$: Loss for secondary structure prediction  
+- Coefficient $0.5$: Weighting factor
 
 
 #### 7.4.2 Additional preprocessing and the generation process
@@ -635,127 +661,8 @@ Further validation will be required to assess the performance of these models in
 </div>
 
 
-## References
-
-<a id="ref1"></a>
-[1] Nelson, David L., and Michael M. Cox. Lehninger Principles of Biochemistry. 6th ed. W. H. Freeman, 2012.
-
-<a id="ref2"></a>
-[2] Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., ... & Chintala, S. (2019). PyTorch: An imperative style, high-performance deep learning library. Advances in neural information processing systems, 32.
-
-<a id="ref3"></a>
-[3] Fey, M., & Lenssen, J. E. (2019). Fast graph representation learning with PyTorch Geometric. arXiv preprint arXiv:1903.02428.
-
-<a id="ref4"></a>
-[4] Aric A. Hagberg, Daniel A. Schult and Pieter J. Swart, “Exploring network structure, dynamics, and function using NetworkX”, in Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15, Aug 2008
-
-<a id="ref5"></a>
-[5] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
-
-<a id="ref6"></a>
-[6] Graphein - a Python Library for Geometric Deep Learning and Network Analysis on Protein Structures
-Arian R. Jamasb, Pietro Lió, Tom L. Blundell
-bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
-
-<a id="ref7"></a>
-[7] Google Colab. (2017). Colaboratory: A Google research project. Google Research. https://colab.research.google.com/
-
-<a id="ref8"></a>
-[8] UBELIX (https://www.id.unibe.ch/hpc), the HPC cluster at the University of Bern.  
-
-<a id="ref9"></a>
-[9] Biewald, L. (2020). Experiment tracking with Weights and Biases. Software available from wandb.com. URL: https://www.wandb.com/
-
-<a id="ref10"></a>
-[10] Casual Labs. (2025). GRAN-Nanobody-Proteins Dataset. Hugging Face. https://huggingface.co/Casual-Labs/gran-nanobody-proteins
-
-<a id="ref11"></a>
-[11] Berman, H. M., Westbrook, J., Feng, Z., Gilliland, G., Bhat, T. N., Weissig, H., Shindyalov, I. N., & Bourne, P. E. (2000). The Protein Data Bank. Nucleic Acids Research, 28(1), 235-242. https://doi.org/10.1093/nar/28.1.235
-
-<a id="ref12"></a>
-[12] Chang A., Jeske L., Ulbrich S., Hofmann J., Koblitz J., Schomburg I., Neumann-Schaal M., Jahn D., Schomburg D. BRENDA, the ELIXIR core data resource in 2021: new developments and updates. (2021), Nucleic Acids Res., 49:D498-D508. DOI: 10.1093/nar/gkaa1025 PubMed: 33211880
-
-<a id="ref13"></a>
-[13] Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 https://doi.org/10.1093/bioinformatics/btp163 pmid:19304878
-
-<a id="ref14"></a>
-[14] PyMOL, The PyMOL Molecular Graphics System, Version 3.0 Schrödinger, LLC.
-
-<a id="ref15"></a>
-[15] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
-
-<a id="ref16"></a>
-[16] De Cao, Nicola & Kipf, Thomas. (2018). MolGAN: An implicit generative model for small molecular graphs. 10.48550/arXiv.1805.11973. 
-
-<a id="ref17"></a>
-[17] Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
-
-<a id="ref18"></a>
-[18] Korman, A. (2023). Prediction of protein movement upon ligand binding using equivariant graph neural networks. Stanford CS224W: Machine Learning with Graphs. Medium. https://medium.com/stanford-cs224w/prediction-of-protein-movement-upon-ligand-binding-using-equivariant-graph-neural-networks-a1f4b2c8b8a0
-
-<a id="ref19"></a>
-[19] Efficient Graph Generation with Graph Recurrent Attention Networks
-Renjie Liao, Yujia Li, Yang Song, Shenlong Wang, Charlie Nash, William L. Hamilton, David Duvenaud, Raquel Urtasun, Richard S. Zemel
- 
-
-<a id="ref20"></a>
-[20] Lamb, Alex & Goyal, Anirudh & Zhang, Ying & Zhang, Saizheng & Courville, Aaron & Bengio, Y.. (2016). Professor Forcing: A New Algorithm for Training Recurrent Networks. 10.48550/arXiv.1610.09038. 
-
-<a id="ref21"></a>
-[21] Claude (Anthropic). (2025). Claude Sonnet 4 [Large language model]. June 2025, from https://claude.ai
-
-<a id="ref22"></a>
-[22] Hernandez-Garcia, Alex & König, Peter. (2019). Further advantages of data augmentation on convolutional neural networks. 10.48550/arXiv.1906.11052. 
-
 <div style="page-break-after: always;"></div>
 
-## List of Figures
-
-<div style="text-align: justify;">
-
-**Figure 1**:Comparison between molecular and graph-based representations of the same protein structure.
-
-**Figure 2**: Comparison of protein representation formats. 
-
-**Figure 3**: 3D visualization of a protein structure showing amino acid residues as colored spheres according to type.
-
-**Figure 4**: Schematic representation of the Protein GraphVAE with weights and parameters.
-
-**Figure 5**: Protein chain length distribution.
-
-**Figure 6**: Pairwise distance distribution across the Fluoproteins dataset.
-
-**Figure 7**:Schematic representation of the modified VAE with weights and parameters.
-
-**Figures 8–10**: Comparison for protein TC.
-
-**Figure 11**: Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
-
-**Figure 12**: Schematic representation of the GRAN model with weights and parameters.
-
-**Figure 13**: Training logs from the GRAN model.
-
-**Figure 14**: Contact map prediction accuracy analysis with binary comparison and difference analysis.
-
-**Figure 15**: Cartoon visualization of the generated protein through PyMOL.
-
-**Figure 16**: Surface visualization of the generated protein through PyMOL.
-
-**Figure 17**: MDS reconstruction systematic study.
-
-**Figure 18**: Optimized reconstructions systematic study.
-
-
-</div>
-
-<div style="page-break-after: always;"></div>
-
-
-## List of Tables
-
-**Table 1**: GRAN-inspired dual output model hyperparameters.
-
-<div style="page-break-after: always;"></div>
 
 
 ## Appendix
@@ -959,3 +866,138 @@ $$
 - $ss_i^{\text{true}}$: Ground truth secondary structure label for node $i$  
 - $\mathbf{h}_i$: Final node embedding of node $i$
 
+<div style="page-break-after: always;"></div>
+
+
+## List of Figures
+
+<div style="text-align: justify;">
+
+**Figure 1**:Comparison between molecular and graph-based representations of the same protein structure.
+
+**Figure 2**: Comparison of protein representation formats. 
+
+**Figure 3**: 3D visualization of a protein structure showing amino acid residues as colored spheres according to type.
+
+**Figure 4**: Schematic representation of the Protein GraphVAE with weights and parameters.
+
+**Figure 5**: Protein chain length distribution.
+
+**Figure 6**: Pairwise distance distribution across the Fluoproteins dataset.
+
+**Figure 7**:Schematic representation of the modified VAE with weights and parameters.
+
+**Figures 8–10**: Comparison for protein TC.
+
+**Figure 11**: Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
+
+**Figure 12**: Schematic representation of the GRAN model with weights and parameters.
+
+**Figure 13**: Training logs from the GRAN model.
+
+**Figure 14**: Contact map prediction accuracy analysis with binary comparison and difference analysis.
+
+**Figure 15**: Cartoon visualization of the generated protein through PyMOL.
+
+**Figure 16**: Surface visualization of the generated protein through PyMOL.
+
+**Figure 17**: MDS reconstruction systematic study.
+
+**Figure 18**: Optimized reconstructions systematic study.
+
+
+</div>
+
+<div style="page-break-after: always;"></div>
+
+
+## List of Tables
+
+**Table 1**: GRAN-inspired dual output model hyperparameters.
+
+<div style="page-break-after: always;"></div>
+
+## References
+
+<a id="ref1"></a>
+[1] Nelson, David L., and Michael M. Cox. Lehninger Principles of Biochemistry. 6th ed. W. H. Freeman, 2012.
+
+<a id="ref2"></a>
+[2] Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., ... & Chintala, S. (2019). PyTorch: An imperative style, high-performance deep learning library. Advances in neural information processing systems, 32.
+
+<a id="ref3"></a>
+[3] Fey, M., & Lenssen, J. E. (2019). Fast graph representation learning with PyTorch Geometric. arXiv preprint arXiv:1903.02428.
+
+<a id="ref4"></a>
+[4] Aric A. Hagberg, Daniel A. Schult and Pieter J. Swart, “Exploring network structure, dynamics, and function using NetworkX”, in Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15, Aug 2008
+
+<a id="ref5"></a>
+[5] Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577–2637. https://doi.org/10.1002/bip.360221211
+
+<a id="ref6"></a>
+[6] Graphein - a Python Library for Geometric Deep Learning and Network Analysis on Protein Structures
+Arian R. Jamasb, Pietro Lió, Tom L. Blundell
+bioRxiv 2020.07.15.204701; doi: https://doi.org/10.1101/2020.07.15.204701
+
+<a id="ref7"></a>
+[7] Google Colab. (2017). Colaboratory: A Google research project. Google Research. https://colab.research.google.com/
+
+<a id="ref8"></a>
+[8] UBELIX (https://www.id.unibe.ch/hpc), the HPC cluster at the University of Bern.  
+
+<a id="ref9"></a>
+[9] Biewald, L. (2020). Experiment tracking with Weights and Biases. Software available from wandb.com. URL: https://www.wandb.com/
+
+<a id="ref10"></a>
+[10] Casual Labs. (2025). GRAN-Nanobody-Proteins Dataset. Hugging Face. https://huggingface.co/Casual-Labs/gran-nanobody-proteins
+
+<a id="ref11"></a>
+[11] Berman, H. M., Westbrook, J., Feng, Z., Gilliland, G., Bhat, T. N., Weissig, H., Shindyalov, I. N., & Bourne, P. E. (2000). The Protein Data Bank. Nucleic Acids Research, 28(1), 235-242. https://doi.org/10.1093/nar/28.1.235
+
+<a id="ref12"></a>
+[12] Chang A., Jeske L., Ulbrich S., Hofmann J., Koblitz J., Schomburg I., Neumann-Schaal M., Jahn D., Schomburg D. BRENDA, the ELIXIR core data resource in 2021: new developments and updates. (2021), Nucleic Acids Res., 49:D498-D508. DOI: 10.1093/nar/gkaa1025 PubMed: 33211880
+
+<a id="ref13"></a>
+[13] Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 https://doi.org/10.1093/bioinformatics/btp163 pmid:19304878
+
+<a id="ref14"></a>
+[14] PyMOL, The PyMOL Molecular Graphics System, Version 3.0 Schrödinger, LLC.
+
+<a id="ref15"></a>
+[15] Antonina Andreeva, Dave Howorth, Cyrus Chothia, Eugene Kulesha, Alexey Murzin, SCOP2 prototype: a new approach to protein structure mining. (2014) Nucl. Acid Res., 42 (D1): D310-D314 and Antonina Andreeva, Eugene Kulesha, Julian Gough, Alexey Murzin, The SCOP database in 2020: expanded classification of representative family and superfamily domains of known protein structures. (2020) Nucl. Acid Res., 48 (D1): D376-D382
+
+<a id="ref16"></a>
+[16] De Cao, Nicola & Kipf, Thomas. (2018). MolGAN: An implicit generative model for small molecular graphs. 10.48550/arXiv.1805.11973. 
+
+<a id="ref17"></a>
+[17] Basu, V. (2024, December 2017). Drug molecule generation with VAE. Keras. https://mng.bz/rKve
+
+<a id="ref18"></a>
+[18] Korman, A. (2023). Prediction of protein movement upon ligand binding using equivariant graph neural networks. Stanford CS224W: Machine Learning with Graphs. Medium. https://medium.com/stanford-cs224w/prediction-of-protein-movement-upon-ligand-binding-using-equivariant-graph-neural-networks-a1f4b2c8b8a0
+
+<a id="ref19"></a>
+[19] Efficient Graph Generation with Graph Recurrent Attention Networks
+Renjie Liao, Yujia Li, Yang Song, Shenlong Wang, Charlie Nash, William L. Hamilton, David Duvenaud, Raquel Urtasun, Richard S. Zemel
+ 
+
+<a id="ref20"></a>
+[20] Lamb, Alex & Goyal, Anirudh & Zhang, Ying & Zhang, Saizheng & Courville, Aaron & Bengio, Y.. (2016). Professor Forcing: A New Algorithm for Training Recurrent Networks. 10.48550/arXiv.1610.09038. 
+
+<a id="ref21"></a>
+[21] Claude (Anthropic). (2025). Claude Sonnet 4 [Large language model]. June 2025, from https://claude.ai
+
+<a id="ref22"></a>
+[22] Hernandez-Garcia, Alex & König, Peter. (2019). Further advantages of data augmentation on convolutional neural networks. 10.48550/arXiv.1906.11052. 
+
+<div style="page-break-after: always;"></div>
+
+
+## Statement
+The following part is mandatory and must be signed by the author or authors. 
+„Ich erkläre hiermit, dass ich diese Arbeit selbstständig verfasst und keine anderen als die angegebenen Quellen benutzt habe. Alle Stellen, die wörtlich oder sinngemäss aus Quellen entnommen wurden, habe ich als solche gekennzeichnet. Mir ist bekannt, dass andernfalls die Arbeit als nicht erfüllt bewertet wird und dass die Universitätsleitung bzw. der Senat zum Entzug des aufgrund dieser Arbeit verliehenen Abschlusses bzw. Titels berechtigt ist. Für die Zwecke der Begutachtung und der Überprüfung der Einhaltung der Selbstständigkeitserklärung bzw. der Reglemente betreffend Plagiate erteile ich der Universität Bern das Recht, die dazu erforderlichen Personendaten zu bearbeiten und Nutzungshandlungen vorzunehmen, insbesondere die schriftliche Arbeit zu vervielfältigen und dauerhaft in einer Datenbank zu speichern sowie diese zur Überprüfung von Arbeiten Dritter zu verwenden oder hierzu zur Verfügung zu stellen.“
+
+Date:						 
+Signature(s):
+
+
+<div style="page-break-after: always;"></div>
