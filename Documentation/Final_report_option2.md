@@ -410,7 +410,7 @@ An alternative methodology demonstrating comparable performance was investigated
 
 Rather than using full-length amino acid sequences as input, each sequence was fragmented into fixed-length subsequences of length L, where L represented a fraction of the maximum protein length (bandwidth). Each amino acid was thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping was applied, resulting in a consistent probability distribution across all subsequences.
 
-The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
+We followed the empirical framework established in the comparative study (see [Appendix 1](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization)) to determine the critical parameter length 𝐿, which we define as at least 30% of the maximum length studied. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein length" width="700">
