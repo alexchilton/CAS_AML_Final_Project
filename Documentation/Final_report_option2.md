@@ -19,7 +19,7 @@
 <p style="color: #666; font-size: 18px; margin-bottom: 10px;">Data Science Project</p>
 
 <h1 style="font-size: 35px; line-height: 1.2; margin: 20px 0; border-bottom: none; text-decoration: none;">
-(Title TBD)
+Methodological Exploration of Protein Structure Generation from PDB Representations
 </h1>
 
 <p style="color: #666; font-size: 16px; ">15 June 2025</p>
@@ -33,7 +33,7 @@
 <div style="text-align: justify;">
 
 
-This project assessed the complexities and challenges of protein structure generation from PDB-derived crystallographic representations. Understanding how to computationally generate protein tertiary structures is crucial for advancing protein engineering and drug discovery applications. 
+This project assessed the complexities and challenges of protein structure generation from PDB-derived representations. Understanding how to computationally generate protein tertiary structures is crucial for advancing protein engineering and drug discovery applications. 
 
 The methodology involved developing and evaluating multiple neural network architectures, including graph variational autoencoders, hybrid learning frameworks, and graph recurrent networks. The datasets comprised different protein structures from the Protein Data Bank, which were processed through a comprehensive preprocessing pipeline to convert 3D crystallographic data into graph representations with physicochemical properties and spatial relationships.  
 
@@ -112,7 +112,7 @@ More specifically the preliminary studies involved:
 - **Parsing of crystallographic / X-ray experimental data (PDB files)**: to extract meaningful information for the subsequent phases of the project;
 - **Preprocessing and pre-calculation**: of all the properties potentially required to describe the 3D structure of the protein and could play a role in the interaction with the environment;
 - **Models exploration**: with state of the art generative models commonly used in the chemical field or in the image processing environment. 
-- **Development of a loss function**: to incorporate physical constraints into the neural network and direct the generation process toward biologically plausible structures
+- **Early exploration on a loss function development**: to incorporate physical constraints into the neural network and direct the generation process toward biologically plausible structures.
 
 The present report will focus on the pre-studies leaving the ultimate goal for future development on the project. 
 
@@ -389,7 +389,7 @@ The comparative study in Annex 1 established an empirical framework for the crit
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein length" width="700">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 5:</strong> In the Fluoproteins dataset, protein chain lengths exhibit a peak around 225 residues, with 99% of sequences containing no more than 233 residues. Based on this observation, a conservative chunk length of 78 residues was selected—representing approximately 35% of the maximum observed length. This choice ensures a minimum coverage bandwidth of 70%, providing sufficient context within each fragment while maintaining consistency across samples.</p>
+    <strong>Figure 5:</strong> Protein chain length distribution. In the Fluoproteins dataset, protein chain lengths exhibit a peak around 225 residues, with 99% of sequences containing no more than 233 residues. Based on this observation, a conservative chunk length of 78 residues was selected—representing approximately 35% of the maximum observed length. This choice ensures a minimum coverage bandwidth of 70%, providing sufficient context within each fragment while maintaining consistency across samples.</p>
 </div>
 
 
@@ -419,7 +419,7 @@ A modified Variational Autoencoder (VAE) was subsequently trained using the foll
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/model_schema_VAE.jpg" alt="Schematic representation of the modified VAE with weights and parameters" width="800">
   <p style="margin: 10px 40px 10px; font-style: italic;">
-    <strong>Figure 7:</strong> Schematic representation of the modified VAE with weights and parameters 
+    <strong>Figure 7:</strong> Schematic representation of the modified VAE with weights and parameters. 
   </p>
 </div>
 
@@ -587,14 +587,14 @@ The 3D structure was generated and converted in pdb file for reading through PyM
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/visualization.png" alt="GRAN model" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 15:</strong> cartoon visualization of the generated protein through PyMOL.
+    <strong>Figure 15:</strong> Cartoon visualization of the generated protein through PyMOL.
   </p>
 </div>
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/surface_atoms.png" alt="GRAN model" width="600">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figure 16:</strong> surface visualization of the generated protein through PyMOL. Blue and red areas represent charged residues, green and yellow area represent hydrophobic regions. 
+    <strong>Figure 16:</strong> Surface visualization of the generated protein through PyMOL. Blue and red areas represent charged residues, green and yellow area represent hydrophobic regions. 
   </p>
 </div>
 
@@ -713,31 +713,38 @@ Renjie Liao, Yujia Li, Yang Song, Shenlong Wang, Charlie Nash, William L. Hamilt
 
 <div style="text-align: justify;">
 
-Figure 1: Comparison between molecular and graph-based representations of the same protein structure. 
+**Figure 1**:Comparison between molecular and graph-based representations of the same protein structure.
 
-Figure 2: Comparison of protein representation formats.
+**Figure 2**: Comparison of protein representation formats. 
 
-Figure 3: 3D visualization of a protein structure showing amino acid residues as colored spheres according to type.
+**Figure 3**: 3D visualization of a protein structure showing amino acid residues as colored spheres according to type.
 
-Figure 4: Schematic representation of the Protein GraphVAE with weights and parameters 
+**Figure 4**: Schematic representation of the Protein GraphVAE with weights and parameters.
 
-Figure 5: In the Fluoproteins dataset, protein chain lengths exhibit a peak around 225 residues, with 99% of sequences containing no more than 233 residues. Based on this observation, a conservative chunk length of 78 residues was selected—representing approximately 35% of the maximum observed length. This choice ensures a minimum coverage bandwidth of 70%, providing sufficient context within each fragment while maintaining consistency across samples.
+**Figure 5**: Protein chain length distribution.
 
-Figure 6: Pairwise distance distribution across the Fluoproteins dataset. 
+**Figure 6**: Pairwise distance distribution across the Fluoproteins dataset.
 
-Figures 7–9: Comparison for protein TC.
+**Figure 7**:Schematic representation of the modified VAE with weights and parameters.
 
-Figure 10: Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
+**Figures 8–10**: Comparison for protein TC.
 
-Figure 11:Schematic representation of the GRAN model with weights and parameters.
+**Figure 11**: Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
 
-Figure 12: Training logs from the GRAN model.
+**Figure 12**: Schematic representation of the GRAN model with weights and parameters.
 
-Figure 13: Contact map prediction accuracy analysis with binary comparison and difference analysis.
+**Figure 13**: Training logs from the GRAN model.
 
-Figure 14: Cartoon visualization of the generated protein through PyMOL.
+**Figure 14**: Contact map prediction accuracy analysis with binary comparison and difference analysis.
 
-Figure 15: surface visualization of the generated protein through PyMOL. 
+**Figure 15**: Cartoon visualization of the generated protein through PyMOL.
+
+**Figure 16**: Surface visualization of the generated protein through PyMOL.
+
+**Figure 17**: MDS reconstruction systematic study.
+
+**Figure 18**: Optimized reconstructions systematic study.
+
 
 </div>
 
@@ -745,6 +752,8 @@ Figure 15: surface visualization of the generated protein through PyMOL.
 
 
 ## List of Tables
+
+**Table 1**: GRAN-inspired dual output model hyperparameters.
 
 <div style="page-break-after: always;"></div>
 
