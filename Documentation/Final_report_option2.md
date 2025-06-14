@@ -999,5 +999,9 @@ The following part is mandatory and must be signed by the author or authors.
 Date:						 
 Signature(s):
 
+<div style="text-align: center; margin: 20px 0;">
+  <img src="figures/Signatures.png" alt="First parsing" width="500">
+</div>
+
 
 <div style="page-break-after: always;"></div>
