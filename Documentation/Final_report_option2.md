@@ -408,9 +408,9 @@ An alternative methodology demonstrating comparable performance was investigated
 
 #### 7.2.1 Data Fragmentation
 
-Rather than using full-length amino acid sequences as input, each sequence was fragmented into fixed-length subsequences of length L, where L represented a fraction of the maximum protein length (bandwidth). Each amino acid was thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping was applied, resulting in a consistent probability distribution across all subsequences.
+Rather than using full-length amino acid sequences as input, each sequence was fragmented into fixed-length subsequences of length 𝐿, where 𝐿 represented a fraction of the maximum protein length (bandwidth). Each amino acid was thus associated with a corresponding subchain. To ensure uniform coverage and preserve the statistical properties of the original sequence, circular wrapping was applied, resulting in a consistent probability distribution across all subsequences.
 
-The comparative study in Annex 1 established an empirical framework for the critical parameter length L, defined as 30% at least of maximum studied length. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
+We followed the empirical framework established in the comparative study (see [Appendix 1](#appendix-1-three-dimensional-structure-recovery-through-gradient-based-optimization)) to determine the critical parameter length 𝐿, which we define as at least 30% of the maximum length studied. This parameter will vary depending on the dataset and the inner distribution of protein lengths.
 
 <div style="text-align: center; margin: 20px 0;">
   <img src="figures/FLUOPROTEINS_lengths.png" alt="Fluoprotein length" width="700">
@@ -462,7 +462,7 @@ Local predictions from individual subsequences were aggregated and averaged to p
   <img src="figures/FLUOPROTEINSReconstructedcontactmaps.png" alt="Recovered maps" width="1200">
   <img src="figures/FLUOPROTEINS_Errors.png" alt="Errors" width="1200">
   <p style="margin: 10px 40px; font-style: italic;">
-    <strong>Figures 8–10: </strong>Comparison for protein TC.
+    <strong>Figures 8–10: </strong>Comparison for fluoprotein 6MXW, chain G.
 <strong>Figure 8 </strong>(top) presents the original contact maps derived from structural data, masked according to the chosen subsequence length.
 <strong>Figure 9 </strong> (middle) shows the aggregated model predictions obtained by averaging local outputs from subsequences.
 <strong>Figure 10 </strong> (bottom) displays the absolute difference between the predicted and original contact maps.
@@ -873,7 +873,7 @@ $$
 
 <div style="text-align: justify;">
 
-**Figure 1**:Comparison between molecular and graph-based representations of the same protein structure.
+**Figure 1**: Comparison between molecular and graph-based representations of the same protein structure.
 
 **Figure 2**: Comparison of protein representation formats. 
 
@@ -885,9 +885,9 @@ $$
 
 **Figure 6**: Pairwise distance distribution across the Fluoproteins dataset.
 
-**Figure 7**:Schematic representation of the modified VAE with weights and parameters.
+**Figure 7**: Schematic representation of the modified VAE with weights and parameters.
 
-**Figures 8–10**: Comparison for protein TC.
+**Figures 8–10**: Comparison for protein fluoprotein 6MXW, chain G.
 
 **Figure 11**: Visual comparison of structures (original and recovered) of fluoprotein 6MXW, chain G.
 
