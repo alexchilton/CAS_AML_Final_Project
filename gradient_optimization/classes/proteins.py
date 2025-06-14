@@ -78,18 +78,73 @@ class Protein:
         self.len = len(self.aa)
 
     def get_D(self):
-        self.D = cdist(self.ca, self.ca, metric='euclidean')
+        coords = np.array(self.ca)
+        assert coords.ndim == 2 and coords.shape[1] == 3
+        self.D = cdist(coords, coords, metric='euclidean')
 
     def add_contact_map(self, threshold_lower=0., threshold_upper=12., save=True):
-        contact = self.D.copy()
-        contact[self.D<threshold_lower] = 0.
-        contact[self.D>threshold_upper] = 0.
+        contact = np.zeros(self.D.shape)
         contact[(self.D>=threshold_lower) & (self.D<=threshold_upper)] = 1.
         if save:
             self.contact_maps.append(contact)
             self.contact_maps_config.append({'lower': threshold_lower, 'upper': threshold_upper})
         else:
             return contact
+
+    def fuzzy_band(self, lower=0.0, upper=12.0, sigma=0.5):
+        return 1 / (1 + np.exp(-(D - lower)/sigma)) - 1 / (1 + np.exp(-(D - upper)/sigma))
+
+    def soft_binning(self, bins, sigma=0.5):
+        """
+        Transforme une matrice de distances en une pile de cartes de contact floues.
+        
+        bins : liste de (lower, upper)
+        Retourne : shape (N, N, len(bins))
+        """
+        N = self.D.shape[0]
+        contact_stack = np.zeros((N, N, len(bins)))
+    
+        for idx, (low, high) in enumerate(bins):
+            contact_stack[:, :, idx] = fuzzy_band(D, low, high, sigma)
+        
+        # Normalise les scores sur l'axe des plages
+        contact_stack /= np.sum(contact_stack, axis=-1, keepdims=True) + 1e-8
+        self.soft_contact_maps = contact_stack 
+        return contact_stack
+
+    def add_soft_contact_map(self, threshold_lower=0.0, threshold_upper=12.0, sigma=0.5, save=True):
+        """
+        Crée une carte de contact floue où la valeur est proche de 1 si la distance D_ij est dans l'intervalle,
+        et décroît en dehors selon une fonction sigmoïde.
+        
+        Args:
+            threshold_lower: borne inférieure de la plage de contact
+            threshold_upper: borne supérieure de la plage de contact
+            sigma: paramètre de flou, plus petit = transition plus abrupte
+            save: stocke la carte dans self.contact_maps si True
+        
+        Returns:
+            soft_contact: matrice NxN avec valeurs entre 0 et 1
+        """
+        D = self.D.copy()
+    
+        # Sigmoïde inversée pour modéliser la plage floue
+        lower_sigmoid = 1.0 / (1.0 + np.exp(-(D - threshold_lower) / sigma))
+        upper_sigmoid = 1.0 / (1.0 + np.exp(-(D - threshold_upper) / sigma))
+    
+        # La "fenêtre" entre les deux sigmoïdes
+        soft_contact = lower_sigmoid - upper_sigmoid
+        print (soft_contact)
+    
+        if save:
+            self.contact_maps.append(soft_contact)
+            self.contact_maps_config.append({
+                'lower': threshold_lower,
+                'upper': threshold_upper,
+                'sigma': sigma
+            })
+        else:
+            return soft_contact
         
     def explode(self, length):
         new_aas = []
@@ -102,14 +157,18 @@ class Protein:
             new_cas.append(self.ca[i-length:i])
         return (new_aas, new_cas)
 
-class Database:
+class Protein_Collection:
     def __init__(self):
         self.proteins = []
 
     def __getitem__(self, idx):
         if isinstance(idx, slice):
-            new_db = Database()
+            new_db = Protein_Collection()
             new_db.proteins = self.proteins[idx]
+            return new_db
+        elif isinstance(idx, list):
+            new_db = Protein_Collection()
+            [new_db.append(self.proteins[item]) for item in idx]
             return new_db
         return self.proteins[idx]
 
